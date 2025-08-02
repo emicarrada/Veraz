@@ -1,5 +1,18 @@
+@media (max-width: 600px) {
+  html, body {
+    overflow-x: hidden;
+  }
+}
+/* Eliminadas reglas de logo y contenedores de logo */
+html, body {
+  height: 100%;
+  background: #e5e5e5;
+}
 body {
   background: #e5e5e5;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 #root {
@@ -34,13 +47,10 @@ body {
 }
 
 
+
 .veraz-logo-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  width: 100vw;
-  /* Más desplazado a la izquierda */
+  /* ya definido arriba */
+  /* Centrado vertical a la izquierda en desktop, arriba en mobile */
   transform: translateX(-32vw);
 }
 
