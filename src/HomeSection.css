@@ -1,0 +1,457 @@
+/* Variables CSS para fácil tematización */
+:root {
+  --primary-text: #000000;
+  --secondary-text: #333333;
+  --muted-text: #666666;
+  --background-light: #e5e5e5;
+  --white: #ffffff;
+  --accent-color: #000000;
+  --accent-light: #e5e5e5;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --border-radius: 1rem;
+  --border-radius-pill: 999px;
+}
+
+/* Configuración de fuentes */
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('../fonts/font/HelveticaNowDisplay-Bold.woff2') format('woff2'),
+       url('../fonts/font/HelveticaNowDisplay-Bold.woff') format('woff');
+  font-weight: bold;
+  font-display: swap;
+}
+
+/* Sección principal hero */
+.home-section {
+  width: 100vw;
+  min-height: 100vh;
+  background: var(--background-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', Arial, sans-serif;
+  padding: 2rem 1rem 1rem 1rem;
+  gap: 3rem;
+}
+
+/* Contenedor principal del hero (logo + texto) */
+.home-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1000px;
+  margin-left: 15%;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Contenedor del logo */
+.home-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.home-logo {
+  max-width: 220px;
+  max-height: 220px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(var(--shadow-light));
+}
+
+/* Contenedor del texto */
+.home-text-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1 1 0;
+}
+
+.home-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.home-text-title {
+  font-family: 'Helvetica Now Display', Arial, sans-serif;
+  font-size: 1.75rem;
+  font-weight: bold;
+  letter-spacing: 0;
+  margin: 0 0 0.3em 0;
+  color: var(--primary-text);
+}
+
+.home-text-adjetivo {
+  font-family: 'Aleo', serif;
+  font-size: 1rem;
+  color: var(--muted-text);
+  font-style: italic;
+  margin: 0 0 0.3em 0;
+}
+
+.home-text-meaning {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 1rem;
+  color: var(--secondary-text);
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Contador regresivo estilo reloj digital */
+.countdown-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.countdown-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: bold;
+  font-size: 3rem;
+  color: var(--primary-text);
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.countdown-number {
+  display: inline-block;
+  min-width: 2.5ch;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.countdown-separator {
+  color: var(--accent-color);
+  margin: 0 0.1rem;
+  animation: blink 2s infinite;
+}
+
+.countdown-labels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3.5rem;
+  width: 100%;
+}
+
+.countdown-label {
+  font-family: 'Aleo', serif;
+  font-size: 0.9rem;
+  color: var(--secondary-text);
+  font-weight: 400;
+  text-align: center;
+  min-width: 4ch;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+/* Botón de llamada a la acción con efecto glassmorphism */
+.cta-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.cta-button {
+  font-family: 'Helvetica Now Display', Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--primary-text);
+  background: rgba(229, 229, 229, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(229, 229, 229, 0.5);
+  border-radius: var(--border-radius-pill);
+  padding: 1rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(229, 229, 229, 0.4), transparent);
+  transition: left 0.5s;
+}
+
+.cta-button:hover {
+  background: rgba(229, 229, 229, 0.5);
+  border-color: rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  color: var(--primary-text);
+}
+
+.cta-button:hover::before {
+  left: 100%;
+}
+
+.cta-button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+}
+
+.cta-button:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.cta-button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Footer */
+.home-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 1rem;
+  gap: 0.5rem;
+  animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.footer-copyright,
+.footer-credit {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted-text);
+  margin: 0;
+  text-align: center;
+}
+
+.footer-link {
+  color: var(--primary-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.footer-link:hover {
+  color: var(--primary-text);
+  border-bottom: 1px solid var(--primary-text);
+}
+
+.footer-link:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design - Mobile First */
+@media (max-width: 767px) {
+  .home-section {
+    padding: 1rem;
+    gap: 3rem;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .home-content {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    text-align: center;
+    margin-left: 0;
+  }
+
+  .home-logo-container {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .home-logo {
+    max-width: 280px;
+    max-height: 280px;
+    width: 60vw;
+  }
+
+  .home-text-container {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-text {
+    align-items: center;
+    text-align: center;
+  }
+
+  .home-text-title {
+    font-size: 2.5rem;
+  }
+
+  .home-text-adjetivo {
+    font-size: 1.3rem;
+  }
+
+  .home-text-meaning {
+    font-size: 1.2rem;
+  }
+
+  .countdown-display {
+    font-size: 2.8rem;
+    gap: 0.2rem;
+  }
+
+  .countdown-number {
+    min-width: 2.5ch;
+  }
+
+  .countdown-separator {
+    margin: 0 0.1rem;
+  }
+
+  .countdown-labels {
+    gap: 2.8rem;
+  }
+
+  .countdown-label {
+    font-size: 1rem;
+    min-width: 4ch;
+  }
+
+  .cta-button {
+    font-size: 1.1rem;
+    padding: 1.2rem 2.2rem;
+  }
+
+  .home-footer {
+    margin-top: 1.5rem;
+  }
+
+  .footer-copyright,
+  .footer-credit {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-section {
+    gap: 2.5rem;
+    overflow: hidden;
+  }
+
+  .home-logo {
+    max-width: 240px;
+    max-height: 240px;
+    width: 55vw;
+  }
+
+  .home-text-title {
+    font-size: 2.2rem;
+  }
+
+  .home-text-adjetivo {
+    font-size: 1.2rem;
+  }
+
+  .home-text-meaning {
+    font-size: 1.1rem;
+  }
+
+  .countdown-display {
+    font-size: 2.5rem;
+  }
+
+  .countdown-labels {
+    gap: 2.5rem;
+  }
+
+  .countdown-label {
+    font-size: 0.95rem;
+  }
+
+  .cta-button {
+    font-size: 1rem;
+    padding: 1.1rem 2rem;
+  }
+
+  .footer-copyright,
+  .footer-credit {
+    font-size: 0.75rem;
+  }
+}
+
+/* Responsive Design - Desktop */
+@media (min-width: 768px) {
+  .home-section {
+    padding: 3rem 2rem;
+    overflow: hidden;
+  }
+
+  .home-content {
+    gap: 3rem;
+    margin-left: 20%;
+  }
+
+  .home-logo {
+    max-width: 250px;
+    max-height: 250px;
+  }
+
+  .home-text-title {
+    font-size: 2rem;
+  }
+
+  .home-text-meaning {
+    font-size: 1.1rem;
+  }
+
+  .countdown-display {
+    font-size: 3.5rem;
+  }
+
+  .countdown-labels {
+    gap: 4rem;
+  }
+
+  .countdown-label {
+    font-size: 1rem;
+  }
+}
