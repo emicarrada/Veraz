@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { appendFileSync, existsSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
@@ -6,6 +7,7 @@ const NEXT_DIR = join(ROOT, ".next");
 const MARKER = join(NEXT_DIR, ".production-build");
 const DOCUMENT = join(NEXT_DIR, "server", "pages", "_document.js");
 const DEBUG_LOG = join(ROOT, ".cursor", "debug-190033.log");
+const DEV_PORTS = [3000, 3001, 3002];
 
 function debugLog(message, data, hypothesisId) {
   try {
@@ -23,6 +25,17 @@ function debugLog(message, data, hypothesisId) {
     );
   } catch {
     // ignore logging failures
+  }
+}
+
+function stopStaleNextServers() {
+  for (const port of DEV_PORTS) {
+    try {
+      execSync(`fuser -k ${port}/tcp`, { stdio: "ignore" });
+      console.log(`[veraz] Stopped stale Next.js process on port ${port}.`);
+    } catch {
+      // No process on this port.
+    }
   }
 }
 
@@ -74,11 +87,12 @@ if (shouldClean) {
     hasMissingRootChunks,
   }}, "H1");
   console.log("[veraz] Stale production .next cache detected — cleaning before dev...");
+  stopStaleNextServers();
   rmSync(NEXT_DIR, { recursive: true, force: true });
   console.warn(
-    "[veraz] Si ya tenías `next dev` en otra terminal, deténlo (Ctrl+C) y vuelve a ejecutar npm run dev.",
+    "[veraz] Caché limpia. Si el navegador sigue fallando, recarga con Ctrl+Shift+R.",
   );
   console.warn(
-    "[veraz] Un servidor obsoleto en :3000 con caché borrada provoca el error [object Event] en el navegador.",
+    "[veraz] Evita `npm run build` y `npm run dev` a la vez: el build deja artefactos de producción.",
   );
 }

@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/ensure-dev-cache.mjs && next dev",
+    "predev": "node scripts/ensure-dev-cache.mjs",
+    "dev": "next dev",
     "dev:clean": "node scripts/kill-next-dev.mjs && rm -rf .next && next dev",
     "build": "next build",
     "postbuild": "node scripts/mark-prod-build.mjs",

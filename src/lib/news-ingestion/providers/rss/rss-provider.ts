@@ -22,6 +22,7 @@ import { RssFeedFetcher } from "@/lib/news-ingestion/providers/rss/rss-feed-fetc
 import { RssXmlParser } from "@/lib/news-ingestion/providers/rss/rss-xml-parser";
 import { ingestionFail, ingestionOk } from "@/lib/news-ingestion/utils/ingestion-result";
 import { urlFingerprint } from "@/lib/news-ingestion/utils/url-fingerprint";
+import { isExcludedFeedArticleUrl } from "@/lib/news-ingestion/utils/feed-url-policy";
 
 const RSS_CAPABILITIES = ["discover", "fetch", "health_check"] as const satisfies ReadonlyArray<ProviderCapability>;
 
@@ -58,6 +59,7 @@ export class RSSProvider implements NewsProvider {
 
       const candidates: IngestionCandidate[] = document.items
         .slice(0, limit)
+        .filter((item) => !isExcludedFeedArticleUrl(item.link))
         .map((item) => ({
           providerId: this.id,
           providerItemId: item.id || urlFingerprint(item.link),

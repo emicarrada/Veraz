@@ -1,4 +1,4 @@
-import { NormalizationFailedError } from "@/lib/news-ingestion/errors";
+import { NormalizationFailedError, ProviderPolicyViolationError } from "@/lib/news-ingestion/errors";
 import { IngestionEngineError } from "@/lib/news-ingestion/errors/base";
 import type { Normalizer } from "@/lib/news-ingestion/normalize/normalizer";
 import type { PipelineContext } from "@/lib/news-ingestion/pipeline/pipeline-stage";
@@ -9,6 +9,7 @@ import type {
 import type { IngestionResult } from "@/lib/news-ingestion/types/results";
 import type { RssProviderRaw } from "@/lib/news-ingestion/providers/rss/rss-types";
 import { normalizeImageUrl, stripHtml } from "@/lib/news-ingestion/utils/html-utils";
+import { isExcludedFeedArticleUrl } from "@/lib/news-ingestion/utils/feed-url-policy";
 import { ingestionFail, ingestionOk } from "@/lib/news-ingestion/utils/ingestion-result";
 import { urlFingerprint } from "@/lib/news-ingestion/utils/url-fingerprint";
 
@@ -86,6 +87,16 @@ export class RssNormalizer implements Normalizer {
       }
 
       const { item, feed } = payload.raw;
+
+      if (isExcludedFeedArticleUrl(item.link)) {
+        return ingestionFail(
+          new ProviderPolicyViolationError(
+            payload.providerId,
+            `Live blog URL excluded from feed: ${item.link}`,
+          ),
+        );
+      }
+
       const excerpt = buildExcerpt(item.description, item.content, item.title);
       const bodyExcerpt = buildBodyExcerpt(item.description, item.content);
 
