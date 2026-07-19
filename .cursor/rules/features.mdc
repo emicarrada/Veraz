@@ -1,0 +1,20 @@
+---
+description: Organización de features y aliases de importación
+globs: src/features/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Features
+
+Estructura por feature:
+
+- `components/` — UI del feature
+- `hooks/` — hooks del feature
+- `services/` — casos de uso / acceso a datos del feature
+- `types/` — tipos del feature
+- `utils/` — helpers del feature
+- `index.ts` — único public API
+
+Imports con aliases: `@/features/...`, `@/components/...`, `@/lib/...`, etc.
+
+No colocar clientes de infraestructura (Supabase/OpenAI) dentro de components; viven en `src/lib` y se usan desde services.

@@ -1,0 +1,105 @@
+/* Landing / marketing motion — loaded after Tailwind via globals.css */
+
+@keyframes veraz-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes veraz-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.landing-reveal {
+  animation: veraz-fade-up 700ms var(--veraz-ease-emphasized) both;
+}
+
+.landing-reveal-delay-1 {
+  animation-delay: 80ms;
+}
+
+.landing-reveal-delay-2 {
+  animation-delay: 160ms;
+}
+
+.landing-reveal-delay-3 {
+  animation-delay: 240ms;
+}
+
+.landing-fade {
+  animation: veraz-fade-in 900ms var(--veraz-ease-standard) both;
+}
+
+.landing-hero-glow {
+  background:
+    radial-gradient(
+      120% 80% at 80% 10%,
+      rgb(255 255 255 / 0.06),
+      transparent 55%
+    ),
+    radial-gradient(
+      90% 70% at 8% 95%,
+      rgb(82 82 82 / 0.22),
+      transparent 50%
+    ),
+    linear-gradient(165deg, #111111 0%, var(--veraz-color-bg) 48%, #141414 100%);
+}
+
+.landing-grid-mask {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--veraz-color-border) 65%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--veraz-color-border) 65%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+}
+
+/* ——— Landing page shell ——— */
+
+.landing-page {
+  background-color: var(--veraz-color-bg);
+  color: var(--veraz-color-ink);
+}
+
+.landing-page [id] {
+  scroll-margin-top: calc(var(--veraz-header-height) + 0.75rem);
+}
+
+.landing-section {
+  background-color: var(--veraz-color-bg);
+}
+
+.landing-section--muted {
+  background-color: var(--veraz-color-surface);
+}
+
+.landing-section--cta {
+  background-color: var(--veraz-color-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-reveal,
+  .landing-reveal-delay-1,
+  .landing-reveal-delay-2,
+  .landing-reveal-delay-3,
+  .landing-fade {
+    animation: none !important;
+  }
+}

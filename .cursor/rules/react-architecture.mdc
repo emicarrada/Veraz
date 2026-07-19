@@ -1,0 +1,15 @@
+---
+description: React, componentes y separación de capas
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# React y capas
+
+- Componentes pequeños, reutilizables y con una sola responsabilidad.
+- Separar lógica de presentación: services/hooks para lógica; components para UI.
+- Server Components por defecto; `"use client"` solo si hay estado, efectos o APIs del browser.
+- No duplicar código: extraer a `components/ui`, `utils` o el feature adecuado.
+- Seguir SOLID: interfaces estables en el public API del feature (`index.ts`).
+- UI compartida → `src/components`. UI de dominio → `src/features/<feature>/components`.
+- Explicar decisiones no obvias con un comentario breve o en `docs/`.

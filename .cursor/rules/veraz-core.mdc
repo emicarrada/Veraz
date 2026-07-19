@@ -1,0 +1,19 @@
+---
+description: Principios centrales de arquitectura y producto Veraz
+alwaysApply: true
+---
+
+# Veraz — Core
+
+- Producto: informar sin influenciar. No inventar hechos; todo insight debe ser trazable a fuentes.
+- Núcleo = plataforma de noticias. La IA solo enriquece y es opcional.
+- Dominio puro en `src/domain` / `docs/domain.md`. Domain no importa infra/UI.
+- Arquitectura: modular monolith. Lógica de negocio en `src/features/<feature>`, no en `src/app`.
+- `src/app` solo routing, layouts, composition y Route Handlers delgados.
+- No deep-importar internals de otro feature; solo su `index.ts`.
+- AI: única puerta `@/lib/ai-engine`. Prohibido importar `providers/*` o SDKs de IA desde features/app.
+- Default AI = disabled. Nunca bloquear publicación por fallo o ausencia de IA.
+- No modificar funcionalidad existente sin necesidad.
+- Al agregar features relevantes, actualizar `docs/` (y ADR si cambia una decisión).
+- No implementar integraciones (Supabase/providers IA/APIs) salvo que la tarea lo pida explícitamente.
+- Preferir cambios mínimos y focalizados; evitar refactors oportunistas.

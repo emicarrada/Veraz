@@ -1,0 +1,168 @@
+/* ==========================================================================
+   Veraz Design Tokens — dark-first premium palette
+   Single source of truth. Tailwind maps to these CSS variables.
+   ========================================================================== */
+
+:root,
+[data-theme="dark"] {
+  /* ——— Color: surfaces (graphite — pairs with Specular #525252 / #fff) ——— */
+  --veraz-color-bg: #0a0a0a;
+  --veraz-color-surface: #111111;
+  --veraz-color-surface-muted: #1a1a1a;
+  --veraz-color-surface-elevated: #222222;
+  --veraz-color-overlay: rgb(0 0 0 / 0.68);
+
+  /* ——— Color: ink (text) ——— */
+  --veraz-color-ink: #f5f5f5;
+  --veraz-color-ink-secondary: #c4c4c4;
+  --veraz-color-ink-muted: #8a8a8a;
+  --veraz-color-ink-disabled: #525252;
+  --veraz-color-ink-inverse: #0a0a0a;
+
+  /* ——— Color: borders ——— */
+  --veraz-color-border: #2a2a2a;
+  --veraz-color-border-strong: #525252;
+  --veraz-color-border-focus: #ffffff;
+
+  /* ——— Color: brand / accent (silver · glass · neutral) ——— */
+  --veraz-color-accent: #e5e5e5;
+  --veraz-color-accent-hover: #ffffff;
+  --veraz-color-accent-active: #d4d4d4;
+  --veraz-color-accent-subtle: #1a1a1a;
+  --veraz-color-accent-foreground: #0a0a0a;
+
+  /* ——— Color: semantic ——— */
+  --veraz-color-success: #3ecf8e;
+  --veraz-color-success-subtle: #0f2a1c;
+  --veraz-color-warning: #e0b44a;
+  --veraz-color-warning-subtle: #2a220e;
+  --veraz-color-danger: #f07167;
+  --veraz-color-danger-subtle: #2c1210;
+  --veraz-color-info: #5ba4e6;
+  --veraz-color-info-subtle: #0e2033;
+
+  /* ——— Typography families ——— */
+  --veraz-font-display: "Helvetica Now Display", "Veraz Sans", ui-sans-serif,
+    system-ui, sans-serif;
+  --veraz-font-body: "Helvetica Now Display", "Veraz Sans", ui-sans-serif,
+    system-ui, sans-serif;
+  --veraz-font-mono: "IBM Plex Mono", "SF Mono", ui-monospace, monospace;
+
+  /* ——— Font sizes (fluid-friendly rem) ——— */
+  --veraz-text-display: clamp(2.5rem, 2.1rem + 2vw, 3.75rem);
+  --veraz-text-h1: clamp(2rem, 1.75rem + 1.2vw, 2.75rem);
+  --veraz-text-h2: clamp(1.625rem, 1.45rem + 0.8vw, 2.125rem);
+  --veraz-text-h3: clamp(1.375rem, 1.28rem + 0.45vw, 1.625rem);
+  --veraz-text-h4: 1.25rem;
+  --veraz-text-body-lg: 1.125rem;
+  --veraz-text-body: 1rem;
+  --veraz-text-small: 0.875rem;
+  --veraz-text-caption: 0.8125rem;
+  --veraz-text-label: 0.75rem;
+
+  /* ——— Line heights ——— */
+  --veraz-leading-display: 1.08;
+  --veraz-leading-heading: 1.2;
+  --veraz-leading-body: 1.55;
+  --veraz-leading-tight: 1.35;
+  --veraz-leading-none: 1;
+
+  /* ——— Letter spacing ——— */
+  --veraz-tracking-display: -0.03em;
+  --veraz-tracking-heading: -0.02em;
+  --veraz-tracking-label: 0.04em;
+  --veraz-tracking-normal: 0;
+
+  /* ——— Font weights ——— */
+  --veraz-weight-regular: 400;
+  --veraz-weight-medium: 500;
+  --veraz-weight-semibold: 500;
+  --veraz-weight-bold: 700;
+  --veraz-weight-extrabold: 800;
+
+  /* ——— Spacing scale (4px base) ——— */
+  --veraz-space-0: 0;
+  --veraz-space-0-5: 0.125rem;
+  --veraz-space-1: 0.25rem;
+  --veraz-space-1-5: 0.375rem;
+  --veraz-space-2: 0.5rem;
+  --veraz-space-2-5: 0.625rem;
+  --veraz-space-3: 0.75rem;
+  --veraz-space-4: 1rem;
+  --veraz-space-5: 1.25rem;
+  --veraz-space-6: 1.5rem;
+  --veraz-space-8: 2rem;
+  --veraz-space-10: 2.5rem;
+  --veraz-space-12: 3rem;
+  --veraz-space-16: 4rem;
+  --veraz-space-20: 5rem;
+  --veraz-space-24: 6rem;
+
+  /* ——— Radii ——— */
+  --veraz-radius-none: 0;
+  --veraz-radius-sm: 0.375rem;
+  --veraz-radius-md: 0.5rem;
+  --veraz-radius-lg: 0.75rem;
+  --veraz-radius-xl: 1rem;
+  --veraz-radius-2xl: 1.25rem;
+  --veraz-radius-full: 9999px;
+
+  /* ——— Borders ——— */
+  --veraz-border-width: 1px;
+  --veraz-border-width-strong: 2px;
+
+  /* ——— Shadows (subtle depth on dark) ——— */
+  --veraz-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.35);
+  --veraz-shadow-sm: 0 1px 3px rgb(0 0 0 / 0.4), 0 1px 2px rgb(0 0 0 / 0.28);
+  --veraz-shadow-md: 0 8px 24px rgb(0 0 0 / 0.45), 0 2px 6px rgb(0 0 0 / 0.3);
+  --veraz-shadow-lg: 0 18px 48px rgb(0 0 0 / 0.55), 0 6px 14px rgb(0 0 0 / 0.35);
+  --veraz-shadow-focus: 0 0 0 3px rgb(255 255 255 / 0.22);
+
+  /* ——— Opacities ——— */
+  --veraz-opacity-disabled: 0.48;
+  --veraz-opacity-muted: 0.72;
+  --veraz-opacity-hover: 0.88;
+  --veraz-opacity-overlay: 0.64;
+
+  /* ——— Motion ——— */
+  --veraz-duration-fast: 120ms;
+  --veraz-duration-normal: 200ms;
+  --veraz-duration-slow: 320ms;
+  --veraz-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --veraz-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ——— Z-index ——— */
+  --veraz-z-base: 0;
+  --veraz-z-dropdown: 40;
+  --veraz-z-sticky: 50;
+  --veraz-z-overlay: 60;
+  --veraz-z-modal: 70;
+  --veraz-z-toast: 80;
+  --veraz-z-tooltip: 90;
+
+  /* ——— Layout ——— */
+  --veraz-header-height: 4rem;
+  --veraz-sidebar-width: 16rem;
+  --veraz-container-sm: 40rem;
+  --veraz-container-md: 48rem;
+  --veraz-container-lg: 72rem;
+  --veraz-container-xl: 80rem;
+  --veraz-container-2xl: 90rem;
+
+  /* ——— Breakpoints (reference; Tailwind owns media queries) ——— */
+  --veraz-bp-xs: 20rem; /* 320 */
+  --veraz-bp-sm: 30rem; /* 480 */
+  --veraz-bp-md: 48rem; /* 768 */
+  --veraz-bp-lg: 64rem; /* 1024 */
+  --veraz-bp-xl: 80rem; /* 1280 */
+  --veraz-bp-2xl: 96rem; /* 1536 */
+  --veraz-bp-3xl: 120rem; /* 1920 */
+  --veraz-bp-4k: 160rem; /* 2560 */
+
+  color-scheme: dark;
+}
+
+/* Reserved for a future explicit light theme */
+[data-theme="light"] {
+  color-scheme: light;
+}

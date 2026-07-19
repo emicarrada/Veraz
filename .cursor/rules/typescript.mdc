@@ -1,0 +1,29 @@
+---
+description: TypeScript estricto — prohibido any
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# TypeScript
+
+- Mantener `strict` y tipado explícito en APIs públicas.
+- Nunca usar `any`. Alternativas: `unknown` + narrowing, genéricos, union types, tipos de dominio.
+- Evitar `as` salvo en boundaries validados; preferir type guards.
+- Evitar `!` non-null assertion salvo justificación breve.
+- Preferir `type`/`interface` en `features/*/types` o `src/types` según el alcance.
+
+```ts
+// ❌ BAD
+function parse(data: any) {
+  return data.value;
+}
+
+// ✅ GOOD
+function parse(data: unknown): string {
+  if (typeof data === "object" && data !== null && "value" in data) {
+    const value = (data as { value: unknown }).value;
+    if (typeof value === "string") return value;
+  }
+  throw new Error("Invalid payload");
+}
+```

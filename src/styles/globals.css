@@ -1,0 +1,82 @@
+@import "./fonts.css";
+@import "./tokens.css";
+@import "./typography.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "./landing.css";
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--veraz-color-border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    min-height: 100dvh;
+    margin: 0;
+    background-color: var(--veraz-color-bg);
+    color: var(--veraz-color-ink);
+    font-family: var(--veraz-font-body);
+    font-size: var(--veraz-text-body);
+    line-height: var(--veraz-leading-body);
+    font-weight: var(--veraz-weight-regular);
+  }
+
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--veraz-color-border-focus);
+    outline-offset: 2px;
+    box-shadow: var(--veraz-shadow-focus);
+  }
+
+  ::selection {
+    background-color: var(--veraz-color-accent-subtle);
+    color: var(--veraz-color-ink);
+  }
+
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+}
+
+@layer utilities {
+  .veraz-focus-ring {
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    outline-color: var(--veraz-color-border-focus);
+  }
+
+  .veraz-transition {
+    transition-property: color, background-color, border-color, box-shadow,
+      opacity, transform;
+    transition-duration: var(--veraz-duration-normal);
+    transition-timing-function: var(--veraz-ease-standard);
+  }
+}

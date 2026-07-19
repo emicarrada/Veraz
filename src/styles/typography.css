@@ -1,0 +1,88 @@
+/* Typography utilities — map 1:1 to design tokens */
+
+.text-display {
+  font-family: var(--veraz-font-display);
+  font-size: var(--veraz-text-display);
+  line-height: var(--veraz-leading-display);
+  font-weight: var(--veraz-weight-extrabold);
+  letter-spacing: var(--veraz-tracking-display);
+  color: var(--veraz-color-ink);
+}
+
+.text-h1 {
+  font-family: var(--veraz-font-display);
+  font-size: var(--veraz-text-h1);
+  line-height: var(--veraz-leading-heading);
+  font-weight: var(--veraz-weight-bold);
+  letter-spacing: var(--veraz-tracking-heading);
+  color: var(--veraz-color-ink);
+}
+
+.text-h2 {
+  font-family: var(--veraz-font-display);
+  font-size: var(--veraz-text-h2);
+  line-height: var(--veraz-leading-heading);
+  font-weight: var(--veraz-weight-bold);
+  letter-spacing: var(--veraz-tracking-heading);
+  color: var(--veraz-color-ink);
+}
+
+.text-h3 {
+  font-family: var(--veraz-font-display);
+  font-size: var(--veraz-text-h3);
+  line-height: var(--veraz-leading-heading);
+  font-weight: var(--veraz-weight-semibold);
+  letter-spacing: var(--veraz-tracking-heading);
+  color: var(--veraz-color-ink);
+}
+
+.text-h4 {
+  font-family: var(--veraz-font-display);
+  font-size: var(--veraz-text-h4);
+  line-height: var(--veraz-leading-tight);
+  font-weight: var(--veraz-weight-semibold);
+  letter-spacing: var(--veraz-tracking-heading);
+  color: var(--veraz-color-ink);
+}
+
+.text-body-lg {
+  font-family: var(--veraz-font-body);
+  font-size: var(--veraz-text-body-lg);
+  line-height: var(--veraz-leading-body);
+  font-weight: var(--veraz-weight-regular);
+  color: var(--veraz-color-ink-secondary);
+}
+
+.text-body {
+  font-family: var(--veraz-font-body);
+  font-size: var(--veraz-text-body);
+  line-height: var(--veraz-leading-body);
+  font-weight: var(--veraz-weight-regular);
+  color: var(--veraz-color-ink-secondary);
+}
+
+.text-small {
+  font-family: var(--veraz-font-body);
+  font-size: var(--veraz-text-small);
+  line-height: var(--veraz-leading-tight);
+  font-weight: var(--veraz-weight-regular);
+  color: var(--veraz-color-ink-muted);
+}
+
+.text-caption {
+  font-family: var(--veraz-font-body);
+  font-size: var(--veraz-text-caption);
+  line-height: var(--veraz-leading-tight);
+  font-weight: var(--veraz-weight-regular);
+  color: var(--veraz-color-ink-muted);
+}
+
+.text-label {
+  font-family: var(--veraz-font-body);
+  font-size: var(--veraz-text-label);
+  line-height: var(--veraz-leading-none);
+  font-weight: var(--veraz-weight-medium);
+  letter-spacing: var(--veraz-tracking-label);
+  text-transform: uppercase;
+  color: var(--veraz-color-ink-muted);
+}

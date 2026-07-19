@@ -1,0 +1,14 @@
+---
+description: Design System Veraz — tokens, UI y a11y
+globs: src/components/**/*.{ts,tsx},src/styles/**/*.css
+alwaysApply: false
+---
+
+# Design System
+
+- Usar tokens (`bg-accent`, `text-ink`, `border-border`, spacing/radius del tema). No hardcodear colores.
+- Tipografía: clases `.text-*` o `<Text variant>`.
+- Variantes tipadas por props; componentes pequeños y componibles.
+- Icon-only controls requieren `aria-label`.
+- Mantener focus-visible y teclado en overlays (Modal/Drawer/Dropdown/Tabs).
+- Sin lógica de negocio ni llamadas a API en `components/`.

@@ -1,0 +1,341 @@
+"use client";
+
+import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useRef } from "react";
+import Link from "next/link";
+import { gsap } from "gsap";
+
+import { cn } from "@/utils/cn";
+
+import "./pill-nav.css";
+
+export type PillNavItem = {
+  label: string;
+  href: string;
+  ariaLabel?: string;
+};
+
+export type PillNavProps = {
+  logo: string;
+  logoAlt?: string;
+  /** App route for the logo link (defaults to first item href or `/`). */
+  logoHref?: string;
+  /** Invert logo mark for dark base circles (black logo → light). */
+  invertLogo?: boolean;
+  items: PillNavItem[];
+  activeHref?: string;
+  className?: string;
+  ease?: string;
+  baseColor?: string;
+  pillColor?: string;
+  hoveredPillTextColor?: string;
+  /** Fill color for the hover ripple animation on pills. */
+  hoveredPillFillColor?: string;
+  pillTextColor?: string;
+  initialLoadAnimation?: boolean;
+};
+
+function isExternalOrHashLink(href: string): boolean {
+  return (
+    href.startsWith("http://") ||
+    href.startsWith("https://") ||
+    href.startsWith("//") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:") ||
+    href.startsWith("#")
+  );
+}
+
+function isAppRouterLink(href: string): boolean {
+  return Boolean(href) && !isExternalOrHashLink(href);
+}
+
+/**
+ * Pill navigation — same layout on mobile and desktop (logo + items, centered).
+ */
+export function PillNav({
+  logo,
+  logoAlt = "Logo",
+  logoHref,
+  invertLogo = false,
+  items,
+  activeHref,
+  className = "",
+  ease = "power3.easeOut",
+  baseColor = "#000000",
+  pillColor = "#ffffff",
+  hoveredPillTextColor = "#111111",
+  hoveredPillFillColor = "#ffffff",
+  pillTextColor,
+  initialLoadAnimation = true,
+}: PillNavProps) {
+  const resolvedPillTextColor = pillTextColor ?? baseColor;
+
+  const circleRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const tlRefs = useRef<Array<gsap.core.Timeline | null>>([]);
+  const activeTweenRefs = useRef<Array<gsap.core.Tween | null>>([]);
+  const logoImgRef = useRef<HTMLImageElement | null>(null);
+  const logoTweenRef = useRef<gsap.core.Tween | null>(null);
+  const navCenterRef = useRef<HTMLDivElement | null>(null);
+  const logoRef = useRef<HTMLAnchorElement | null>(null);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    const layout = () => {
+      circleRefs.current.forEach((circle) => {
+        if (!circle?.parentElement) return;
+
+        const pill = circle.parentElement;
+        const rect = pill.getBoundingClientRect();
+        const { width: w, height: h } = rect;
+        if (w === 0 || h === 0) return;
+
+        const R = ((w * w) / 4 + h * h) / (2 * h);
+        const D = Math.ceil(2 * R) + 2;
+        const delta =
+          Math.ceil(R - Math.sqrt(Math.max(0, R * R - (w * w) / 4))) + 1;
+        const originY = D - delta;
+
+        circle.style.width = `${D}px`;
+        circle.style.height = `${D}px`;
+        circle.style.bottom = `-${delta}px`;
+
+        gsap.set(circle, {
+          xPercent: -50,
+          scale: 0,
+          transformOrigin: `50% ${originY}px`,
+        });
+
+        const label = pill.querySelector(".pill-label");
+        const white = pill.querySelector(".pill-label-hover");
+
+        if (label) gsap.set(label, { y: 0 });
+        if (white) gsap.set(white, { y: h + 12, opacity: 0 });
+
+        const index = circleRefs.current.indexOf(circle);
+        if (index === -1) return;
+
+        tlRefs.current[index]?.kill();
+        const tl = gsap.timeline({ paused: true });
+
+        tl.to(
+          circle,
+          { scale: 1.2, xPercent: -50, duration: 2, ease, overwrite: "auto" },
+          0,
+        );
+
+        if (label) {
+          tl.to(
+            label,
+            { y: -(h + 8), duration: 2, ease, overwrite: "auto" },
+            0,
+          );
+        }
+
+        if (white) {
+          gsap.set(white, { y: Math.ceil(h + 100), opacity: 0 });
+          tl.to(
+            white,
+            { y: 0, opacity: 1, duration: 2, ease, overwrite: "auto" },
+            0,
+          );
+        }
+
+        tlRefs.current[index] = tl;
+      });
+    };
+
+    layout();
+
+    const onResize = () => layout();
+    window.addEventListener("resize", onResize);
+
+    if (document.fonts?.ready) {
+      void document.fonts.ready.then(layout).catch(() => undefined);
+    }
+
+    if (initialLoadAnimation && !reduceMotion) {
+      const logoEl = logoRef.current;
+      const navCenter = navCenterRef.current;
+
+      if (logoEl) {
+        gsap.set(logoEl, { scale: 0 });
+        gsap.to(logoEl, {
+          scale: 1,
+          duration: 0.6,
+          ease,
+        });
+      }
+
+      if (navCenter) {
+        gsap.set(navCenter, { width: 0, overflow: "hidden" });
+        gsap.to(navCenter, {
+          width: "auto",
+          duration: 0.6,
+          ease,
+          onComplete: () => {
+            gsap.set(navCenter, { clearProps: "width,overflow" });
+          },
+        });
+      }
+    }
+
+    return () => window.removeEventListener("resize", onResize);
+  }, [items, ease, initialLoadAnimation]);
+
+  const handleEnter = (i: number) => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const tl = tlRefs.current[i];
+    if (!tl) return;
+    activeTweenRefs.current[i]?.kill();
+    activeTweenRefs.current[i] = tl.tweenTo(tl.duration(), {
+      duration: 0.3,
+      ease,
+      overwrite: "auto",
+    });
+  };
+
+  const handleLeave = (i: number) => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const tl = tlRefs.current[i];
+    if (!tl) return;
+    activeTweenRefs.current[i]?.kill();
+    activeTweenRefs.current[i] = tl.tweenTo(0, {
+      duration: 0.2,
+      ease,
+      overwrite: "auto",
+    });
+  };
+
+  const handleLogoEnter = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const img = logoImgRef.current;
+    if (!img) return;
+    logoTweenRef.current?.kill();
+    gsap.set(img, { rotate: 0 });
+    logoTweenRef.current = gsap.to(img, {
+      rotate: 360,
+      duration: 0.2,
+      ease,
+      overwrite: "auto",
+    });
+  };
+
+  const cssVars = {
+    "--base": baseColor,
+    "--pill-bg": pillColor,
+    "--hover-text": hoveredPillTextColor,
+    "--hover-fill": hoveredPillFillColor,
+    "--pill-text": resolvedPillTextColor,
+  } as CSSProperties;
+
+  const homeHref = logoHref ?? items[0]?.href ?? "/";
+
+  const renderLogo = (): ReactNode => {
+    const img = (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={logo}
+        alt={logoAlt}
+        ref={logoImgRef}
+        className={invertLogo ? "pill-logo-invert" : undefined}
+      />
+    );
+
+    if (isAppRouterLink(homeHref)) {
+      return (
+        <Link
+          className="pill-logo"
+          href={homeHref}
+          aria-label="Inicio"
+          onMouseEnter={handleLogoEnter}
+          ref={logoRef}
+        >
+          {img}
+        </Link>
+      );
+    }
+
+    return (
+      <a
+        className="pill-logo"
+        href={homeHref}
+        aria-label="Inicio"
+        onMouseEnter={handleLogoEnter}
+        ref={logoRef}
+      >
+        {img}
+      </a>
+    );
+  };
+
+  const renderItem = (item: PillNavItem, i: number) => {
+    const classNamePill = cn("pill", activeHref === item.href && "is-active");
+
+    const content = (
+      <>
+        <span
+          className="hover-circle"
+          aria-hidden
+          ref={(el) => {
+            circleRefs.current[i] = el;
+          }}
+        />
+        <span className="label-stack">
+          <span className="pill-label">{item.label}</span>
+          <span className="pill-label-hover" aria-hidden>
+            {item.label}
+          </span>
+        </span>
+      </>
+    );
+
+    const sharedProps = {
+      className: classNamePill,
+      "aria-label": item.ariaLabel || item.label,
+      onMouseEnter: () => handleEnter(i),
+      onMouseLeave: () => handleLeave(i),
+    };
+
+    if (isAppRouterLink(item.href)) {
+      return (
+        <Link role="menuitem" href={item.href} {...sharedProps}>
+          {content}
+        </Link>
+      );
+    }
+
+    return (
+      <a role="menuitem" href={item.href} {...sharedProps}>
+        {content}
+      </a>
+    );
+  };
+
+  return (
+    <div className="pill-nav-container">
+      <nav
+        className={cn("pill-nav", className)}
+        aria-label="Principal"
+        style={cssVars}
+      >
+        <div className="pill-nav-center" ref={navCenterRef}>
+          {renderLogo()}
+
+          <div className="pill-nav-items">
+            <ul className="pill-list" role="menubar">
+              {items.map((item, i) => (
+                <li key={item.href || `item-${i}`} role="none">
+                  {renderItem(item, i)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </div>
+  );
+}

@@ -1,0 +1,14 @@
+---
+description: AI Engine — provider-agnostic, optional, fail-open
+globs: src/lib/ai-engine/**/*.{ts,tsx},src/features/ai/**/*.{ts,tsx},src/config/ai.ts
+alwaysApply: false
+---
+
+# AI Engine
+
+- Solo esta capa puede hablar con vendors de IA.
+- Features importan `@/lib/ai-engine`, nunca `providers/<id>`.
+- Modos: `disabled` | `summaries` | `context` | `full` (default disabled).
+- Soft-fail (`AIResult` / `failOpen`): no tumbar publish ni el hot path de lectura.
+- No añadir SDKs ni HTTP hasta que se pida implementar un provider concreto.
+- Documentar cambios en `docs/ai-engine.md` + ADR si aplica.

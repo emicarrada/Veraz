@@ -1,0 +1,55 @@
+/* Helvetica Now Display — primary brand / UI face */
+
+@font-face {
+  font-family: "Helvetica Now Display";
+  src: url("/fonts/font/HelveticaNowDisplay-Regular.woff2") format("woff2"),
+    url("/fonts/font/HelveticaNowDisplay-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Helvetica Now Display";
+  src: url("/fonts/font/HelveticaNowDisplay-Medium.woff2") format("woff2"),
+    url("/fonts/font/HelveticaNowDisplay-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Helvetica Now Display";
+  src: url("/fonts/font/HelveticaNowDisplay-Bold.woff2") format("woff2"),
+    url("/fonts/font/HelveticaNowDisplay-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Helvetica Now Display";
+  src: url("/fonts/font/HelveticaNowDisplay-ExtraBold.woff2") format("woff2"),
+    url("/fonts/font/HelveticaNowDisplay-ExtraBold.woff") format("woff");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Helvetica Now Display";
+  src: url("/fonts/font/HelveticaNowDisplay-Light.woff2") format("woff2"),
+    url("/fonts/font/HelveticaNowDisplay-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Alias for branding in CSS / Tailwind */
+@font-face {
+  font-family: "Veraz Sans";
+  src: url("/fonts/font/HelveticaNowDisplay-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

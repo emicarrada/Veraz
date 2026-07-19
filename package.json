@@ -1,27 +1,43 @@
 {
   "name": "veraz",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "node scripts/ensure-dev-cache.mjs && next dev",
+    "dev:clean": "rm -rf .next && next dev",
+    "build": "next build",
+    "postbuild": "node scripts/mark-prod-build.mjs",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "ingest:discover": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-scheduler-job.ts discover_feeds",
+    "ingest:run": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-scheduler-job.ts run_ingestion",
+    "ingest:health": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-scheduler-job.ts health_check",
+    "ingest:watch": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/ingest-loop.ts",
+    "feeds:validate": "tsx scripts/validate-rss-feeds.ts",
+    "sync:vercel-env": "./scripts/sync-vercel-env.sh"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.7",
+    "gsap": "^3.15.0",
+    "next": "^15.3.5",
+    "ogl": "^1.0.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.30.1",
+    "@types/node": "^22.15.32",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.30.1",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.3.0",
-    "vite": "^7.0.4"
+    "eslint-config-next": "^15.3.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   }
 }

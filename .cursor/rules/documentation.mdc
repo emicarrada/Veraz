@@ -1,0 +1,19 @@
+---
+description: Mantener documentación alineada con el código
+globs: docs/**/*.md
+alwaysApply: false
+---
+
+# Documentación
+
+- `docs/vision.md` — producto y principios
+- `docs/architecture.md` — arquitectura y boundaries
+- `docs/domain.md` — modelo de dominio y entidades
+- `docs/ai-engine.md` — AI Engine, modos, Provider Pattern
+- `docs/roadmap.md` — fases
+- `docs/database.md` — mapeo dominio → persistencia
+- `docs/api.md` — contratos HTTP/Actions
+- `docs/coding-standards.md` — estándares
+- `docs/adr/` — decisiones arquitectónicas
+
+Si un cambio de código altera arquitectura, dominio, datos, API, AI Engine o roadmap, actualizar el doc correspondiente en el mismo PR/cambio.
