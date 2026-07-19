@@ -295,9 +295,7 @@ Ruta: `/` vía `src/app/(marketing)/page.tsx`.
 | Secciones | `src/components/marketing/landing/*-section.tsx` |
 | Header/Footer marketing | `landing-header.tsx` (`PillNav` mobile-first), `landing-footer.tsx` |
 | PillNav | `src/components/ui/pill-nav` (GSAP) |
-| ScrollReveal | `src/components/ui/scroll-reveal` (GSAP ScrollTrigger) — títulos y copy de secciones |
-| SpecularButton | `src/components/ui/specular-button` (ogl) |
-| Motion sutil | `src/styles/landing.css` + ScrollReveal / PillNav |
+| Motion sutil | `src/styles/landing.css` + PillNav |
 
 ### Secciones (orden)
 

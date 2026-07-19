@@ -1,5 +1,8 @@
 import { buildConfig } from "@/config/build-config";
+import { getCanonicalSiteUrl } from "@/config/resolve-environment";
 import type { VerazConfig } from "@/config/types/veraz-config";
+
+export { getCanonicalSiteUrl };
 
 let cachedConfig: VerazConfig | null = null;
 

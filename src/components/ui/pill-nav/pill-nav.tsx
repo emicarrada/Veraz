@@ -273,7 +273,8 @@ export function PillNav({
   };
 
   const renderItem = (item: PillNavItem, i: number) => {
-    const classNamePill = cn("pill", activeHref === item.href && "is-active");
+    const isActive = activeHref === item.href;
+    const classNamePill = cn("pill", isActive && "is-active");
 
     const content = (
       <>
@@ -296,8 +297,13 @@ export function PillNav({
     const sharedProps = {
       className: classNamePill,
       "aria-label": item.ariaLabel || item.label,
-      onMouseEnter: () => handleEnter(i),
-      onMouseLeave: () => handleLeave(i),
+      ...(isActive ? { "aria-current": "page" as const } : {}),
+      onMouseEnter: () => {
+        if (!isActive) handleEnter(i);
+      },
+      onMouseLeave: () => {
+        if (!isActive) handleLeave(i);
+      },
     };
 
     if (isAppRouterLink(item.href)) {

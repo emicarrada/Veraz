@@ -8,7 +8,7 @@ const linkClassName =
   "text-small text-ink-secondary veraz-transition hover:text-ink veraz-focus-ring rounded-sm";
 
 const legalLinkClassName =
-  "text-ink-muted veraz-transition hover:text-ink veraz-focus-ring rounded-sm";
+  "text-ink-muted veraz-transition hover:text-ink-secondary veraz-focus-ring rounded-sm";
 
 export function SiteFooter() {
   return (

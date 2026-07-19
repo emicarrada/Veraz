@@ -29,6 +29,7 @@ export type {
 } from "@/config/domains";
 
 export {
+  CANONICAL_SITE_URL,
   DEFAULT_APP_NAME,
   DEFAULT_APP_TAGLINE,
   DEFAULT_FEATURE_FLAGS,
@@ -47,6 +48,7 @@ export { ENV_KEYS, type EnvKey } from "@/config/env/keys";
 export {
   getConfig,
   getAppConfig,
+  getCanonicalSiteUrl,
   getAIConfig,
   getNewsConfig,
   getRssFeedBySourceSlug,

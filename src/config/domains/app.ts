@@ -16,8 +16,10 @@ export type AppConfig = {
 export const DEFAULT_APP_NAME = "Veraz" as const;
 export const DEFAULT_APP_TAGLINE = "Informar sin influenciar." as const;
 
+export const CANONICAL_SITE_URL = "https://www.veraz.app" as const;
+
 export const DEFAULT_SITE_URLS: Record<AppEnvironment, string> = {
   development: "http://localhost:3000",
-  staging: "https://staging.veraz.example",
-  production: "https://veraz.example",
+  staging: "https://staging.veraz.app",
+  production: CANONICAL_SITE_URL,
 };

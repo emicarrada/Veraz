@@ -1,7 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
+import { ChiikoCredit } from "@/components/layout/chiiko-credit";
 import { Container } from "@/components/ui/container";
-import { Divider } from "@/components/ui/divider";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/utils/cn";
 
@@ -46,12 +46,24 @@ export function Footer({
           ) : null}
           {meta ? <div className="text-small">{meta}</div> : null}
         </div>
-        <Divider className="my-8" />
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-caption">© {year} Veraz</p>
-          {legal ? (
-            <div className="flex flex-wrap gap-4 text-caption">{legal}</div>
-          ) : null}
+
+        <div className="mt-8 flex flex-col items-center gap-4 border-t border-border pt-6 sm:mt-10 sm:pt-8">
+          <div className="flex flex-col items-center gap-2 text-center sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-4 sm:gap-y-1">
+            <p className="text-caption text-ink-muted">© {year} Veraz</p>
+            {legal ? (
+              <>
+                <span
+                  className="hidden sm:block h-3 w-px shrink-0 bg-border"
+                  aria-hidden
+                />
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-caption">
+                  {legal}
+                </div>
+              </>
+            ) : null}
+          </div>
+
+          <ChiikoCredit />
         </div>
       </Container>
     </footer>

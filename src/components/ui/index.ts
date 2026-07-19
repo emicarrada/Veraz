@@ -76,9 +76,6 @@ export type { SpinnerProps, SpinnerSize } from "@/components/ui/spinner";
 export { PillNav } from "@/components/ui/pill-nav";
 export type { PillNavItem, PillNavProps } from "@/components/ui/pill-nav";
 
-export { ScrollReveal } from "@/components/ui/scroll-reveal";
-export type { ScrollRevealProps } from "@/components/ui/scroll-reveal";
-
 export { Tabs } from "@/components/ui/tabs";
 export type { TabItem, TabsProps } from "@/components/ui/tabs";
 

@@ -188,25 +188,26 @@
   will-change: transform, opacity;
 }
 
-.pill.is-active::after {
-  content: "";
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 10px;
-  height: 10px;
-  background: var(--base, #111);
-  border-radius: 50px;
-  z-index: 4;
+.pill.is-active {
+  background: var(--hover-fill, #ffffff);
+  color: var(--hover-text, #111111);
 }
 
-@media (min-width: 769px) {
-  .pill.is-active::after {
-    bottom: -6px;
-    width: 12px;
-    height: 12px;
-  }
+.pill.is-active .pill-label {
+  color: var(--hover-text, #111111);
+}
+
+.pill.is-active .pill-label-hover {
+  opacity: 0;
+}
+
+.pill.is-active .hover-circle {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.pill.is-active::after {
+  content: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

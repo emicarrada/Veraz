@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { StaticPageShell } from "@/components/marketing/static-page-shell";
-import { getAppConfig } from "@/config";
+import { getAppConfig, getCanonicalSiteUrl } from "@/config";
 import { SUPPORT_EMAIL } from "@/config/site-navigation";
 
 export const metadata: Metadata = {
@@ -10,7 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacidadPage() {
-  const { name, siteUrl } = getAppConfig();
+  const { name } = getAppConfig();
+  const siteUrl = getCanonicalSiteUrl();
 
   return (
     <StaticPageShell

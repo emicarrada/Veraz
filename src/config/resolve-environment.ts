@@ -1,3 +1,4 @@
+import { CANONICAL_SITE_URL, DEFAULT_SITE_URLS } from "@/config/domains/app";
 import type { AppEnvironment } from "@/config/types/environment";
 import { ENV_KEYS, getEnv, getEnvString } from "@/config/env";
 
@@ -19,14 +20,7 @@ export function resolveAppEnvironment(): AppEnvironment {
 }
 
 export function getDefaultSiteUrl(environment: AppEnvironment): string {
-  switch (environment) {
-    case "production":
-      return "https://veraz.example";
-    case "staging":
-      return "https://staging.veraz.example";
-    default:
-      return "http://localhost:3000";
-  }
+  return DEFAULT_SITE_URLS[environment];
 }
 
 export function resolveSiteUrl(environment: AppEnvironment): string {
@@ -34,4 +28,17 @@ export function resolveSiteUrl(environment: AppEnvironment): string {
     ENV_KEYS.NEXT_PUBLIC_SITE_URL,
     getDefaultSiteUrl(environment),
   );
+}
+
+/**
+ * Public URL for legal copy and user-facing references — never localhost.
+ */
+export function getCanonicalSiteUrl(): string {
+  const configured = getEnv(ENV_KEYS.NEXT_PUBLIC_SITE_URL)?.trim();
+
+  if (configured && !/localhost|127\.0\.0\.1/i.test(configured)) {
+    return configured.replace(/\/$/, "");
+  }
+
+  return CANONICAL_SITE_URL;
 }

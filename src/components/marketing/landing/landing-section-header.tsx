@@ -1,5 +1,3 @@
-import { LANDING_SCROLL_REVEAL } from "@/components/marketing/landing/scroll-reveal-presets";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/utils/cn";
 
@@ -13,7 +11,7 @@ type LandingSectionHeaderProps = {
 };
 
 /**
- * Shared section intro — dark editorial layout, one ScrollReveal on the title.
+ * Shared section intro — dark editorial layout.
  */
 export function LandingSectionHeader({
   id,
@@ -37,20 +35,14 @@ export function LandingSectionHeader({
           {eyebrow}
         </Text>
       ) : null}
-      <ScrollReveal
-        {...LANDING_SCROLL_REVEAL}
-        as="div"
+      <Text
         id={id}
-        textAs="h2"
-        containerClassName={cn(centered && "scroll-reveal--center")}
-        textClassName={
-          titleVariant === "display"
-            ? "scroll-reveal-text--display"
-            : "scroll-reveal-text--headline"
-        }
+        as="h2"
+        variant={titleVariant === "display" ? "display" : "h2"}
+        className={cn(centered && "text-center")}
       >
         {title}
-      </ScrollReveal>
+      </Text>
       {description ? (
         <Text
           as="p"

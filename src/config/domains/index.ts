@@ -1,5 +1,6 @@
 export type { AppConfig } from "@/config/domains/app";
 export {
+  CANONICAL_SITE_URL,
   DEFAULT_APP_NAME,
   DEFAULT_APP_TAGLINE,
   DEFAULT_SITE_URLS,
