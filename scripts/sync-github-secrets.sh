@@ -13,10 +13,16 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
-# shellcheck disable=SC1090
-set -a
-source "$ENV_FILE"
-set +a
+read_env_var() {
+  local name="$1"
+  local line
+  line="$(grep -m1 "^${name}=" "$ENV_FILE" || true)"
+  if [[ -z "$line" ]]; then
+    echo ""
+    return
+  fi
+  echo "${line#*=}"
+}
 
 SECRETS=(
   NEXT_PUBLIC_SUPABASE_URL
@@ -26,13 +32,13 @@ SECRETS=(
 )
 
 for name in "${SECRETS[@]}"; do
-  value="${!name:-}"
+  value="$(read_env_var "$name")"
   if [[ -z "$value" ]]; then
     echo "Skip $name (empty)"
     continue
   fi
   printf '%s' "$value" | gh secret set "$name"
-  echo "Synced $name to GitHub Actions secrets"
+  echo "Synced $name to GitHub Actions secrets (${#value} chars)"
 done
 
 echo "Done. Workflows read NEWS_INGESTION_ENABLED=true and VERAZ_ENV=production from the workflow files."
