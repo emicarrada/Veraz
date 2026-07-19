@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 
@@ -77,133 +77,143 @@ export function PillNav({
   const logoImgRef = useRef<HTMLImageElement | null>(null);
   const logoTweenRef = useRef<gsap.core.Tween | null>(null);
   const navCenterRef = useRef<HTMLDivElement | null>(null);
+  const navItemsRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLAnchorElement | null>(null);
+  const layoutRafRef = useRef<number | null>(null);
 
-  const resetPillHoverState = (index: number, immediate = true) => {
-    activeTweenRefs.current[index]?.kill();
-    activeTweenRefs.current[index] = null;
+  const buildPillTimeline = useCallback(
+    (index: number) => {
+      const circle = circleRefs.current[index];
+      const pill = circle?.parentElement;
+      if (!circle || !pill) return;
 
-    const circle = circleRefs.current[index];
-    const pill = circle?.parentElement;
-    if (!circle || !pill) return;
+      const rect = pill.getBoundingClientRect();
+      const { width: w, height: h } = rect;
+      if (w === 0 || h === 0) return;
 
-    const { height: h } = pill.getBoundingClientRect();
-    const label = pill.querySelector(".pill-label");
-    const white = pill.querySelector(".pill-label-hover");
-    const targets = [circle, label, white].filter(
-      (target): target is Element => target instanceof Element,
-    );
+      const R = ((w * w) / 4 + h * h) / (2 * h);
+      const D = Math.ceil(2 * R) + 2;
+      const delta =
+        Math.ceil(R - Math.sqrt(Math.max(0, R * R - (w * w) / 4))) + 1;
+      const originY = D - delta;
 
-    gsap.killTweensOf(targets);
+      circle.style.width = `${D}px`;
+      circle.style.height = `${D}px`;
+      circle.style.bottom = `-${delta}px`;
 
-    if (immediate) {
-      gsap.set(circle, { scale: 0, xPercent: -50 });
+      gsap.set(circle, {
+        xPercent: -50,
+        scale: 0,
+        transformOrigin: `50% ${originY}px`,
+      });
+
+      const label = pill.querySelector<HTMLElement>(".pill-label");
+      const white = pill.querySelector<HTMLElement>(".pill-label-hover");
+
       if (label) gsap.set(label, { y: 0 });
-      if (white) gsap.set(white, { y: h > 0 ? h + 12 : 12, opacity: 0 });
-      tlRefs.current[index]?.progress(0);
-      return;
-    }
+      if (white) gsap.set(white, { y: h + 12, opacity: 0 });
 
-    const tl = tlRefs.current[index];
-    if (!tl) return;
+      activeTweenRefs.current[index]?.kill();
+      activeTweenRefs.current[index] = null;
+      tlRefs.current[index]?.kill();
 
-    activeTweenRefs.current[index] = tl.tweenTo(0, {
-      duration: 0.2,
-      ease,
-      overwrite: "auto",
-    });
-  };
+      const tl = gsap.timeline({ paused: true });
 
-  const resetInactivePills = () => {
-    items.forEach((_, index) => {
-      resetPillHoverState(index);
-    });
-  };
+      tl.to(
+        circle,
+        { scale: 1.2, xPercent: -50, duration: 2, ease, overwrite: "auto" },
+        0,
+      );
 
-  useEffect(() => {
-    resetInactivePills();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset hover visuals when route changes
-  }, [activeHref, items]);
-
-  useEffect(() => {
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    const layout = () => {
-      circleRefs.current.forEach((circle) => {
-        if (!circle?.parentElement) return;
-
-        const pill = circle.parentElement;
-        const rect = pill.getBoundingClientRect();
-        const { width: w, height: h } = rect;
-        if (w === 0 || h === 0) return;
-
-        const R = ((w * w) / 4 + h * h) / (2 * h);
-        const D = Math.ceil(2 * R) + 2;
-        const delta =
-          Math.ceil(R - Math.sqrt(Math.max(0, R * R - (w * w) / 4))) + 1;
-        const originY = D - delta;
-
-        circle.style.width = `${D}px`;
-        circle.style.height = `${D}px`;
-        circle.style.bottom = `-${delta}px`;
-
-        gsap.set(circle, {
-          xPercent: -50,
-          scale: 0,
-          transformOrigin: `50% ${originY}px`,
-        });
-
-        const label = pill.querySelector(".pill-label");
-        const white = pill.querySelector(".pill-label-hover");
-
-        if (label) gsap.set(label, { y: 0 });
-        if (white) gsap.set(white, { y: h + 12, opacity: 0 });
-
-        const index = circleRefs.current.indexOf(circle);
-        if (index === -1) return;
-
-        tlRefs.current[index]?.kill();
-        const tl = gsap.timeline({ paused: true });
-
+      if (label) {
         tl.to(
-          circle,
-          { scale: 1.2, xPercent: -50, duration: 2, ease, overwrite: "auto" },
+          label,
+          { y: -(h + 8), duration: 2, ease, overwrite: "auto" },
           0,
         );
+      }
 
-        if (label) {
-          tl.to(
-            label,
-            { y: -(h + 8), duration: 2, ease, overwrite: "auto" },
-            0,
-          );
-        }
+      if (white) {
+        gsap.set(white, { y: Math.ceil(h + 100), opacity: 0 });
+        tl.to(
+          white,
+          { y: 0, opacity: 1, duration: 2, ease, overwrite: "auto" },
+          0,
+        );
+      }
 
-        if (white) {
-          gsap.set(white, { y: Math.ceil(h + 100), opacity: 0 });
-          tl.to(
-            white,
-            { y: 0, opacity: 1, duration: 2, ease, overwrite: "auto" },
-            0,
-          );
-        }
+      tlRefs.current[index] = tl;
+    },
+    [ease],
+  );
 
-        tlRefs.current[index] = tl;
-      });
-    };
+  const layoutAllPills = useCallback(() => {
+    items.forEach((_, index) => {
+      buildPillTimeline(index);
+    });
+  }, [buildPillTimeline, items]);
 
-    layout();
-
-    const onResize = () => layout();
-    window.addEventListener("resize", onResize);
-
-    if (document.fonts?.ready) {
-      void document.fonts.ready.then(layout).catch(() => undefined);
+  const scheduleLayout = useCallback(() => {
+    if (layoutRafRef.current !== null) {
+      cancelAnimationFrame(layoutRafRef.current);
     }
 
-    if (initialLoadAnimation && !reduceMotion) {
+    layoutRafRef.current = requestAnimationFrame(() => {
+      layoutRafRef.current = requestAnimationFrame(() => {
+        layoutRafRef.current = null;
+        layoutAllPills();
+      });
+    });
+  }, [layoutAllPills]);
+
+  const resetPillHoverState = useCallback(
+    (index: number, immediate = true) => {
+      activeTweenRefs.current[index]?.kill();
+      activeTweenRefs.current[index] = null;
+
+      const tl = tlRefs.current[index];
+      if (!tl) return;
+
+      if (immediate) {
+        tl.pause(0);
+        return;
+      }
+
+      activeTweenRefs.current[index] = tl.tweenTo(0, {
+        duration: 0.2,
+        ease,
+        overwrite: "auto",
+      });
+    },
+    [ease],
+  );
+
+  const resetInactivePills = useCallback(() => {
+    items.forEach((item, index) => {
+      if (activeHref === item.href) return;
+      resetPillHoverState(index);
+    });
+  }, [activeHref, items, resetPillHoverState]);
+
+  useEffect(() => {
+    scheduleLayout();
+
+    const onResize = () => scheduleLayout();
+    window.addEventListener("resize", onResize);
+
+    const navItems = navItemsRef.current;
+    let resizeObserver: ResizeObserver | null = null;
+
+    if (typeof ResizeObserver !== "undefined" && navItems) {
+      resizeObserver = new ResizeObserver(() => scheduleLayout());
+      resizeObserver.observe(navItems);
+    }
+
+    if (document.fonts?.ready) {
+      void document.fonts.ready.then(scheduleLayout).catch(() => undefined);
+    }
+
+    if (initialLoadAnimation) {
       const logoEl = logoRef.current;
       const navCenter = navCenterRef.current;
 
@@ -224,24 +234,47 @@ export function PillNav({
           ease,
           onComplete: () => {
             gsap.set(navCenter, { clearProps: "width,overflow" });
+            scheduleLayout();
           },
         });
       }
     }
 
-    return () => window.removeEventListener("resize", onResize);
-  }, [items, ease, initialLoadAnimation]);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      resizeObserver?.disconnect();
+      if (layoutRafRef.current !== null) {
+        cancelAnimationFrame(layoutRafRef.current);
+      }
+    };
+  }, [ease, initialLoadAnimation, scheduleLayout]);
+
+  useEffect(() => {
+    scheduleLayout();
+    resetInactivePills();
+  }, [activeHref, resetInactivePills, scheduleLayout]);
 
   const handleEnter = (i: number) => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (activeHref === items[i]?.href) return;
+
     const tl = tlRefs.current[i];
-    if (!tl) return;
+    if (!tl) {
+      buildPillTimeline(i);
+    }
+
+    const resolvedTimeline = tlRefs.current[i];
+    if (!resolvedTimeline) return;
+
     activeTweenRefs.current[i]?.kill();
-    activeTweenRefs.current[i] = tl.tweenTo(tl.duration(), {
-      duration: 0.3,
-      ease,
-      overwrite: "auto",
-    });
+    activeTweenRefs.current[i] = resolvedTimeline.tweenTo(
+      resolvedTimeline.duration(),
+      {
+        duration: 0.3,
+        ease,
+        overwrite: "auto",
+      },
+    );
   };
 
   const handleLeave = (i: number) => {
@@ -338,12 +371,8 @@ export function PillNav({
       className: classNamePill,
       "aria-label": item.ariaLabel || item.label,
       ...(isActive ? { "aria-current": "page" as const } : {}),
-      onMouseEnter: () => {
-        if (!isActive) handleEnter(i);
-      },
-      onMouseLeave: () => {
-        if (!isActive) handleLeave(i);
-      },
+      onPointerEnter: () => handleEnter(i),
+      onPointerLeave: () => handleLeave(i),
     };
 
     if (isAppRouterLink(item.href)) {
@@ -371,7 +400,7 @@ export function PillNav({
         <div className="pill-nav-center" ref={navCenterRef}>
           {renderLogo()}
 
-          <div className="pill-nav-items">
+          <div className="pill-nav-items" ref={navItemsRef}>
             <ul className="pill-list" role="menubar">
               {items.map((item, i) => (
                 <li key={item.href || `item-${i}`} role="none">
