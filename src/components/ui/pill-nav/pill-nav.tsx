@@ -79,6 +79,52 @@ export function PillNav({
   const navCenterRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLAnchorElement | null>(null);
 
+  const resetPillHoverState = (index: number, immediate = true) => {
+    activeTweenRefs.current[index]?.kill();
+    activeTweenRefs.current[index] = null;
+
+    const circle = circleRefs.current[index];
+    const pill = circle?.parentElement;
+    if (!circle || !pill) return;
+
+    const { height: h } = pill.getBoundingClientRect();
+    const label = pill.querySelector(".pill-label");
+    const white = pill.querySelector(".pill-label-hover");
+    const targets = [circle, label, white].filter(
+      (target): target is Element => target instanceof Element,
+    );
+
+    gsap.killTweensOf(targets);
+
+    if (immediate) {
+      gsap.set(circle, { scale: 0, xPercent: -50 });
+      if (label) gsap.set(label, { y: 0 });
+      if (white) gsap.set(white, { y: h > 0 ? h + 12 : 12, opacity: 0 });
+      tlRefs.current[index]?.progress(0);
+      return;
+    }
+
+    const tl = tlRefs.current[index];
+    if (!tl) return;
+
+    activeTweenRefs.current[index] = tl.tweenTo(0, {
+      duration: 0.2,
+      ease,
+      overwrite: "auto",
+    });
+  };
+
+  const resetInactivePills = () => {
+    items.forEach((_, index) => {
+      resetPillHoverState(index);
+    });
+  };
+
+  useEffect(() => {
+    resetInactivePills();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset hover visuals when route changes
+  }, [activeHref, items]);
+
   useEffect(() => {
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -200,14 +246,8 @@ export function PillNav({
 
   const handleLeave = (i: number) => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const tl = tlRefs.current[i];
-    if (!tl) return;
-    activeTweenRefs.current[i]?.kill();
-    activeTweenRefs.current[i] = tl.tweenTo(0, {
-      duration: 0.2,
-      ease,
-      overwrite: "auto",
-    });
+    if (activeHref === items[i]?.href) return;
+    resetPillHoverState(i, false);
   };
 
   const handleLogoEnter = () => {
