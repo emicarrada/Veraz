@@ -1,5 +1,6 @@
 import { getSecurityConfig } from "@/config/accessors";
 import { ENV_KEYS, getEnv } from "@/config/env";
+import { safeCompare } from "@/lib/security/safe-compare";
 
 function extractBearerToken(request: Request): string | null {
   const header = request.headers.get("authorization");
@@ -24,10 +25,14 @@ export function verifyCronAuth(request: Request): boolean {
   }
 
   const bearer = extractBearerToken(request);
-  if (bearer && bearer === secret) {
+  if (bearer && safeCompare(bearer, secret)) {
     return true;
   }
 
   const headerSecret = request.headers.get("x-cron-secret");
-  return headerSecret === secret;
+  if (headerSecret && safeCompare(headerSecret, secret)) {
+    return true;
+  }
+
+  return false;
 }

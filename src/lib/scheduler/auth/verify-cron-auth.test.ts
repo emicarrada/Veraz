@@ -42,4 +42,28 @@ describe("verifyCronAuth", () => {
     });
     expect(verifyCronAuth(authorized)).toBe(true);
   });
+
+  it("accepts x-cron-secret header in production", () => {
+    process.env[ENV_KEYS.VERAZ_ENV] = "production";
+    process.env[ENV_KEYS.CRON_SECRET] = "test-secret";
+    resetEnvSnapshot();
+    resetConfigCache();
+
+    const authorized = new Request("http://localhost/api/cron/ingest/run", {
+      headers: { "x-cron-secret": "test-secret" },
+    });
+    expect(verifyCronAuth(authorized)).toBe(true);
+  });
+
+  it("requires secret in staging", () => {
+    process.env[ENV_KEYS.VERAZ_ENV] = "staging";
+    delete process.env[ENV_KEYS.CRON_SECRET];
+    resetEnvSnapshot();
+    resetConfigCache();
+
+    const request = new Request("http://localhost/api/cron/ingest/run", {
+      headers: { Authorization: "Bearer anything" },
+    });
+    expect(verifyCronAuth(request)).toBe(false);
+  });
 });

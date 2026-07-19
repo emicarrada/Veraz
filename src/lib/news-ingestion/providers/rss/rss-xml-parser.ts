@@ -12,6 +12,7 @@ import { extractFirstImageUrl, normalizeImageUrl, stripHtml } from "@/lib/news-i
 import { urlFingerprint } from "@/lib/news-ingestion/utils/url-fingerprint";
 
 const RSS_PROVIDER_ID = "rss" as const;
+const MAX_ITEMS_PER_FEED = 100;
 
 export type RssParseContext = {
   sourceSlug: string;
@@ -217,6 +218,7 @@ export class RssXmlParser {
       metadata.language = extractTagValue(trimmed, "language");
 
       const items = extractBlocks(trimmed, "item")
+        .slice(0, MAX_ITEMS_PER_FEED)
         .map(parseRssItem)
         .filter((item): item is RssRawItem => item !== null);
 
@@ -228,6 +230,7 @@ export class RssXmlParser {
     metadata.language = extractTagValue(trimmed, "language");
 
     const items = extractBlocks(trimmed, "entry")
+      .slice(0, MAX_ITEMS_PER_FEED)
       .map(parseAtomEntry)
       .filter((item): item is RssRawItem => item !== null);
 

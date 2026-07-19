@@ -1,4 +1,5 @@
 import type { AppEnvironment } from "@/config/types/environment";
+import { hasEnv, ENV_KEYS } from "@/config/env";
 
 export type ConfigValidationSeverity = "error" | "warning";
 
@@ -65,6 +66,49 @@ export function runBuiltInValidators(
     issues.push({
       path: "ai.engine.provider",
       message: "AI mode is active but provider is none.",
+      severity: "warning",
+    });
+  }
+
+  if (config.environment === "production" || config.environment === "staging") {
+    if (!hasEnv(ENV_KEYS.CRON_SECRET)) {
+      issues.push({
+        path: "security.cronSecret",
+        message: "CRON_SECRET is required in staging/production.",
+        severity: "error",
+      });
+    }
+
+    if (!hasEnv(ENV_KEYS.SUPABASE_SERVICE_ROLE_KEY)) {
+      issues.push({
+        path: "supabase.serviceRoleKey",
+        message: "SUPABASE_SERVICE_ROLE_KEY is required in staging/production.",
+        severity: "error",
+      });
+    }
+  }
+
+  if (
+    config.environment === "production" &&
+    config.news.ingestionEnabled &&
+    config.news.rss.feeds.length === 0
+  ) {
+    issues.push({
+      path: "news.rss.feeds",
+      message: "NEWS_INGESTION_ENABLED is true but NEWS_RSS_FEEDS is empty.",
+      severity: "warning",
+    });
+  }
+
+  const aiCredentialKey = config.ai.credentialEnvKey;
+  if (
+    config.ai.engine.mode === "disabled" &&
+    aiCredentialKey &&
+    hasEnv(aiCredentialKey)
+  ) {
+    issues.push({
+      path: "ai.credentials",
+      message: `AI is disabled but ${aiCredentialKey} is set.`,
       severity: "warning",
     });
   }

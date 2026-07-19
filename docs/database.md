@@ -1,7 +1,7 @@
 # Base de datos — Veraz
 
 > Estado: **schema inicial implementado** para `sources`, `articles`, `media`, `article_references`.
-> Migración: `supabase/migrations/20250717000000_initial_content_schema.sql`.
+> Migraciones: `supabase/migrations/20250717000000_initial_content_schema.sql`, `20250719180000_enable_rls_public_read.sql`.
 > Repositorios activos: `ArticleRepository`, `SourceRepository` (Supabase, service role).
 >
 > Este documento describe el **mapeo futuro** dominio → persistencia.
@@ -40,7 +40,7 @@ PostgreSQL vía **Supabase**, con Row Level Security (RLS) para datos de usuario
 | PremiumPlan | `premium_plans` | |
 | PremiumSubscription | `premium_subscriptions` | |
 
-No se generan migraciones en esta fase.
+No se generan migraciones adicionales en esta fase salvo hardening de seguridad (RLS baseline).
 
 ## Diagrama de persistencia (conceptual)
 
@@ -76,7 +76,7 @@ erDiagram
 1. Preferir URL + excerpt + atribución; no cuerpo completo sin licencia.
 2. `articles` son válidos **sin** filas en `ai_analyses`.
 3. Todo analysis factual debe poder citar fuentes (`source_refs`).
-4. Contenido público: lectura abierta vía políticas o vistas controladas.
+4. Contenido público: RLS read-only (`articles.status = 'published'`, `sources.status = 'active'`) — ver [`docs/security.md`](./security.md).
 5. Datos de usuario: RLS estricta (`auth.uid()`).
 6. `service_role` solo en server/jobs.
 7. Fallos de IA no revierten un article ya insertado.

@@ -7,6 +7,7 @@
     "dev": "next dev",
     "dev:clean": "node scripts/kill-next-dev.mjs && rm -rf .next && next dev",
     "build": "next build",
+    "prebuild": "tsx scripts/validate-config.ts",
     "postbuild": "node scripts/mark-prod-build.mjs",
     "start": "next start",
     "lint": "next lint",

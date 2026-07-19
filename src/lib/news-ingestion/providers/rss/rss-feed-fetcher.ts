@@ -16,10 +16,77 @@ export type RssFeedFetchResult = {
 
 export type RssFeedFetcherOptions = {
   timeoutMs?: number;
+  maxBytes?: number;
   fetchImpl?: typeof fetch;
 };
 
 const DEFAULT_TIMEOUT_MS = 15_000;
+const DEFAULT_MAX_BYTES = 2 * 1024 * 1024;
+
+const ALLOWED_CONTENT_TYPES = [
+  "application/rss+xml",
+  "application/atom+xml",
+  "application/xml",
+  "text/xml",
+  "application/octet-stream",
+];
+
+function isAllowedContentType(contentType: string | null): boolean {
+  if (!contentType) return true;
+
+  const normalized = contentType.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (!normalized) return true;
+
+  return ALLOWED_CONTENT_TYPES.some(
+    (allowed) => normalized === allowed || normalized.endsWith("+xml"),
+  );
+}
+
+async function readResponseWithLimit(
+  response: Response,
+  maxBytes: number,
+): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    const text = await response.text();
+    if (text.length > maxBytes) {
+      throw new ProviderParseFailureError(
+        RSS_PROVIDER_ID,
+        `Feed response exceeds ${maxBytes} bytes.`,
+      );
+    }
+    return text;
+  }
+
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new ProviderParseFailureError(
+        RSS_PROVIDER_ID,
+        `Feed response exceeds ${maxBytes} bytes.`,
+      );
+    }
+
+    chunks.push(value);
+  }
+
+  const merged = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return new TextDecoder("utf-8", { fatal: false }).decode(merged);
+}
 
 /**
  * Downloads RSS/Atom XML from a public feed URL.
@@ -27,10 +94,12 @@ const DEFAULT_TIMEOUT_MS = 15_000;
  */
 export class RssFeedFetcher {
   private readonly timeoutMs: number;
+  private readonly maxBytes: number;
   private readonly fetchImpl: typeof fetch;
 
   constructor(options: RssFeedFetcherOptions = {}) {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    this.maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES;
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
@@ -62,7 +131,15 @@ export class RssFeedFetcher {
         );
       }
 
-      const xml = await response.text();
+      const contentType = response.headers.get("content-type");
+      if (!isAllowedContentType(contentType)) {
+        throw new ProviderParseFailureError(
+          RSS_PROVIDER_ID,
+          `Unsupported feed content type: ${contentType ?? "unknown"}.`,
+        );
+      }
+
+      const xml = await readResponseWithLimit(response, this.maxBytes);
       if (!xml.trim()) {
         throw new ProviderParseFailureError(
           RSS_PROVIDER_ID,
@@ -72,7 +149,7 @@ export class RssFeedFetcher {
 
       return {
         xml,
-        contentType: response.headers.get("content-type") ?? undefined,
+        contentType: contentType ?? undefined,
         fetchedAt: new Date().toISOString(),
       };
     } catch (error) {

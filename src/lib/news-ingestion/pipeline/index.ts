@@ -36,3 +36,4 @@ export {
 } from "@/lib/news-ingestion/pipeline/rss-ingestion-runner";
 
 export { RssNormalizeStage } from "@/lib/news-ingestion/pipeline/rss-normalize-stage";
+export { RssValidateStage } from "@/lib/news-ingestion/pipeline/rss-validate-stage";

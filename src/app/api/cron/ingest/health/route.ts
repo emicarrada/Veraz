@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { verifyCronAuth } from "@/lib/scheduler/auth/verify-cron-auth";
+import { guardCronRequest } from "@/lib/security/cron-route-guard";
 import { runSchedulerJob } from "@/lib/scheduler/run-job";
 import type { JobRunSummary } from "@/lib/scheduler/types/job-run";
 
@@ -11,9 +11,8 @@ function jobResponse(summary: JobRunSummary) {
 }
 
 async function handleHealthCheck(request: Request) {
-  if (!verifyCronAuth(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const blocked = guardCronRequest(request);
+  if (blocked) return blocked;
 
   const summary = await runSchedulerJob("health_check");
   return jobResponse(summary);
