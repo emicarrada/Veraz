@@ -1,8 +1,8 @@
 import { LandingSectionHeader } from "@/components/marketing/landing/landing-section-header";
+import { HeroPrimaryButton } from "@/components/marketing/landing/hero-primary-button";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
-import { SpecularButton } from "@/components/ui/specular-button";
-import { Text } from "@/components/ui/text";
+import { FEED_ROUTE } from "@/features/news/constants";
 
 export function LandingFinalCtaSection() {
   return (
@@ -19,40 +19,17 @@ export function LandingFinalCtaSection() {
       <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-8 text-center">
         <LandingSectionHeader
           id="cta-final-heading"
-          title="[PLACEHOLDER: CTA final — título]"
-          description="[PLACEHOLDER: CTA final — apoyo en una o dos frases]"
+          title="Empieza a leer con contexto"
+          description="Entra al feed, elige tu rubro y abre la fuente cuando quieras profundizar."
           align="center"
           titleVariant="display"
         />
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <SpecularButton
-            href="#placeholder-start"
-            size="lg"
-            radius={18}
-            tint="#ffffff"
-            tintOpacity={0}
-            blur={0}
-            textColor="#f5f5f5"
-            lineColor="#ffffff"
-            baseColor="#525252"
-            intensity={1}
-            shineSize={10}
-            shineFade={40}
-            thickness={1}
-            speed={0.35}
-            proximity={250}
-            followMouse
-            autoAnimate
-          >
-            [PLACEHOLDER: CTA primario final]
-          </SpecularButton>
-          <Button href="#placeholder-learn" variant="secondary" size="lg">
-            [PLACEHOLDER: CTA secundario final]
+          <HeroPrimaryButton href={FEED_ROUTE}>Explorar noticias</HeroPrimaryButton>
+          <Button href="/metodologia" variant="secondary" size="lg">
+            Ver metodología
           </Button>
         </div>
-        <Text as="p" variant="caption" className="text-ink-muted">
-          [PLACEHOLDER: nota — sin formularios conectados en esta fase]
-        </Text>
       </div>
     </Section>
   );

@@ -11,20 +11,20 @@ import { Section } from "@/components/ui/section";
 
 const FEATURES = [
   {
-    title: "[PLACEHOLDER: feature 1 — título]",
-    body: "[PLACEHOLDER: feature 1 — beneficio en una frase]",
+    title: "Fuentes de referencia",
+    body: "Finanzas y tecnología con medios reconocidos; cobertura general en otras pestañas.",
   },
   {
-    title: "[PLACEHOLDER: feature 2 — título]",
-    body: "[PLACEHOLDER: feature 2 — beneficio en una frase]",
+    title: "Actualización frecuente",
+    body: "El feed se alimenta de forma automática para que veas lo publicado hace horas, no días.",
   },
   {
-    title: "[PLACEHOLDER: feature 3 — título]",
-    body: "[PLACEHOLDER: feature 3 — beneficio en una frase]",
+    title: "Trazabilidad total",
+    body: "Sabes quién publicó cada noticia y cuándo. Un clic te lleva al artículo original.",
   },
   {
-    title: "[PLACEHOLDER: feature 4 — título]",
-    body: "[PLACEHOLDER: feature 4 — beneficio en una frase]",
+    title: "Sin ruido editorial",
+    body: "No reescribimos titulares para generar clics. Mostramos lo que la fuente publicó.",
   },
 ] as const;
 
@@ -39,7 +39,7 @@ export function LandingFeaturesSection() {
       <LandingSectionHeader
         id="caracteristicas-heading"
         title="Características principales"
-        description="[PLACEHOLDER: intro — qué hace distinta a la plataforma]"
+        description="Diseñado para quien quiere contexto, no solo titulares."
       />
 
       <ul className="mt-12 grid gap-6 sm:grid-cols-2">

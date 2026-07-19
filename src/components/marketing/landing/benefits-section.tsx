@@ -4,16 +4,16 @@ import { Text } from "@/components/ui/text";
 
 const BENEFITS = [
   {
-    title: "[PLACEHOLDER: beneficio 1]",
-    body: "[PLACEHOLDER: detalle — por qué importa al lector]",
+    title: "Menos tiempo buscando",
+    body: "Un solo lugar para finanzas, tech y actualidad, en lugar de saltar entre diez portadas.",
   },
   {
-    title: "[PLACEHOLDER: beneficio 2]",
-    body: "[PLACEHOLDER: detalle — por qué importa al lector]",
+    title: "Más confianza",
+    body: "Cada noticia lleva su fuente visible. Puedes contrastar antes de compartir o decidir.",
   },
   {
-    title: "[PLACEHOLDER: beneficio 3]",
-    body: "[PLACEHOLDER: detalle — por qué importa al lector]",
+    title: "Neutralidad de presentación",
+    body: "Clasificamos por tema, no por opinión. Veraz no empuja un relato único.",
   },
 ] as const;
 
@@ -28,7 +28,7 @@ export function LandingBenefitsSection() {
       <LandingSectionHeader
         id="beneficios-heading"
         title="Beneficios"
-        description="[PLACEHOLDER: intro — valor concreto para quien se informa]"
+        description="Para leer el día a día con criterio, no con prisa."
       />
 
       <ul className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">

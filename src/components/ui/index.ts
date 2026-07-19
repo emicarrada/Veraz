@@ -73,9 +73,6 @@ export type { SkeletonProps } from "@/components/ui/skeleton";
 export { Spinner } from "@/components/ui/spinner";
 export type { SpinnerProps, SpinnerSize } from "@/components/ui/spinner";
 
-export { SpecularButton } from "@/components/ui/specular-button";
-export type { SpecularButtonProps } from "@/components/ui/specular-button";
-
 export { PillNav } from "@/components/ui/pill-nav";
 export type { PillNavItem, PillNavProps } from "@/components/ui/pill-nav";
 

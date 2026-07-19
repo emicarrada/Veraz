@@ -12,18 +12,18 @@ import { Text } from "@/components/ui/text";
 const STEPS = [
   {
     step: "01",
-    title: "[PLACEHOLDER: paso 1 — título]",
-    body: "[PLACEHOLDER: paso 1 — descripción breve del flujo]",
+    title: "Agregamos fuentes",
+    body: "Consultamos feeds RSS de medios curados varias veces al día. Finanzas y tecnología usan solo fuentes prestigiosas.",
   },
   {
     step: "02",
-    title: "[PLACEHOLDER: paso 2 — título]",
-    body: "[PLACEHOLDER: paso 2 — descripción breve del flujo]",
+    title: "Clasificamos y mostramos",
+    body: "Cada artículo entra al feed con tema, fuente y resumen. Filtras por rubro o buscas por palabra clave.",
   },
   {
     step: "03",
-    title: "[PLACEHOLDER: paso 3 — título]",
-    body: "[PLACEHOLDER: paso 3 — descripción breve del flujo]",
+    title: "Lees en la fuente",
+    body: "Desde Veraz abres el artículo completo en el medio original. El contexto y la responsabilidad editorial siguen allí.",
   },
 ] as const;
 
@@ -38,7 +38,7 @@ export function LandingHowItWorksSection() {
       <LandingSectionHeader
         id="como-funciona-heading"
         title="Cómo funciona"
-        description="[PLACEHOLDER: intro — flujo simple de fuentes a comprensión]"
+        description="De la fuente a tu pantalla en tres pasos, sin cajas negras."
       />
 
       <ol className="mt-12 grid gap-6 md:grid-cols-3">

@@ -1,4 +1,4 @@
-import type { ElementType, HTMLAttributes, ReactNode } from "react";
+import { createElement, type ComponentPropsWithoutRef, type ElementType, type ReactNode } from "react";
 
 import { Container, type ContainerSize } from "@/components/ui/container";
 import { cn } from "@/utils/cn";
@@ -10,15 +10,19 @@ const paddingStyles = {
   lg: "py-16 sm:py-24",
 } as const;
 
-export type SectionProps = HTMLAttributes<HTMLElement> & {
-  as?: ElementType;
+type SectionOwnProps = {
   padding?: keyof typeof paddingStyles;
   containerSize?: ContainerSize;
   contained?: boolean;
   children: ReactNode;
 };
 
-export function Section({
+export type SectionProps<T extends ElementType = "section"> = SectionOwnProps &
+  Omit<ComponentPropsWithoutRef<T>, keyof SectionOwnProps | "as"> & {
+    as?: T;
+  };
+
+export function Section<T extends ElementType = "section">({
   as,
   padding = "md",
   containerSize = "lg",
@@ -26,16 +30,16 @@ export function Section({
   className,
   children,
   ...props
-}: SectionProps) {
+}: SectionProps<T>) {
   const Component = as ?? "section";
 
-  return (
-    <Component className={cn(paddingStyles[padding], className)} {...props}>
-      {contained ? (
-        <Container size={containerSize}>{children}</Container>
-      ) : (
-        children
-      )}
-    </Component>
+  return createElement(
+    Component,
+    { className: cn(paddingStyles[padding], className), ...props },
+    contained ? (
+      <Container size={containerSize}>{children}</Container>
+    ) : (
+      children
+    ),
   );
 }

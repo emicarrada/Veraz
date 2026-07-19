@@ -71,7 +71,93 @@
   mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
 }
 
-/* ——— Landing page shell ——— */
+/* ——— Hero CTA ——— */
+
+.hero-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  border-radius: var(--veraz-radius-lg, 0.5rem);
+  font-size: var(--veraz-font-size-body-lg, 1.0625rem);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--veraz-color-ink);
+  background-color: var(--veraz-color-surface-elevated);
+  border: 1px solid var(--veraz-color-border-strong);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    0 1px 2px rgb(0 0 0 / 0.24);
+  transition:
+    color var(--veraz-duration-fast, 150ms) var(--veraz-ease-standard, ease),
+    background-color var(--veraz-duration-fast, 150ms) var(--veraz-ease-standard, ease),
+    border-color var(--veraz-duration-fast, 150ms) var(--veraz-ease-standard, ease),
+    box-shadow var(--veraz-duration-fast, 150ms) var(--veraz-ease-standard, ease),
+    transform var(--veraz-duration-fast, 150ms) var(--veraz-ease-standard, ease);
+}
+
+.hero-cta-primary:hover {
+  color: var(--veraz-color-accent-foreground);
+  background-color: var(--veraz-color-accent);
+  border-color: var(--veraz-color-accent-hover);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 10px 28px rgb(0 0 0 / 0.35);
+  transform: translateY(-1px);
+}
+
+.hero-cta-primary:active {
+  transform: translateY(0);
+  background-color: var(--veraz-color-accent-active);
+  border-color: var(--veraz-color-accent-active);
+}
+
+.hero-cta-primary:focus-visible {
+  outline: 2px solid var(--veraz-color-border-focus);
+  outline-offset: 2px;
+}
+
+.static-page-content {
+  max-width: 42rem;
+  color: var(--veraz-color-ink-secondary);
+  font-size: var(--veraz-font-size-body, 1rem);
+  line-height: 1.65;
+}
+
+.static-page-content h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--veraz-color-ink);
+  font-size: var(--veraz-font-size-h3, 1.25rem);
+  font-weight: 500;
+}
+
+.static-page-content p + p {
+  margin-top: 1rem;
+}
+
+.static-page-content ul {
+  margin-top: 0.75rem;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.static-page-content li + li {
+  margin-top: 0.5rem;
+}
+
+.static-page-content a {
+  color: var(--veraz-color-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.static-page-content a:hover {
+  color: var(--veraz-color-accent-hover);
+}
+
 
 .landing-page {
   background-color: var(--veraz-color-bg);

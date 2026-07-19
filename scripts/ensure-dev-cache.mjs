@@ -75,4 +75,10 @@ if (shouldClean) {
   }}, "H1");
   console.log("[veraz] Stale production .next cache detected — cleaning before dev...");
   rmSync(NEXT_DIR, { recursive: true, force: true });
+  console.warn(
+    "[veraz] Si ya tenías `next dev` en otra terminal, deténlo (Ctrl+C) y vuelve a ejecutar npm run dev.",
+  );
+  console.warn(
+    "[veraz] Un servidor obsoleto en :3000 con caché borrada provoca el error [object Event] en el navegador.",
+  );
 }

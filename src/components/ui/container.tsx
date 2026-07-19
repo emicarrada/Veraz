@@ -1,4 +1,4 @@
-import type { ElementType, HTMLAttributes, ReactNode } from "react";
+import { createElement, type ComponentPropsWithoutRef, type ElementType, type ReactNode } from "react";
 
 import { cn } from "@/utils/cn";
 
@@ -13,31 +13,33 @@ const sizeStyles = {
 
 export type ContainerSize = keyof typeof sizeStyles;
 
-export type ContainerProps = HTMLAttributes<HTMLElement> & {
-  as?: ElementType;
+type ContainerOwnProps = {
   size?: ContainerSize;
   children: ReactNode;
 };
 
-export function Container({
+export type ContainerProps<T extends ElementType = "div"> = ContainerOwnProps &
+  Omit<ComponentPropsWithoutRef<T>, keyof ContainerOwnProps | "as"> & {
+    as?: T;
+  };
+
+export function Container<T extends ElementType = "div">({
   as,
   size = "lg",
   className,
   children,
   ...props
-}: ContainerProps) {
-  const Component = as ?? "div";
-
-  return (
-    <Component
-      className={cn(
+}: ContainerProps<T>) {
+  return createElement(
+    as ?? "div",
+    {
+      className: cn(
         "mx-auto w-full px-4 sm:px-6 lg:px-8",
         sizeStyles[size],
         className,
-      )}
-      {...props}
-    >
-      {children}
-    </Component>
+      ),
+      ...props,
+    },
+    children,
   );
 }

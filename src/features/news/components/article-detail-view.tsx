@@ -1,12 +1,14 @@
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
+import { ArticleBackLink } from "@/features/news/components/article-back-link";
 import { ArticleContent } from "@/features/news/components/article-content";
 import { ArticleHeader } from "@/features/news/components/article-header";
 import { ArticleHeroImage } from "@/features/news/components/article-hero-image";
 import { ArticleMeta } from "@/features/news/components/article-meta";
 import { ArticleReferences } from "@/features/news/components/article-references";
 import { NewsAppShell } from "@/features/news/components/news-app-shell";
+import { feedReturnHref } from "@/features/news/constants";
 import type { ArticleDetailItem } from "@/features/news/types/article-detail";
 
 export type ArticleDetailViewProps = {
@@ -18,6 +20,7 @@ export function ArticleDetailView({ article }: ArticleDetailViewProps) {
     <NewsAppShell>
       <Section padding="md" containerSize="md">
         <article className="mx-auto max-w-3xl space-y-8">
+          <ArticleBackLink feedHref={feedReturnHref(article.categorySlug)} />
           <ArticleMeta article={article} />
           <ArticleHeader article={article} />
 

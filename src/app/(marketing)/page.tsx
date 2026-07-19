@@ -4,7 +4,7 @@ import { LandingPage } from "@/components/marketing/landing";
 import { getAppConfig } from "@/config";
 
 const SITE_DESCRIPTION =
-  "[PLACEHOLDER: meta description — plataforma de noticias claras, verificables y neutrales]";
+  "Noticias agregadas de fuentes de referencia, con trazabilidad a la publicación original. Informar sin influenciar.";
 
 const { name: SITE_NAME, tagline: SITE_TAGLINE, siteUrl } = getAppConfig();
 
@@ -18,10 +18,11 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   keywords: [
     "Veraz",
-    "[PLACEHOLDER: keyword 1]",
-    "[PLACEHOLDER: keyword 2]",
     "noticias",
+    "finanzas",
+    "tecnología",
     "información verificable",
+    "fuentes de referencia",
   ],
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,

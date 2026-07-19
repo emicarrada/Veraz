@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/ensure-dev-cache.mjs && next dev",
-    "dev:clean": "rm -rf .next && next dev",
+    "dev:clean": "node scripts/kill-next-dev.mjs && rm -rf .next && next dev",
     "build": "next build",
     "postbuild": "node scripts/mark-prod-build.mjs",
     "start": "next start",
@@ -21,17 +21,21 @@
     "sync:github-secrets": "./scripts/sync-github-secrets.sh"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "@supabase/supabase-js": "^2.110.7",
     "gsap": "^3.15.0",
     "next": "^15.3.5",
     "ogl": "^1.0.11",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/node": "^22.15.32",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/three": "^0.185.1",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.30.1",
     "eslint-config-next": "^15.3.5",

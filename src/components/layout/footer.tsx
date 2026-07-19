@@ -9,6 +9,7 @@ export type FooterProps = HTMLAttributes<HTMLElement> & {
   nav?: ReactNode;
   meta?: ReactNode;
   legal?: ReactNode;
+  logoVariant?: "default" | "transparent" | "icon";
 };
 
 /**
@@ -18,6 +19,7 @@ export function Footer({
   nav,
   meta,
   legal,
+  logoVariant = "icon",
   className,
   ...props
 }: FooterProps) {
@@ -31,7 +33,7 @@ export function Footer({
       <Container className="py-10 sm:py-12">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-sm">
-            <Logo size="sm" />
+            <Logo variant={logoVariant} size="sm" />
             <p className="mt-3 text-small">Informar sin influenciar.</p>
           </div>
           {nav ? (

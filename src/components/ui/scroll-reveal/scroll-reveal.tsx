@@ -1,12 +1,12 @@
 "use client";
 
 import type {
+  ComponentPropsWithoutRef,
   ElementType,
-  HTMLAttributes,
   ReactNode,
   RefObject,
 } from "react";
-import { useEffect, useMemo, useRef } from "react";
+import { createElement, useEffect, useMemo, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -16,10 +16,7 @@ import "./scroll-reveal.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export type ScrollRevealProps = Omit<
-  HTMLAttributes<HTMLElement>,
-  "children"
-> & {
+type ScrollRevealOwnProps = {
   children: ReactNode;
   scrollContainerRef?: RefObject<HTMLElement | null>;
   enableBlur?: boolean;
@@ -30,17 +27,22 @@ export type ScrollRevealProps = Omit<
   textClassName?: string;
   rotationEnd?: string;
   wordAnimationEnd?: string;
-  /** Semantic wrapper — default `div` (use `h2`/`p` as needed). */
-  as?: ElementType;
   /** Inner text element — default `p`. */
   textAs?: ElementType;
 };
+
+export type ScrollRevealProps<T extends ElementType = "div"> =
+  ScrollRevealOwnProps &
+    Omit<ComponentPropsWithoutRef<T>, keyof ScrollRevealOwnProps | "as"> & {
+      /** Semantic wrapper — default `div` (use `h2`/`p` as needed). */
+      as?: T;
+    };
 
 /**
  * Scroll-scrubbed word reveal (React Bits / GSAP ScrollTrigger).
  * Pass a string as children to animate word-by-word.
  */
-export function ScrollReveal({
+export function ScrollReveal<T extends ElementType = "div">({
   children,
   scrollContainerRef,
   enableBlur = true,
@@ -55,10 +57,10 @@ export function ScrollReveal({
   textAs,
   className,
   ...rest
-}: ScrollRevealProps) {
+}: ScrollRevealProps<T>) {
   const containerRef = useRef<HTMLElement | null>(null);
-  const Container = (as ?? "div") as ElementType;
-  const TextEl = (textAs ?? "p") as ElementType;
+  const Container = as ?? "div";
+  const TextEl = textAs ?? "p";
 
   const splitText = useMemo(() => {
     if (typeof children !== "string") {
@@ -183,15 +185,17 @@ export function ScrollReveal({
     blurStrength,
   ]);
 
-  return (
-    <Container
-      ref={containerRef}
-      className={cn("scroll-reveal", containerClassName, className)}
-      {...rest}
-    >
-      <TextEl className={cn("scroll-reveal-text", textClassName)}>
-        {splitText}
-      </TextEl>
-    </Container>
+  return createElement(
+    Container,
+    {
+      ref: containerRef,
+      className: cn("scroll-reveal", containerClassName, className),
+      ...rest,
+    },
+    createElement(
+      TextEl,
+      { className: cn("scroll-reveal-text", textClassName) },
+      splitText,
+    ),
   );
 }

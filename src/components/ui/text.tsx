@@ -1,4 +1,4 @@
-import type { ElementType, HTMLAttributes, ReactNode } from "react";
+import { createElement, type ComponentPropsWithoutRef, type ElementType, type ReactNode } from "react";
 
 import { cn } from "@/utils/cn";
 
@@ -30,24 +30,28 @@ const defaultElement: Record<TextVariant, ElementType> = {
   label: "span",
 };
 
-export type TextProps = Omit<HTMLAttributes<HTMLElement>, "color"> & {
+type TextOwnProps = {
   variant?: TextVariant;
-  as?: ElementType;
   children: ReactNode;
 };
 
-export function Text({
+export type TextProps<T extends ElementType = "p"> = TextOwnProps &
+  Omit<ComponentPropsWithoutRef<T>, keyof TextOwnProps | "as" | "color"> & {
+    as?: T;
+  };
+
+export function Text<T extends ElementType = "p">({
   variant = "body",
   as,
   className,
   children,
   ...rest
-}: TextProps) {
+}: TextProps<T>) {
   const Component = as ?? defaultElement[variant];
 
-  return (
-    <Component className={cn(variantClass[variant], className)} {...rest}>
-      {children}
-    </Component>
+  return createElement(
+    Component,
+    { className: cn(variantClass[variant], className), ...rest },
+    children,
   );
 }

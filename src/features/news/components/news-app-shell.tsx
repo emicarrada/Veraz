@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-import { AppShell } from "@/components/layout/app-shell";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { MainContainer } from "@/components/layout/main-container";
 
 export type NewsAppShellProps = {
   children: ReactNode;
@@ -8,16 +9,9 @@ export type NewsAppShellProps = {
 
 export function NewsAppShell({ children }: NewsAppShellProps) {
   return (
-    <AppShell
-      showHeader={false}
-      showFooter
-      footerLegal={
-        <span className="text-caption text-ink-muted">
-          Veraz — informar sin influenciar.
-        </span>
-      }
-    >
-      {children}
-    </AppShell>
+    <div className="flex min-h-dvh flex-col bg-bg">
+      <MainContainer className="flex-1">{children}</MainContainer>
+      <SiteFooter />
+    </div>
   );
 }
