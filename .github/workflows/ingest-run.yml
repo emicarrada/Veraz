@@ -1,0 +1,44 @@
+name: Ingest — run ingestion
+
+on:
+  schedule:
+    # Offset from discover_feeds (runs at :00, :15, :30, :45).
+    - cron: "5,20,35,50 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ingest-run
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run_ingestion:
+    name: run_ingestion
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      VERAZ_ENV: production
+      NEWS_INGESTION_ENABLED: "true"
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEWS_RSS_FEEDS: ${{ secrets.NEWS_RSS_FEEDS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run run_ingestion job
+        run: npx tsx scripts/run-scheduler-job.ts run_ingestion

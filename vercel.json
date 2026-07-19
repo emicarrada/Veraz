@@ -1,16 +1,3 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/ingest/run",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/ingest/discover",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/ingest/health",
-      "schedule": "*/5 * * * *"
-    }
-  ]
+  "crons": []
 }

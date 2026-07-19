@@ -47,14 +47,12 @@ sync_var() {
     echo "Skip $name ($target, empty)"
     return
   fi
-  printf '%s' "$value" | vercel env add "$name" "$target" --force
+  printf '%s' "$value" | vercel env add "$name" "$target" --force --yes
   echo "Synced $name ($target)"
 }
 
 for name in "${SHARED_VARS[@]}"; do
-  for target in production preview development; do
-    sync_var "$name" "$target"
-  done
+  sync_var "$name" production
 done
 
 # Production-only profile (falls back when unset locally).

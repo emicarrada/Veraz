@@ -17,7 +17,8 @@
     "ingest:health": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-scheduler-job.ts health_check",
     "ingest:watch": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/ingest-loop.ts",
     "feeds:validate": "tsx scripts/validate-rss-feeds.ts",
-    "sync:vercel-env": "./scripts/sync-vercel-env.sh"
+    "sync:vercel-env": "./scripts/sync-vercel-env.sh",
+    "sync:github-secrets": "./scripts/sync-github-secrets.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.7",

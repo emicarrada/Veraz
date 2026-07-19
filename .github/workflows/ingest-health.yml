@@ -1,0 +1,39 @@
+name: Ingest — health check
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health_check:
+    name: health_check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      VERAZ_ENV: production
+      NEWS_INGESTION_ENABLED: "true"
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEWS_RSS_FEEDS: ${{ secrets.NEWS_RSS_FEEDS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run health_check job
+        run: npx tsx scripts/run-scheduler-job.ts health_check

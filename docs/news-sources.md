@@ -18,6 +18,37 @@ Las pestañas **Finanzas** y **Tecnología** en `/noticias` solo muestran artíc
 4. Ingesta completa: `npm run ingest:run`
 5. Sincroniza a Vercel: `npm run sync:vercel-env`
 
+## Producción (Vercel Hobby + GitHub Actions)
+
+El hosting queda en **Vercel**; la ingesta programada corre en **GitHub Actions** (scripts CLI contra Supabase de prod). Vercel Hobby no permite crons frecuentes, así que `vercel.json` no define crons automáticos.
+
+### Secrets en GitHub
+
+En **Settings → Secrets and variables → Actions** del repo, o con el script:
+
+```bash
+./scripts/sync-github-secrets.sh
+```
+
+| Secret | Descripción |
+|--------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role (ingesta) |
+| `NEWS_RSS_FEEDS` | JSON del catálogo (16 feeds) |
+
+### Workflows (`.github/workflows/`)
+
+| Workflow | Schedule | Job |
+|----------|----------|-----|
+| `ingest-health.yml` | cada 5 min | `health_check` |
+| `ingest-discover.yml` | cada 15 min | `discover_feeds` |
+| `ingest-run.yml` | :05, :20, :35, :50 | `run_ingestion` |
+
+Disparo manual: pestaña **Actions** → workflow → **Run workflow**.
+
+Las rutas `/api/cron/ingest/*` en Vercel siguen disponibles para debug con `CRON_SECRET`, pero no son el scheduler principal.
+
 ## Campos por fuente
 
 | Campo | Requerido | Descripción |
