@@ -44,7 +44,12 @@ export const ENV_KEYS = {
   /** Cache (future) */
   CACHE_DEFAULT_TTL_SECONDS: "CACHE_DEFAULT_TTL_SECONDS",
 
-  /** Security (future) */
+  /** Analytics (PostHog) */
+  ANALYTICS_ENABLED: "ANALYTICS_ENABLED",
+  NEXT_PUBLIC_POSTHOG_KEY: "NEXT_PUBLIC_POSTHOG_KEY",
+  NEXT_PUBLIC_POSTHOG_HOST: "NEXT_PUBLIC_POSTHOG_HOST",
+
+  /** Security (cron / internal jobs) */
   CRON_SECRET: "CRON_SECRET",
 } as const;
 

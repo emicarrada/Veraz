@@ -6,7 +6,7 @@ const CONTENT_SECURITY_POLICY_REPORT_ONLY = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' https: data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co https://*.i.posthog.com https://*.posthog.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

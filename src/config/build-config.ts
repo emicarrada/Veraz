@@ -15,6 +15,7 @@ import {
 } from "@/config/domains";
 import type { AIConfig } from "@/config/domains/ai";
 import type { AnalyticsConfig } from "@/config/domains/analytics";
+import { DEFAULT_POSTHOG_HOST } from "@/config/domains/analytics";
 import type { AppConfig } from "@/config/domains/app";
 import type { CacheConfig } from "@/config/domains/cache";
 import type { FeatureFlags } from "@/config/domains/feature-flags";
@@ -217,8 +218,25 @@ function buildSupabaseConfig(): SupabaseConfig {
   };
 }
 
-function buildAnalyticsConfig(): AnalyticsConfig {
-  return { ...DEFAULT_ANALYTICS_CONFIG };
+function buildAnalyticsConfig(environment: AppEnvironment): AnalyticsConfig {
+  const apiKey = getEnv(ENV_KEYS.NEXT_PUBLIC_POSTHOG_KEY)?.trim();
+  const apiHost =
+    getEnv(ENV_KEYS.NEXT_PUBLIC_POSTHOG_HOST)?.trim() || DEFAULT_POSTHOG_HOST;
+  const explicitlyEnabled = getEnvBoolean(ENV_KEYS.ANALYTICS_ENABLED, false);
+  const enabled =
+    Boolean(apiKey) &&
+    (environment === "production" || environment === "staging" || explicitlyEnabled);
+
+  if (!enabled || !apiKey) {
+    return { ...DEFAULT_ANALYTICS_CONFIG };
+  }
+
+  return {
+    enabled: true,
+    provider: "posthog",
+    publicId: apiKey,
+    posthogHost: apiHost,
+  };
 }
 
 function buildFeatureFlags(): FeatureFlags {
@@ -265,7 +283,7 @@ export function buildConfig(): VerazConfig {
     security: buildSecurityConfig(environment),
     supabase: buildSupabaseConfig(),
     scheduler: buildSchedulerConfig(),
-    analytics: buildAnalyticsConfig(),
+    analytics: buildAnalyticsConfig(environment),
     featureFlags,
   };
 }
