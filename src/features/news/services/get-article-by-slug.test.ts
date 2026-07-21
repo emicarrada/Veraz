@@ -30,7 +30,7 @@ const detailRecord: ArticleDetailRecord = {
     title: "Demo Post",
     excerpt: "Lead paragraph for SEO.",
     contentFormat: "text",
-    languageId: "lang-en" as import("@/domain/shared/ids").LanguageId,
+    languageId: "lang-es" as import("@/domain/shared/ids").LanguageId,
     publishedAt: "2026-07-16T12:00:00.000Z",
     ingestedAt: "2026-07-17T00:00:00.000Z",
     updatedAt: "2026-07-17T00:00:00.000Z",
@@ -38,13 +38,13 @@ const detailRecord: ArticleDetailRecord = {
     paywallOriginal: false,
   },
   categorySlug: "general",
-  languageCode: "en",
+  languageCode: "es",
   source: {
     id: "source-1" as SourceId,
-    slug: "demo",
-    name: "Demo Source",
-    attributionName: "Demo Source",
-    homepageUrl: "https://example.com",
+    slug: "infobae",
+    name: "Infobae",
+    attributionName: "Infobae",
+    homepageUrl: "https://www.infobae.com",
   },
   references: [],
 };
@@ -70,7 +70,42 @@ describe("getArticleBySlug", () => {
     if (!result.ok) return;
     expect(result.data.title).toBe("Demo Post");
     expect(result.data.slug).toBe("demo-post-abc12345");
-    expect(result.data.showOriginalLanguageNote).toBe(true);
+    expect(result.data.showOriginalLanguageNote).toBe(false);
+  });
+
+  it("returns not_found for ES article on /en locale", async () => {
+    const result = await getArticleBySlug({
+      slug: "demo-post-abc12345",
+      locale: "en",
+      articleRepository: createRepository(detailRecord),
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toBe("not_found");
+  });
+
+  it("returns not_found for EN sports article on /es locale", async () => {
+    const enSportsRecord: ArticleDetailRecord = {
+      ...detailRecord,
+      languageCode: "en",
+      source: {
+        ...detailRecord.source,
+        slug: "bbc-sport",
+        name: "BBC Sport",
+        attributionName: "BBC Sport",
+      },
+    };
+
+    const result = await getArticleBySlug({
+      slug: "demo-post-abc12345",
+      locale: "es",
+      articleRepository: createRepository(enSportsRecord),
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toBe("not_found");
   });
 
   it("returns not_found for missing slug", async () => {
@@ -104,14 +139,14 @@ describe("article detail SEO helpers", () => {
     categorySlug: "general" as const,
     categoryLabel: "General",
     categoryFallbackImageUrl: "/ImagenesNoticias/general.webp",
-    languageCode: "en",
+    languageCode: "es",
     isTranslated: false,
-    showOriginalLanguageNote: true,
+    showOriginalLanguageNote: false,
     source: {
-      name: "Demo Source",
-      slug: "demo",
-      attributionName: "Demo Source",
-      homepageUrl: "https://example.com",
+      name: "Infobae",
+      slug: "infobae",
+      attributionName: "Infobae",
+      homepageUrl: "https://www.infobae.com",
     },
     references: [],
   };

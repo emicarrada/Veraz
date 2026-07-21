@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { isArticleAccessibleForLocale } from "@/features/news/config/prestigious-sources";
 import type { ArticleDetailItem } from "@/features/news/types/article-detail";
 import { mapArticleDetailRecord } from "@/features/news/services/article-detail-mapper";
 import { resolveArticleDisplay } from "@/features/news/services/resolve-article-display";
@@ -41,6 +42,15 @@ export async function getArticleBySlug(
   try {
     const record = await repository.findBySlug(slug);
     if (!record) {
+      return { ok: false, error: "not_found" };
+    }
+
+    if (
+      !isArticleAccessibleForLocale(
+        { sourceSlug: record.source.slug, languageCode: record.languageCode },
+        params.locale,
+      )
+    ) {
       return { ok: false, error: "not_found" };
     }
 

@@ -124,10 +124,13 @@ Todo vive en **`/noticias`** con pestañas de clasificación (`?categoria=`). Co
 
 | Ruta | Comportamiento |
 |------|----------------|
-| `/es/noticias` (Todas) | Mixto ES+EN; nota de idioma original cuando aplica |
-| `/en/noticias` (Todas) | Solo fuentes EN del catálogo (finanzas, tech, deportes, cultura) |
-| `/es/noticias?categoria=economia\|tecnologia` | Fuentes prestigiosas ES+EN (mixto) |
+| `/es/noticias` (Todas) | Solo fuentes ES del catálogo y artículos en español |
+| `/en/noticias` (Todas) | Solo fuentes EN del catálogo y artículos en inglés |
+| `/es/noticias?categoria=economia\|tecnologia` | Fuentes prestigiosas ES+EN (mixto); aviso de idioma en UI |
+| `/es/noticias?categoria=deportes\|cultura\|…` | Solo fuentes ES y artículos en español |
 | `/en/noticias?categoria=economia\|tecnologia` | Solo fuentes prestigiosas EN |
+| `/en/noticias/[slug]` (detalle) | 404 si el artículo no cumple la política EN |
+| `/es/noticias/[slug]` (detalle) | 404 salvo fuente ES en español o fuente EN de referencia en finanzas/tech |
 
 En `/es` Finanzas/Tecnología se muestra un aviso de transparencia cuando varias fuentes de referencia publican en inglés.
 

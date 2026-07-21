@@ -57,7 +57,7 @@ export async function getFeedPage(params: GetFeedPageParams): Promise<FeedLoadRe
     }
 
     const prestigiousQuery = resolvePrestigiousFeedQuery(params.categorySlug, params.locale);
-    const languageCodes = resolveFeedLanguageCodes(params.locale);
+    const languageCodes = resolveFeedLanguageCodes(params.locale, params.categorySlug);
     const sourceSlugs = resolveFeedSourceSlugs(params.locale, prestigiousQuery.sourceSlugs);
 
     const result = await repository.listForFeed({

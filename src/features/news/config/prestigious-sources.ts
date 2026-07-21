@@ -146,21 +146,53 @@ export const EN_FEED_SOURCE_SLUGS: readonly string[] = RSS_FEED_CATALOG.filter(
   (entry) => entry.defaultLanguageCode === "en",
 ).map((entry) => entry.sourceSlug);
 
-/** @deprecated Use EN_FEED_SOURCE_SLUGS whitelist via resolveFeedSourceSlugs */
-export const SPANISH_MEDIA_SOURCE_SLUGS: readonly string[] = RSS_FEED_CATALOG.filter(
+/** Spanish catalog sources — whitelist for /es feed (except prestigious finance/tech mix). */
+export const ES_FEED_SOURCE_SLUGS: readonly string[] = RSS_FEED_CATALOG.filter(
   (entry) => entry.defaultLanguageCode === "es",
 ).map((entry) => entry.sourceSlug);
 
-/** Feed language filter: /en shows English articles only; /es shows all. */
-export function resolveFeedLanguageCodes(locale: Locale): readonly string[] | undefined {
+/** EN reference outlets allowed on /es Finanzas and Tecnología tabs. */
+export const PRESTIGIOUS_EN_REFERENCE_SOURCE_SLUGS: readonly string[] = [
+  ...PRESTIGIOUS_FINANCE_SOURCES_EN,
+  ...PRESTIGIOUS_TECH_SOURCES_EN,
+].map((source) => source.slug);
+
+/** @deprecated Use ES_FEED_SOURCE_SLUGS whitelist via resolveFeedSourceSlugs */
+export const SPANISH_MEDIA_SOURCE_SLUGS: readonly string[] = ES_FEED_SOURCE_SLUGS;
+
+export type ArticleLocaleAccess = {
+  sourceSlug: string;
+  languageCode: string;
+};
+
+function normalizeLanguageCode(code: string): string {
+  return code.trim().toLowerCase().split("-")[0] ?? code;
+}
+
+function isPrestigiousMixedTab(categorySlug?: NewsTopicSlug): boolean {
+  if (!categorySlug) return false;
+  const group = getTopicGroup(categorySlug);
+  return isPrestigiousFeedGroup(group) && categorySlug === group;
+}
+
+/**
+ * Feed language filter:
+ * /en → English only; /es → Spanish only except Finanzas/Tecnología (mixed EN+ES sources).
+ */
+export function resolveFeedLanguageCodes(
+  locale: Locale,
+  categorySlug?: NewsTopicSlug,
+): readonly string[] | undefined {
   if (locale === "en") return ["en"];
+  if (locale === "es" && isPrestigiousMixedTab(categorySlug)) return undefined;
+  if (locale === "es") return ["es"];
   return undefined;
 }
 
 /**
  * Source filter for feed queries.
- * /en: whitelist EN catalog sources (or prestigious subset when tab applies).
- * /es: no source filter unless prestigious tab.
+ * /en: EN catalog whitelist (or prestigious subset when tab applies).
+ * /es: ES catalog whitelist, or mixed prestigious sources on Finanzas/Tecnología.
  */
 export function resolveFeedSourceSlugs(
   locale: Locale,
@@ -168,7 +200,26 @@ export function resolveFeedSourceSlugs(
 ): readonly string[] | undefined {
   if (prestigiousSourceSlugs?.length) return prestigiousSourceSlugs;
   if (locale === "en") return EN_FEED_SOURCE_SLUGS;
+  if (locale === "es") return ES_FEED_SOURCE_SLUGS;
   return undefined;
+}
+
+/** Whether an article may be viewed under the given UI locale. */
+export function isArticleAccessibleForLocale(
+  article: ArticleLocaleAccess,
+  locale: Locale,
+): boolean {
+  const languageCode = normalizeLanguageCode(article.languageCode);
+
+  if (locale === "en") {
+    return EN_FEED_SOURCE_SLUGS.includes(article.sourceSlug) && languageCode === "en";
+  }
+
+  if (ES_FEED_SOURCE_SLUGS.includes(article.sourceSlug) && languageCode === "es") {
+    return true;
+  }
+
+  return PRESTIGIOUS_EN_REFERENCE_SOURCE_SLUGS.includes(article.sourceSlug);
 }
 
 /** @deprecated Use resolveFeedSourceSlugs */

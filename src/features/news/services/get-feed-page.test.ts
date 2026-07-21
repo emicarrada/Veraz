@@ -105,6 +105,42 @@ describe("getFeedPage", () => {
     expect(repository.listForFeed).toHaveBeenCalledWith(
       expect.not.objectContaining({ categorySlug: "economia" }),
     );
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.not.objectContaining({ languageCodes: ["es"] }),
+    );
+  });
+
+  it("filters /es deportes to Spanish sources and language only", async () => {
+    const repository = createRepository({ items: [], hasMore: false });
+    await getFeedPage({
+      locale: "es",
+      articleRepository: repository,
+      categorySlug: "deportes",
+    });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        languageCodes: ["es"],
+        sourceSlugs: expect.arrayContaining(["infobae", "la-nacion"]),
+      }),
+    );
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceSlugs: expect.not.arrayContaining(["bbc-sport", "espn-top"]),
+      }),
+    );
+  });
+
+  it("filters /es todas to Spanish sources and language only", async () => {
+    const repository = createRepository({ items: [], hasMore: false });
+    await getFeedPage({ locale: "es", articleRepository: repository });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        languageCodes: ["es"],
+        sourceSlugs: expect.not.arrayContaining(["cnbc-top", "techcrunch"]),
+      }),
+    );
   });
 
   it("filters /en feed to English articles and EN sources only", async () => {
