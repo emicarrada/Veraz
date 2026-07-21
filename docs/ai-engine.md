@@ -43,7 +43,7 @@ Definidos en `AIMode`:
 | **1 · `disabled`** | Ninguna (default) |
 | **2 · `summaries`** | `summarize` |
 | **3 · `context`** | `summarize` + `context` |
-| **4 · `full`** | `summarize`, `context`, `bias`, `reliability`, `timeline`, `related` |
+| **4 · `full`** | `summarize`, `context`, `bias`, `reliability`, `timeline`, `related`, `translate` |
 
 El Engine debe rechazar (soft-fail `capability_unavailable`) cualquier capability fuera del modo activo.
 
@@ -93,7 +93,14 @@ src/lib/ai-engine/
   providers/   # slots vacíos por vendor
   engine/      # futura implementación del facade
   index.ts     # API pública
+  translate.ts # translateArticleContent (fail-open stub)
 ```
+
+### Traducción de artículos (`translate`)
+
+- Entrada: `@/lib/ai-engine/translate` → `translateArticleContent`.
+- Usado por `resolveArticleDisplay` en detalle on-demand; caché en `article_translations`.
+- Con `AI_MODE=disabled` o sin runtime de provider: retorna `null` (fail-open).
 
 ## Qué está prohibido
 

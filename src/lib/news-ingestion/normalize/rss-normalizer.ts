@@ -74,7 +74,7 @@ function isRssProviderRaw(raw: unknown): raw is RssProviderRaw {
 export class RssNormalizer implements Normalizer {
   async normalize(
     payload: ProviderPayload,
-    _context: PipelineContext,
+    context: PipelineContext,
   ): Promise<IngestionResult<NormalizedArticle>> {
     try {
       if (!isRssProviderRaw(payload.raw)) {
@@ -100,7 +100,8 @@ export class RssNormalizer implements Normalizer {
       const excerpt = buildExcerpt(item.description, item.content, item.title);
       const bodyExcerpt = buildBodyExcerpt(item.description, item.content);
 
-      const languageCode = feed.language?.split("-")[0] ?? DEFAULT_LANGUAGE;
+      const languageCode =
+        feed.language?.split("-")[0] ?? context.defaultLanguageCode ?? DEFAULT_LANGUAGE;
       const publishedAt =
         item.publishedAt ?? payload.fetchedAt ?? new Date().toISOString();
 

@@ -22,6 +22,9 @@ function item(publishedAt: string, id: string): ArticleFeedItem {
     sourceName: "Demo",
     sourceSlug: "demo",
     sourceAttributionName: "Demo",
+    languageCode: "en",
+    isTranslated: false,
+    showOriginalLanguageNote: false,
   };
 }
 

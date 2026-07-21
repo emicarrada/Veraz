@@ -220,6 +220,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      article_translations: {
+        Row: {
+          article_id: string;
+          locale: string;
+          title: string;
+          excerpt: string;
+          body_excerpt: string | null;
+          source_locale: string;
+          provider: string;
+          created_at: string;
+        };
+        Insert: {
+          article_id: string;
+          locale: string;
+          title: string;
+          excerpt: string;
+          body_excerpt?: string | null;
+          source_locale: string;
+          provider?: string;
+          created_at?: string;
+        };
+        Update: {
+          article_id?: string;
+          locale?: string;
+          title?: string;
+          excerpt?: string;
+          body_excerpt?: string | null;
+          source_locale?: string;
+          provider?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

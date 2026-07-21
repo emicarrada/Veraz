@@ -35,6 +35,9 @@ export function mapArticleDetailRecord(record: ArticleDetailRecord): ArticleDeta
     categoryFallbackImageUrl: getCategoryFallbackImageUrl(categorySlug),
     publishedAt: article.publishedAt,
     canonicalUrl: article.canonicalUrl,
+    languageCode: record.languageCode,
+    isTranslated: false,
+    showOriginalLanguageNote: false,
     source: {
       name: source.name,
       slug: source.slug,

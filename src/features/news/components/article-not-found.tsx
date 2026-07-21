@@ -1,17 +1,24 @@
-import Link from "next/link";
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FEED_ROUTE } from "@/features/news/constants";
+import { Link } from "@/i18n/navigation";
+import { feedPath } from "@/i18n/paths";
+import type { Locale } from "@/i18n/routing";
 
 export function ArticleNotFound() {
+  const t = useTranslations("errors");
+  const locale = useLocale() as Locale;
+
   return (
     <EmptyState
-      title="Artículo no encontrado"
-      description="Es posible que el enlace haya cambiado o que el artículo ya no esté disponible."
+      title={t("articleNotFoundTitle")}
+      description={t("articleNotFoundDescription")}
       action={
-        <Button href={FEED_ROUTE} variant="secondary">
-          Volver al feed
+        <Button href={feedPath(locale)} variant="secondary">
+          {t("backToNews")}
         </Button>
       }
     />
@@ -19,12 +26,18 @@ export function ArticleNotFound() {
 }
 
 export function ArticleNotFoundPage() {
+  const t = useTranslations("errors");
+  const locale = useLocale() as Locale;
+
   return (
     <div className="py-8">
       <ArticleNotFound />
       <p className="mt-6 text-center">
-        <Link href={FEED_ROUTE} className="text-small text-accent veraz-focus-ring rounded-sm hover:underline">
-          Ir a noticias
+        <Link
+          href={feedPath(locale)}
+          className="text-small text-accent veraz-focus-ring rounded-sm hover:underline"
+        >
+          {t("browseNews")}
         </Link>
       </p>
     </div>

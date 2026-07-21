@@ -35,7 +35,7 @@ En **Settings → Secrets and variables → Actions** del repo, o con el script:
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role (ingesta) |
-| `NEWS_RSS_FEEDS` | JSON del catálogo (16 feeds) |
+| `NEWS_RSS_FEEDS` | JSON del catálogo (22 feeds) |
 
 ### Workflows (`.github/workflows/`)
 
@@ -57,7 +57,7 @@ Las rutas `/api/cron/ingest/*` en Vercel siguen disponibles para debug con `CRON
 | `feedUrl` | Sí | URL RSS/Atom |
 | `defaultLanguageCode` | No | `es`, `en`, `pt`, `fr`, `de` (tabla `languages`) |
 | `defaultTopicGroup` | No | Fallback si el clasificador devuelve `general` |
-| `primaryVertical` | No | `finance` \| `tech` \| `general` (metadata editorial) |
+| `primaryVertical` | No | `finance` \| `tech` \| `sports` \| `culture` \| `general` (metadata editorial) |
 
 ## Finanzas — fuentes de referencia (`primaryVertical: finance`)
 
@@ -83,6 +83,22 @@ Solo estas fuentes alimentan la pestaña Finanzas (y sub-temas Mercados / Cripto
 | `engadget` | Engadget | EN |
 | `el-pais-tecnologia` | El País Tecnología | ES |
 
+## Deportes — fuentes EN (`primaryVertical: sports`, solo `/en`)
+
+| sourceSlug | Fuente | Idioma |
+|------------|--------|--------|
+| `bbc-sport` | BBC Sport | EN |
+| `guardian-sport` | The Guardian Sport | EN |
+| `espn-top` | ESPN Top Headlines | EN |
+
+## Cultura / entretenimiento — fuentes EN (`primaryVertical: culture`, solo `/en`)
+
+| sourceSlug | Fuente | Idioma |
+|------------|--------|--------|
+| `bbc-entertainment` | BBC Entertainment & Arts | EN |
+| `guardian-culture` | The Guardian Culture | EN |
+| `variety` | Variety | EN |
+
 ## General (`primaryVertical: general`)
 
 Portadas generales — visibles en **Todas**, no en Finanzas/Tecnología:
@@ -96,13 +112,36 @@ Portadas generales — visibles en **Todas**, no en Finanzas/Tecnología:
 
 ## Rutas de producto por rubro
 
-Todo vive en **`/noticias`** con pestañas de clasificación (`?categoria=`):
+Todo vive en **`/noticias`** con pestañas de clasificación (`?categoria=`). Con i18n, las rutas llevan prefijo de locale:
 
-| Rubro | URL |
-|-------|-----|
-| Finanzas | `/noticias?categoria=economia` |
-| Tecnología | `/noticias?categoria=tecnologia` |
-| Todas | `/noticias` |
+| Rubro | URL (ES) | URL (EN) |
+|-------|----------|----------|
+| Finanzas | `/es/noticias?categoria=economia` | `/en/noticias?categoria=economia` |
+| Tecnología | `/es/noticias?categoria=tecnologia` | `/en/noticias?categoria=tecnologia` |
+| Todas | `/es/noticias` | `/en/noticias` |
+
+### Política de idioma por locale
+
+| Ruta | Comportamiento |
+|------|----------------|
+| `/es/noticias` (Todas) | Mixto ES+EN; nota de idioma original cuando aplica |
+| `/en/noticias` (Todas) | Solo fuentes EN del catálogo (finanzas, tech, deportes, cultura) |
+| `/es/noticias?categoria=economia\|tecnologia` | Fuentes prestigiosas ES+EN (mixto) |
+| `/en/noticias?categoria=economia\|tecnologia` | Solo fuentes prestigiosas EN |
+
+En `/es` Finanzas/Tecnología se muestra un aviso de transparencia cuando varias fuentes de referencia publican en inglés.
+
+## Feed vacío — diagnóstico
+
+Si `/es/noticias` o `/en/noticias` no muestran artículos:
+
+1. **Migraciones:** aplicar todas las migraciones en `supabase/migrations/` (incl. `article_translations` y catálogo `languages`).
+2. **Diagnóstico:** `npm run diagnose:feed` — cuenta artículos visibles, joins rotos de `language_id`, fuentes prestigiosas en DB y existencia de `article_translations`.
+3. **Ingesta:** `npm run ingest:discover` y luego `npm run ingest:run`.
+4. **Idioma EN en `/en`:** si artículos existían antes del fix de ingesta, ejecutar una vez `npm run backfill:language` para recalcular `language_id` desde el catálogo/fuente.
+5. **Variables:** confirmar `NEWS_INGESTION_ENABLED=true` y `NEWS_RSS_FEEDS` en el entorno que ejecuta la ingesta.
+
+Causa habitual post-i18n: artículos con `language_id` huérfano (excluidos por inner join) o artículos EN mal etiquetados como `es` (filtro de `/en` los oculta hasta backfill).
 
 ## Fuentes evaluadas pero no incluidas
 

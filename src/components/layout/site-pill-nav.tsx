@@ -1,36 +1,43 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { PillNav, type PillNavItem } from "@/components/ui/pill-nav";
-import { FEED_ROUTE } from "@/features/news/constants";
-
-const SITE_NAV_ITEMS: PillNavItem[] = [
-  { label: "Inicio", href: "/" },
-  { label: "Noticias", href: FEED_ROUTE },
-];
+import { usePathname } from "@/i18n/navigation";
+import { feedPathname, homePathname, stripLocalePrefix } from "@/i18n/paths";
 
 function resolveActiveHref(pathname: string): string {
-  if (pathname === FEED_ROUTE || pathname.startsWith(`${FEED_ROUTE}/`)) {
-    return FEED_ROUTE;
+  const stripped = stripLocalePrefix(pathname);
+
+  if (stripped === "/noticias" || stripped.startsWith("/noticias/")) {
+    return feedPathname();
   }
-  if (pathname === "/") {
-    return "/";
+
+  if (stripped === "/") {
+    return homePathname();
   }
-  return pathname;
+
+  return stripped;
 }
 
-/** Site-wide pill navigation — logo, Inicio, Noticias. */
+/** Site-wide pill navigation — logo, nav items, locale switcher. */
 export function SitePillNav() {
+  const t = useTranslations("nav");
   const pathname = usePathname();
   const activeHref = resolveActiveHref(pathname);
+
+  const items: PillNavItem[] = [
+    { label: t("home"), href: homePathname() },
+    { label: t("news"), href: feedPathname() },
+  ];
 
   return (
     <PillNav
       logo="/verazicon.png"
-      logoAlt="Veraz"
-      logoHref="/"
-      items={SITE_NAV_ITEMS}
+      logoAlt={t("logoAlt")}
+      logoHref={homePathname()}
+      items={items}
       activeHref={activeHref}
       initialLoadAnimation={false}
       ease="power2.easeOut"
@@ -39,6 +46,9 @@ export function SitePillNav() {
       pillTextColor="#f5f5f5"
       hoveredPillFillColor="#ffffff"
       hoveredPillTextColor="#111111"
+      navAriaLabel={t("mainAria")}
+      homeAriaLabel={t("homeAria")}
+      trailing={<LocaleSwitcher />}
     />
   );
 }

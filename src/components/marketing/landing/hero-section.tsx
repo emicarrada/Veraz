@@ -1,14 +1,17 @@
+import { getLocale, getTranslations } from "next-intl/server";
+
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { Text } from "@/components/ui/text";
 import { HeroGlobeSlot } from "@/components/marketing/landing/hero-globe-slot";
 import { HeroPrimaryButton } from "@/components/marketing/landing/hero-primary-button";
-import { FEED_ROUTE } from "@/features/news/constants";
+import { feedPath } from "@/i18n/paths";
+import type { Locale } from "@/i18n/routing";
 
-/**
- * Full-bleed hero — brand first, one headline, one subcopy, CTA pair, dominant visual.
- */
-export function LandingHeroSection() {
+export async function LandingHeroSection() {
+  const t = await getTranslations("landing.hero");
+  const locale = (await getLocale()) as Locale;
+
   return (
     <section
       aria-labelledby="landing-hero-brand"
@@ -32,7 +35,7 @@ export function LandingHeroSection() {
             variant="h2"
             className="landing-reveal landing-reveal-delay-1 mt-8 max-w-xl"
           >
-            Una forma clara de informarte cada día
+            {t("headline")}
           </Text>
 
           <Text
@@ -40,14 +43,13 @@ export function LandingHeroSection() {
             variant="body-lg"
             className="landing-reveal landing-reveal-delay-2 mt-4 max-w-lg text-ink-secondary"
           >
-            Agregamos noticias de fuentes de referencia, con trazabilidad a la
-            publicación original. Sin inventar hechos ni empujar una agenda.
+            {t("subcopy")}
           </Text>
 
           <div className="landing-reveal landing-reveal-delay-3 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <HeroPrimaryButton href={FEED_ROUTE}>Ver noticias</HeroPrimaryButton>
+            <HeroPrimaryButton href={feedPath(locale)}>{t("ctaNews")}</HeroPrimaryButton>
             <Button href="#que-es-veraz" variant="secondary" size="lg">
-              Conocer Veraz
+              {t("ctaAbout")}
             </Button>
           </div>
         </div>

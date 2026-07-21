@@ -1,10 +1,17 @@
-import { EmptyState } from "@/components/ui/empty-state";
+import { getTranslations } from "next-intl/server";
 
-export function FeedEmptyState() {
+import { EmptyState } from "@/components/ui/empty-state";
+import { Text } from "@/components/ui/text";
+
+export async function FeedEmptyState() {
+  const t = await getTranslations("feed");
+
   return (
-    <EmptyState
-      title="Aún no hay noticias"
-      description="Cuando se ingieran artículos desde RSS, aparecerán aquí ordenados por fecha de publicación."
-    />
+    <div className="space-y-3">
+      <EmptyState title={t("emptyTitle")} description={t("emptyDescription")} />
+      <Text variant="small" className="text-center text-ink-muted">
+        {t("emptyIngestHint")}
+      </Text>
+    </div>
   );
 }

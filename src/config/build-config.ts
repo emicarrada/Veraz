@@ -111,6 +111,8 @@ function parseRssFeeds(raw: string | undefined): ReadonlyArray<RssFeedConfig> {
             : {}),
           ...(feed.primaryVertical === "finance" ||
           feed.primaryVertical === "tech" ||
+          feed.primaryVertical === "sports" ||
+          feed.primaryVertical === "culture" ||
           feed.primaryVertical === "general"
             ? { primaryVertical: feed.primaryVertical }
             : {}),

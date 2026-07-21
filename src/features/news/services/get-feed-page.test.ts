@@ -1,5 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async () => {
+    const t = ((key: string) => key) as ((key: string) => string) & {
+      raw: (key: string) => string;
+    };
+    t.raw = (key: string) => key;
+    return t;
+  }),
+  getLocale: vi.fn(async () => "es"),
+}));
+
 import type { ArticleId, SourceId } from "@/domain/shared/ids";
 import { getFeedPage } from "@/features/news/services/get-feed-page";
 import type {
@@ -26,6 +37,7 @@ const sampleRecord: ArticleFeedRecord = {
     paywallOriginal: false,
   },
   categorySlug: "general",
+  languageCode: "en",
   sourceName: "Demo Source",
   sourceSlug: "demo",
   sourceAttributionName: "Demo Source",
@@ -47,7 +59,7 @@ describe("getFeedPage", () => {
       hasMore: false,
     });
 
-    const result = await getFeedPage({ articleRepository: repository });
+    const result = await getFeedPage({ locale: "es", articleRepository: repository });
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -57,7 +69,7 @@ describe("getFeedPage", () => {
   });
 
   it("returns not_configured when repository is unavailable", async () => {
-    const result = await getFeedPage({ articleRepository: null });
+    const result = await getFeedPage({ locale: "es", articleRepository: null });
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
@@ -67,6 +79,7 @@ describe("getFeedPage", () => {
   it("returns load_failed for invalid cursor", async () => {
     const repository = createRepository({ items: [], hasMore: false });
     const result = await getFeedPage({
+      locale: "es",
       articleRepository: repository,
       cursor: "invalid-cursor",
     });
@@ -79,6 +92,42 @@ describe("getFeedPage", () => {
   it("restricts finanzas feed to prestigious finance sources", async () => {
     const repository = createRepository({ items: [], hasMore: false });
     await getFeedPage({
+      locale: "es",
+      articleRepository: repository,
+      categorySlug: "economia",
+    });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceSlugs: expect.arrayContaining(["cnbc-top", "marketwatch", "expansion"]),
+      }),
+    );
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.not.objectContaining({ categorySlug: "economia" }),
+    );
+  });
+
+  it("filters /en feed to English articles and EN sources only", async () => {
+    const repository = createRepository({ items: [], hasMore: false });
+    await getFeedPage({ locale: "en", articleRepository: repository });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        languageCodes: ["en"],
+        sourceSlugs: expect.arrayContaining(["cnbc-top", "techcrunch"]),
+      }),
+    );
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceSlugs: expect.not.arrayContaining(["infobae", "la-nacion"]),
+      }),
+    );
+  });
+
+  it("uses EN-only finance sources on /en economia tab", async () => {
+    const repository = createRepository({ items: [], hasMore: false });
+    await getFeedPage({
+      locale: "en",
       articleRepository: repository,
       categorySlug: "economia",
     });
@@ -86,10 +135,13 @@ describe("getFeedPage", () => {
     expect(repository.listForFeed).toHaveBeenCalledWith(
       expect.objectContaining({
         sourceSlugs: expect.arrayContaining(["cnbc-top", "marketwatch"]),
+        languageCodes: ["en"],
       }),
     );
     expect(repository.listForFeed).toHaveBeenCalledWith(
-      expect.not.objectContaining({ categorySlug: "economia" }),
+      expect.objectContaining({
+        sourceSlugs: expect.not.arrayContaining(["expansion", "bloomberg-linea"]),
+      }),
     );
   });
 });

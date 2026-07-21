@@ -3,7 +3,7 @@ import type { NewsTopicGroup } from "@/features/news/classification/categories";
 /**
  * News / ingestion configuration (declarative — no pipeline logic).
  */
-export type RssFeedVertical = "finance" | "tech" | "general";
+export type RssFeedVertical = "finance" | "tech" | "sports" | "culture" | "general";
 
 export type RssFeedConfig = {
   sourceSlug: string;

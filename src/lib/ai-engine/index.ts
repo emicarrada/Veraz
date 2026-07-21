@@ -20,6 +20,7 @@ export type {
   AIReliabilityResult,
   AISummaryResult,
   AITimelineResult,
+  AITranslateResult,
 } from "@/lib/ai-engine/types/results";
 
 export type { AIProvider, AIProviderHealth } from "@/lib/ai-engine/types/provider";

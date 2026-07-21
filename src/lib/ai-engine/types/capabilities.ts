@@ -8,7 +8,8 @@ export type AICapability =
   | "bias"
   | "reliability"
   | "timeline"
-  | "related";
+  | "related"
+  | "translate";
 
 /**
  * Operating modes for the AI Engine.
@@ -39,5 +40,5 @@ export const AI_MODE_CAPABILITIES: Record<AIMode, ReadonlyArray<AICapability>> =
   disabled: [],
   summaries: ["summarize"],
   context: ["summarize", "context"],
-  full: ["summarize", "context", "bias", "reliability", "timeline", "related"],
+  full: ["summarize", "context", "bias", "reliability", "timeline", "related", "translate"],
 };

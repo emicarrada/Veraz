@@ -1,10 +1,9 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tag } from "@/components/ui/tag";
 import { Text } from "@/components/ui/text";
 import { SafeArticleImage } from "@/features/news/components/safe-article-image";
-import { articleDetailPath } from "@/features/news/constants";
 import type { ArticleFeedItem } from "@/features/news/types/feed";
 import { formatFeedDate } from "@/features/news/utils/format-feed-date";
 import { cn } from "@/utils/cn";
@@ -38,7 +37,7 @@ export function ArticleCard({ item, className }: ArticleCardProps) {
               </div>
               <CardTitle className="text-balance leading-snug">
                 <Link
-                  href={articleDetailPath(item.slug)}
+                  href={`/noticias/${item.slug}`}
                   className="veraz-focus-ring rounded-sm text-ink underline-offset-4 transition-colors hover:text-accent hover:underline"
                 >
                   {item.title}

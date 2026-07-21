@@ -34,13 +34,23 @@ describe("prestigious sources", () => {
     });
   });
 
-  it("uses source-only filter for broad finanzas and tecnologia tabs", () => {
-    expect(resolvePrestigiousFeedQuery("economia")).toEqual({
+  it("uses source-only filter for broad finanzas and tecnologia tabs on /es", () => {
+    expect(resolvePrestigiousFeedQuery("economia", "es")).toEqual({
       sourceSlugs: PRESTIGIOUS_FINANCE_SOURCES.map((source) => source.slug),
     });
-    expect(resolvePrestigiousFeedQuery("tecnologia")).toEqual({
+    expect(resolvePrestigiousFeedQuery("tecnologia", "es")).toEqual({
       sourceSlugs: PRESTIGIOUS_TECH_SOURCES.map((source) => source.slug),
     });
+  });
+
+  it("uses EN-only sources for broad finanzas and tecnologia tabs on /en", () => {
+    const enFinance = resolvePrestigiousFeedQuery("economia", "en").sourceSlugs ?? [];
+    expect(enFinance).toContain("cnbc-top");
+    expect(enFinance).not.toContain("expansion");
+
+    const enTech = resolvePrestigiousFeedQuery("tecnologia", "en").sourceSlugs ?? [];
+    expect(enTech).toContain("techcrunch");
+    expect(enTech).not.toContain("el-pais-tecnologia");
   });
 
   it("does not filter general categories", () => {

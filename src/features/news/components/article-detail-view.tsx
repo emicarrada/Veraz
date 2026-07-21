@@ -1,6 +1,10 @@
+import { getLocale, getTranslations } from "next-intl/server";
+
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
+import { Tag } from "@/components/ui/tag";
+import { Text } from "@/components/ui/text";
 import { ArticleBackLink } from "@/features/news/components/article-back-link";
 import { ArticleContent } from "@/features/news/components/article-content";
 import { ArticleHeader } from "@/features/news/components/article-header";
@@ -8,20 +12,35 @@ import { ArticleHeroImage } from "@/features/news/components/article-hero-image"
 import { ArticleMeta } from "@/features/news/components/article-meta";
 import { ArticleReferences } from "@/features/news/components/article-references";
 import { NewsAppShell } from "@/features/news/components/news-app-shell";
-import { feedReturnHref } from "@/features/news/constants";
 import type { ArticleDetailItem } from "@/features/news/types/article-detail";
+import { feedReturnPathname } from "@/i18n/paths";
 
 export type ArticleDetailViewProps = {
   article: ArticleDetailItem;
 };
 
-export function ArticleDetailView({ article }: ArticleDetailViewProps) {
+export async function ArticleDetailView({ article }: ArticleDetailViewProps) {
+  const t = await getTranslations("article");
+  const tLanguages = await getTranslations("languages");
+  const feedHref = feedReturnPathname(article.categorySlug);
+
+  const languageLabel =
+    tLanguages(article.languageCode as "es" | "en") || tLanguages("unknown");
+
   return (
     <NewsAppShell>
       <Section padding="md" containerSize="md">
         <article className="mx-auto max-w-3xl space-y-8">
-          <ArticleBackLink feedHref={feedReturnHref(article.categorySlug)} />
+          <ArticleBackLink feedHref={feedHref} />
           <ArticleMeta article={article} />
+          {article.isTranslated ? (
+            <Tag variant="neutral">{t("translatedBadge")}</Tag>
+          ) : null}
+          {article.showOriginalLanguageNote ? (
+            <Text variant="small" className="text-ink-muted">
+              {t("originalLanguageNote", { language: languageLabel })}
+            </Text>
+          ) : null}
           <ArticleHeader article={article} />
 
           {article.heroImage ? (
@@ -42,9 +61,7 @@ export function ArticleDetailView({ article }: ArticleDetailViewProps) {
 
           <div className="rounded-xl border border-border bg-surface-muted px-4 py-4 sm:px-5">
             <p className="text-small text-ink-secondary">
-              Este resumen proviene de{" "}
-              <span className="font-medium text-ink">{article.source.attributionName}</span>.
-              Lee el artículo completo en la fuente original.
+              {t("sourceAttribution", { source: article.source.attributionName })}
             </p>
             <div className="mt-4">
               <Button
@@ -53,7 +70,7 @@ export function ArticleDetailView({ article }: ArticleDetailViewProps) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Leer en {article.source.name}
+                {t("readOriginal")} — {article.source.name}
               </Button>
             </div>
           </div>
@@ -65,11 +82,13 @@ export function ArticleDetailView({ article }: ArticleDetailViewProps) {
   );
 }
 
-export function ArticleDetailError({ message }: { message: string }) {
+export async function ArticleDetailError({ message }: { message: string }) {
+  const t = await getTranslations("errors");
+
   return (
     <NewsAppShell>
       <Section padding="md" containerSize="md">
-        <Alert variant="danger" title="No se pudo cargar el artículo">
+        <Alert variant="danger" title={t("loadFailed")}>
           {message}
         </Alert>
       </Section>

@@ -19,6 +19,8 @@
     "ingest:health": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-scheduler-job.ts health_check",
     "ingest:watch": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/ingest-loop.ts",
     "feeds:validate": "tsx scripts/validate-rss-feeds.ts",
+    "diagnose:feed": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/diagnose-feed.ts",
+    "backfill:language": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/backfill-article-language.ts",
     "sync:vercel-env": "./scripts/sync-vercel-env.sh",
     "sync:github-secrets": "./scripts/sync-github-secrets.sh"
   },
@@ -28,6 +30,7 @@
     "@supabase/supabase-js": "^2.110.7",
     "gsap": "^3.15.0",
     "next": "^15.3.5",
+    "next-intl": "^4.13.2",
     "ogl": "^1.0.11",
     "posthog-js": "^1.404.1",
     "react": "^19.1.0",

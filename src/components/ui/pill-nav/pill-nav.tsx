@@ -2,9 +2,11 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { useCallback, useEffect, useRef } from "react";
-import Link from "next/link";
+
+import { Link as IntlLink } from "@/i18n/navigation";
 import { gsap } from "gsap";
 
+import { computePillHoverGeometry } from "@/components/ui/pill-nav/pill-hover-geometry";
 import { cn } from "@/utils/cn";
 
 import "./pill-nav.css";
@@ -33,6 +35,10 @@ export type PillNavProps = {
   hoveredPillFillColor?: string;
   pillTextColor?: string;
   initialLoadAnimation?: boolean;
+  /** Optional slot rendered to the right of the pill group (e.g. locale switcher). */
+  trailing?: ReactNode;
+  navAriaLabel?: string;
+  homeAriaLabel?: string;
 };
 
 function isExternalOrHashLink(href: string): boolean {
@@ -68,6 +74,9 @@ export function PillNav({
   hoveredPillFillColor = "#ffffff",
   pillTextColor,
   initialLoadAnimation = true,
+  trailing,
+  navAriaLabel = "Principal",
+  homeAriaLabel = "Inicio",
 }: PillNavProps) {
   const resolvedPillTextColor = pillTextColor ?? baseColor;
 
@@ -91,14 +100,10 @@ export function PillNav({
       const { width: w, height: h } = rect;
       if (w === 0 || h === 0) return;
 
-      const R = ((w * w) / 4 + h * h) / (2 * h);
-      const D = Math.ceil(2 * R) + 2;
-      const delta =
-        Math.ceil(R - Math.sqrt(Math.max(0, R * R - (w * w) / 4))) + 1;
-      const originY = D - delta;
+      const { diameter, delta, originY, targetScale } = computePillHoverGeometry(w, h);
 
-      circle.style.width = `${D}px`;
-      circle.style.height = `${D}px`;
+      circle.style.width = `${diameter}px`;
+      circle.style.height = `${diameter}px`;
       circle.style.bottom = `-${delta}px`;
 
       gsap.set(circle, {
@@ -121,7 +126,7 @@ export function PillNav({
 
       tl.to(
         circle,
-        { scale: 1.2, xPercent: -50, duration: 2, ease, overwrite: "auto" },
+        { scale: targetScale, xPercent: -50, duration: 2, ease, overwrite: "auto" },
         0,
       );
 
@@ -320,15 +325,15 @@ export function PillNav({
 
     if (isAppRouterLink(homeHref)) {
       return (
-        <Link
+        <IntlLink
           className="pill-logo"
           href={homeHref}
-          aria-label="Inicio"
+          aria-label={homeAriaLabel}
           onMouseEnter={handleLogoEnter}
           ref={logoRef}
         >
           {img}
-        </Link>
+        </IntlLink>
       );
     }
 
@@ -377,9 +382,9 @@ export function PillNav({
 
     if (isAppRouterLink(item.href)) {
       return (
-        <Link role="menuitem" href={item.href} {...sharedProps}>
+        <IntlLink role="menuitem" href={item.href} {...sharedProps}>
           {content}
-        </Link>
+        </IntlLink>
       );
     }
 
@@ -394,7 +399,7 @@ export function PillNav({
     <div className="pill-nav-container">
       <nav
         className={cn("pill-nav", className)}
-        aria-label="Principal"
+        aria-label={navAriaLabel}
         style={cssVars}
       >
         <div className="pill-nav-center" ref={navCenterRef}>
@@ -408,6 +413,7 @@ export function PillNav({
                 </li>
               ))}
             </ul>
+            {trailing ? <div className="pill-nav-trailing">{trailing}</div> : null}
           </div>
         </div>
       </nav>

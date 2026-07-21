@@ -7,6 +7,8 @@ export type PipelineContext = {
   runId: string;
   state: PipelineState;
   retryPolicy?: import("@/lib/news-ingestion/types/pipeline-state").RetryPolicy;
+  /** Catalog default when RSS feed omits `<language>`. */
+  defaultLanguageCode?: string;
 };
 
 export type PipelineStage<TInput, TOutput> = {

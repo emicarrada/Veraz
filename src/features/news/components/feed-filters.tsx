@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { SearchInput } from "@/components/ui/search-input";
 import { Tag } from "@/components/ui/tag";
@@ -11,12 +11,16 @@ import {
   NEWS_SPECIFIC_FILTER_TOPICS,
   parseCategorySlug,
 } from "@/features/news/classification/categories";
+import { useRouter } from "@/i18n/navigation";
+import { feedPathnameWithQuery } from "@/i18n/paths";
 import { cn } from "@/utils/cn";
+import { useSearchParams } from "next/navigation";
 
 export function FeedFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("feed");
 
   const activeCategory = parseCategorySlug(searchParams.get("categoria") ?? undefined);
   const queryParam = searchParams.get("q") ?? "";
@@ -27,12 +31,12 @@ export function FeedFilters() {
   }, [queryParam]);
 
   const applyFilters = (nextQuery: string, category?: string) => {
-    const params = new URLSearchParams();
     const trimmed = nextQuery.trim();
-    if (trimmed) params.set("q", trimmed);
-    if (category) params.set("categoria", category);
 
-    const path = params.size > 0 ? `/noticias?${params.toString()}` : "/noticias";
+    const path = feedPathnameWithQuery({
+      ...(trimmed ? { q: trimmed } : {}),
+      ...(category ? { categoria: category } : {}),
+    });
     startTransition(() => {
       router.push(path);
     });
@@ -90,8 +94,8 @@ export function FeedFilters() {
             setQuery("");
             applyFilters("", activeCategory);
           }}
-          placeholder="Buscar noticias por titular, resumen o tema…"
-          aria-label="Buscar noticias"
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchAria")}
           disabled={isPending}
         />
       </form>
@@ -99,20 +103,22 @@ export function FeedFilters() {
       <div className="space-y-3">
         <nav
           role="tablist"
-          aria-label="Clasificación del feed"
+          aria-label={t("tabsAria")}
           className="-mb-px flex gap-1 overflow-x-auto border-b border-border"
         >
-          {renderTab(undefined, "Todas")}
-          {NEWS_FILTER_GROUPS.map((category) => renderTab(category.slug, category.label))}
+          {renderTab(undefined, t("allTab"))}
+          {NEWS_FILTER_GROUPS.map((category) =>
+            renderTab(category.slug, t(`categories.${category.slug}`)),
+          )}
         </nav>
 
         <div>
           <Text variant="caption" className="mb-2 block text-ink-muted">
-            Temas específicos
+            {t("specificTopics")}
           </Text>
-          <div className="flex flex-wrap gap-2" role="list" aria-label="Filtrar por tema específico">
+          <div className="flex flex-wrap gap-2" role="list" aria-label={t("specificTopicsAria")}>
             {NEWS_SPECIFIC_FILTER_TOPICS.map((topic) =>
-              renderChip(topic.slug, topic.label),
+              renderChip(topic.slug, t(`categories.${topic.slug}`)),
             )}
           </div>
         </div>

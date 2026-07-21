@@ -22,6 +22,9 @@ export type ArticleDetailItem = {
   categorySlug: NewsCategorySlug;
   categoryLabel: string;
   categoryFallbackImageUrl: Url;
+  languageCode: string;
+  isTranslated: boolean;
+  showOriginalLanguageNote: boolean;
   source: {
     name: string;
     slug: string;

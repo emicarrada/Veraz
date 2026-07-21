@@ -1,5 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async () => {
+    const t = ((key: string) => key) as ((key: string) => string) & {
+      raw: (key: string) => string;
+    };
+    t.raw = (key: string) => key;
+    return t;
+  }),
+  getLocale: vi.fn(async () => "es"),
+}));
+
 import type { ArticleId, SourceId } from "@/domain/shared/ids";
 import {
   buildArticleDetailMetadata,
@@ -27,6 +38,7 @@ const detailRecord: ArticleDetailRecord = {
     paywallOriginal: false,
   },
   categorySlug: "general",
+  languageCode: "en",
   source: {
     id: "source-1" as SourceId,
     slug: "demo",
@@ -50,6 +62,7 @@ describe("getArticleBySlug", () => {
   it("returns article detail item when slug exists", async () => {
     const result = await getArticleBySlug({
       slug: "demo-post-abc12345",
+      locale: "es",
       articleRepository: createRepository(detailRecord),
     });
 
@@ -57,11 +70,13 @@ describe("getArticleBySlug", () => {
     if (!result.ok) return;
     expect(result.data.title).toBe("Demo Post");
     expect(result.data.slug).toBe("demo-post-abc12345");
+    expect(result.data.showOriginalLanguageNote).toBe(true);
   });
 
   it("returns not_found for missing slug", async () => {
     const result = await getArticleBySlug({
       slug: "missing",
+      locale: "es",
       articleRepository: createRepository(null),
     });
 
@@ -71,7 +86,7 @@ describe("getArticleBySlug", () => {
   });
 
   it("returns not_configured without repository", async () => {
-    const result = await getArticleBySlug({ slug: "demo", articleRepository: null });
+    const result = await getArticleBySlug({ slug: "demo", locale: "es", articleRepository: null });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.error).toBe("not_configured");
@@ -89,6 +104,9 @@ describe("article detail SEO helpers", () => {
     categorySlug: "general" as const,
     categoryLabel: "General",
     categoryFallbackImageUrl: "/ImagenesNoticias/general.webp",
+    languageCode: "en",
+    isTranslated: false,
+    showOriginalLanguageNote: true,
     source: {
       name: "Demo Source",
       slug: "demo",
@@ -99,19 +117,20 @@ describe("article detail SEO helpers", () => {
   };
 
   it("builds metadata with canonical and open graph fields", () => {
-    const metadata = buildArticleDetailMetadata(item, "http://localhost:3000");
+    const metadata = buildArticleDetailMetadata(item, "http://localhost:3000", "es");
 
     expect(metadata.title).toContain("Demo Post");
-    expect(metadata.alternates?.canonical).toBe("/noticias/demo-post-abc12345");
+    expect(metadata.alternates?.canonical).toBe("/es/noticias/demo-post-abc12345");
     expect(metadata.openGraph?.type).toBe("article");
     expect(metadata.twitter?.card).toBe("summary");
   });
 
   it("builds NewsArticle JSON-LD", () => {
-    const jsonLd = buildArticleNewsArticleJsonLd(item, "http://localhost:3000");
+    const jsonLd = buildArticleNewsArticleJsonLd(item, "http://localhost:3000", "es");
 
     expect(jsonLd["@type"]).toBe("NewsArticle");
     expect(jsonLd.headline).toBe("Demo Post");
     expect(jsonLd.isBasedOn).toBe("https://example.com/post");
+    expect(jsonLd.inLanguage).toBe("es");
   });
 });

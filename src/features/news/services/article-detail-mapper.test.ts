@@ -24,6 +24,7 @@ const record: ArticleDetailRecord = {
     byline: "Jane Doe",
   },
   categorySlug: "general",
+  languageCode: "en",
   source: {
     id: "source-1" as SourceId,
     slug: "demo",

@@ -2,7 +2,7 @@ import type { NewsTopicGroup } from "@/features/news/classification/categories";
 import { isNewsTopicGroup } from "@/features/news/classification/categories";
 import type { RssFeedConfig } from "@/config/domains/news";
 
-export type RssFeedVertical = "finance" | "tech" | "general";
+export type RssFeedVertical = "finance" | "tech" | "sports" | "culture" | "general";
 
 export type RssFeedCatalogEntry = RssFeedConfig & {
   /** Editorial vertical for docs and UI grouping. */
@@ -122,6 +122,59 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultTopicGroup: "tecnologia",
     primaryVertical: "tech",
     label: "El País Tecnología",
+  },
+  // ——— Sports (EN — /en deportes) ———
+  {
+    sourceSlug: "bbc-sport",
+    feedUrl: "https://feeds.bbci.co.uk/sport/rss.xml",
+    defaultLanguageCode: "en",
+    defaultTopicGroup: "deportes",
+    primaryVertical: "sports",
+    label: "BBC Sport",
+    notes: "Global sports coverage, editorial tone.",
+  },
+  {
+    sourceSlug: "guardian-sport",
+    feedUrl: "https://www.theguardian.com/sport/rss",
+    defaultLanguageCode: "en",
+    defaultTopicGroup: "deportes",
+    primaryVertical: "sports",
+    label: "The Guardian Sport",
+  },
+  {
+    sourceSlug: "espn-top",
+    feedUrl: "https://www.espn.com/espn/rss/news",
+    defaultLanguageCode: "en",
+    defaultTopicGroup: "deportes",
+    primaryVertical: "sports",
+    label: "ESPN Top Headlines",
+    notes: "USA-centric; low item count in RSS — monitor in feeds:validate.",
+  },
+  // ——— Culture / entertainment (EN — /en cultura) ———
+  {
+    sourceSlug: "bbc-entertainment",
+    feedUrl: "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+    defaultLanguageCode: "en",
+    defaultTopicGroup: "cultura",
+    primaryVertical: "culture",
+    label: "BBC Entertainment & Arts",
+  },
+  {
+    sourceSlug: "guardian-culture",
+    feedUrl: "https://www.theguardian.com/culture/rss",
+    defaultLanguageCode: "en",
+    defaultTopicGroup: "cultura",
+    primaryVertical: "culture",
+    label: "The Guardian Culture",
+  },
+  {
+    sourceSlug: "variety",
+    feedUrl: "https://variety.com/feed/",
+    defaultLanguageCode: "en",
+    defaultTopicGroup: "cultura",
+    primaryVertical: "culture",
+    label: "Variety",
+    notes: "Entertainment industry; film/TV business.",
   },
   // ——— General (ES/LATAM — solo en pestaña Todas, no en Finanzas/Tecnología) ———
   {

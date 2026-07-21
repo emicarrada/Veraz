@@ -37,6 +37,7 @@ type ArticleWithSourceRow = Database["public"]["Tables"]["articles"]["Row"] & {
     Database["public"]["Tables"]["sources"]["Row"],
     "name" | "slug" | "attribution_name"
   >;
+  languages: Pick<Database["public"]["Tables"]["languages"]["Row"], "code"> | null;
 };
 
 type ArticleDetailRow = Database["public"]["Tables"]["articles"]["Row"] & {
@@ -44,8 +45,15 @@ type ArticleDetailRow = Database["public"]["Tables"]["articles"]["Row"] & {
     Database["public"]["Tables"]["sources"]["Row"],
     "id" | "slug" | "name" | "attribution_name" | "homepage_url"
   >;
+  languages: Pick<Database["public"]["Tables"]["languages"]["Row"], "code"> | null;
   article_references: Database["public"]["Tables"]["article_references"]["Row"][];
 };
+
+/** Fail-open when languages join is missing (orphan language_id). */
+export function resolveLanguageCode(row: { languages?: { code: string } | null }): string {
+  const code = row.languages?.code?.trim().toLowerCase().split("-")[0];
+  return code && code.length > 0 ? code : "es";
+}
 
 function escapeIlikePattern(value: string): string {
   return value.replace(/[%_\\]/g, "\\$&");
@@ -80,6 +88,9 @@ export class SupabaseArticleRepository implements ArticleRepository {
           name,
           attribution_name,
           homepage_url
+        ),
+        languages (
+          code
         ),
         article_references (
           id,
@@ -140,6 +151,7 @@ export class SupabaseArticleRepository implements ArticleRepository {
     return {
       article: mapArticleRow(row),
       categorySlug: parseCategorySlug(row.category_slug) ?? "general",
+      languageCode: resolveLanguageCode(row),
       source: {
         id: source.id,
         slug: source.slug,
@@ -172,6 +184,20 @@ export class SupabaseArticleRepository implements ArticleRepository {
       }
     }
 
+    let excludeSourceIds: string[] | undefined;
+    if (params.excludeSourceSlugs && params.excludeSourceSlugs.length > 0) {
+      const { data: excludeRows, error: excludeError } = await this.client
+        .from("sources")
+        .select("id")
+        .in("slug", [...params.excludeSourceSlugs]);
+
+      if (excludeError) {
+        throw new Error(`Failed to resolve excluded sources: ${excludeError.message}`);
+      }
+
+      excludeSourceIds = (excludeRows ?? []).map((row) => row.id);
+    }
+
     let query = this.client
       .from("articles")
       .select(
@@ -181,6 +207,9 @@ export class SupabaseArticleRepository implements ArticleRepository {
           name,
           slug,
           attribution_name
+        ),
+        languages (
+          code
         )
       `,
       )
@@ -188,6 +217,14 @@ export class SupabaseArticleRepository implements ArticleRepository {
 
     if (sourceIds) {
       query = query.in("source_id", sourceIds);
+    }
+
+    if (excludeSourceIds && excludeSourceIds.length > 0) {
+      query = query.not("source_id", "in", `(${excludeSourceIds.join(",")})`);
+    }
+
+    if (params.languageCodes && params.languageCodes.length > 0) {
+      query = query.in("languages.code", [...params.languageCodes]);
     }
 
     if (params.categorySlug) {
@@ -279,6 +316,7 @@ export class SupabaseArticleRepository implements ArticleRepository {
     return {
       article,
       categorySlug: parseCategorySlug(row.category_slug) ?? "general",
+      languageCode: resolveLanguageCode(row),
       sourceName: row.sources.name,
       sourceSlug: row.sources.slug,
       sourceAttributionName: row.sources.attribution_name,

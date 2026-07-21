@@ -1,10 +1,16 @@
+import { getLocale, getTranslations } from "next-intl/server";
+
 import { LandingSectionHeader } from "@/components/marketing/landing/landing-section-header";
 import { HeroPrimaryButton } from "@/components/marketing/landing/hero-primary-button";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
-import { FEED_ROUTE } from "@/features/news/constants";
+import { feedPath, staticPath } from "@/i18n/paths";
+import type { Locale } from "@/i18n/routing";
 
-export function LandingFinalCtaSection() {
+export async function LandingFinalCtaSection() {
+  const t = await getTranslations("landing.finalCta");
+  const locale = (await getLocale()) as Locale;
+
   return (
     <Section
       id="cta-final"
@@ -19,15 +25,15 @@ export function LandingFinalCtaSection() {
       <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-8 text-center">
         <LandingSectionHeader
           id="cta-final-heading"
-          title="Empieza a leer con contexto"
-          description="Entra al feed, elige tu rubro y abre la fuente cuando quieras profundizar."
+          title={t("title")}
+          description={t("description")}
           align="center"
           titleVariant="display"
         />
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <HeroPrimaryButton href={FEED_ROUTE}>Explorar noticias</HeroPrimaryButton>
-          <Button href="/metodologia" variant="secondary" size="lg">
-            Ver metodología
+          <HeroPrimaryButton href={feedPath(locale)}>{t("ctaNews")}</HeroPrimaryButton>
+          <Button href={staticPath(locale, "/metodologia")} variant="secondary" size="lg">
+            {t("ctaMethodology")}
           </Button>
         </div>
       </div>

@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const CONTENT_SECURITY_POLICY_REPORT_ONLY = [
   "default-src 'self'",
@@ -52,17 +55,52 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/",
+        destination: "/es",
+        permanent: false,
+      },
+      {
         source: "/noticias/finanzas",
-        destination: "/noticias?categoria=economia",
+        destination: "/es/noticias?categoria=economia",
         permanent: true,
       },
       {
         source: "/noticias/tecnologia",
-        destination: "/noticias?categoria=tecnologia",
+        destination: "/es/noticias?categoria=tecnologia",
         permanent: true,
+      },
+      {
+        source: "/noticias",
+        destination: "/es/noticias",
+        permanent: false,
+      },
+      {
+        source: "/metodologia",
+        destination: "/es/metodologia",
+        permanent: false,
+      },
+      {
+        source: "/acerca-de",
+        destination: "/es/acerca-de",
+        permanent: false,
+      },
+      {
+        source: "/contacto",
+        destination: "/es/contacto",
+        permanent: false,
+      },
+      {
+        source: "/privacidad",
+        destination: "/es/privacidad",
+        permanent: false,
+      },
+      {
+        source: "/terminos",
+        destination: "/es/terminos",
+        permanent: false,
       },
     ];
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

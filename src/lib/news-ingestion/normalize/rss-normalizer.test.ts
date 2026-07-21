@@ -72,6 +72,39 @@ describe("RssNormalizer", () => {
     expect(result.data.heroImageUrl).toBe("https://example.com/inline.jpg");
   });
 
+  it("uses catalog defaultLanguageCode when RSS omits language tag", async () => {
+    const [payload] = parser.parseToPayloads(SAMPLE_RSS_XML, {
+      sourceSlug: "test-source",
+      feedUrl: "https://example.com/feed.xml",
+      fetchedAt: FETCHED_AT,
+    });
+
+    expect(payload).toBeDefined();
+
+    const raw = payload!.raw as {
+      kind: string;
+      item: object;
+      feed: { title?: string; format?: string; language?: string };
+    };
+
+    const noLangPayload = {
+      ...payload!,
+      raw: {
+        ...raw,
+        feed: { ...raw.feed, language: undefined },
+      },
+    };
+
+    const result = await normalizer.normalize(noLangPayload, {
+      ...context,
+      defaultLanguageCode: "en",
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.languageCode).toBe("en");
+  });
+
   it("returns typed failure for invalid raw payload", async () => {
     const result = await normalizer.normalize(
       {

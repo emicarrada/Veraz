@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ export type FeedPaginationProps = {
 };
 
 export function FeedPagination({ initialPage, search, categorySlug }: FeedPaginationProps) {
+  const t = useTranslations("feed");
   const [items, setItems] = useState<ReadonlyArray<ArticleFeedItem>>(initialPage.items);
   const [nextCursor, setNextCursor] = useState<string | undefined>(initialPage.nextCursor);
   const [hasMore, setHasMore] = useState(initialPage.hasMore);
@@ -67,11 +69,11 @@ export function FeedPagination({ initialPage, search, categorySlug }: FeedPagina
             onClick={loadMore}
             disabled={!nextCursor || isPending}
           >
-            Cargar más
+            {t("loadMore")}
           </Button>
         </div>
       ) : items.length > 0 ? (
-        <p className="text-center text-small text-ink-muted">Has llegado al final del feed.</p>
+        <p className="text-center text-small text-ink-muted">{t("endOfFeed")}</p>
       ) : null}
     </div>
   );

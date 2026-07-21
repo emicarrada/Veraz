@@ -1,0 +1,321 @@
+{
+  "nav": {
+    "home": "Home",
+    "news": "News",
+    "methodology": "Methodology",
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy",
+    "terms": "Terms of use",
+    "logoAlt": "Veraz",
+    "mainAria": "Main",
+    "homeAria": "Home",
+    "localeEs": "Español",
+    "localeEn": "English",
+    "localeSwitchAria": "Language: {locale}. Click to switch."
+  },
+  "footer": {
+    "copyright": "© {year} Veraz"
+  },
+  "common": {
+    "brand": "Veraz",
+    "tagline": "Inform without influencing.",
+    "contactUs": "Contact us",
+    "backToFeed": "Back to feed",
+    "backToFeedAria": "Back to feed",
+    "readAtSource": "Read at source",
+    "publishedAt": "Published",
+    "source": "Source",
+    "translated": "Translated",
+    "originalLanguageNote": "Content in {language}"
+  },
+  "errors": {
+    "404Label": "Error 404",
+    "404Title": "Page not found",
+    "404Description": "The route you're looking for doesn't exist or was moved. You can go back home or browse the news feed.",
+    "404Contact": "Think this is a mistake?",
+    "articleNotFound": "Article not found",
+    "articleNotFoundTitle": "We couldn't find this story",
+    "articleNotFoundDescription": "The link may be outdated or the article is no longer available.",
+    "backToNews": "Back to news",
+    "browseNews": "Browse news",
+    "dbNotConfigured": "The database is not configured.",
+    "loadFailed": "Could not load the article.",
+    "invalidCursor": "Invalid pagination cursor."
+  },
+  "landing": {
+    "metaDescription": "News aggregated from reference sources, with traceability to the original publication. Inform without influencing.",
+    "keywords": "Veraz, news, finance, technology, verifiable information, reference sources",
+    "hero": {
+      "headline": "A clear way to stay informed every day",
+      "subcopy": "We aggregate news from reference sources, with traceability to the original publication. No invented facts, no pushed agenda.",
+      "ctaNews": "View news",
+      "ctaAbout": "About Veraz"
+    },
+    "whatIs": {
+      "eyebrow": "News platform",
+      "title": "What is Veraz?",
+      "p1": "Veraz aggregates headlines and summaries from reference outlets in finance, technology, and general news. Each item shows the source, date, and a link to the original article so you can verify for yourself.",
+      "p2": "We are not a publisher writing our own stories. Our job is to organize, classify, and present what verifiable sources already published — inform without influencing."
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "description": "From source to your screen in three steps, no black boxes.",
+      "steps": {
+        "1": {
+          "title": "We aggregate sources",
+          "body": "We fetch curated media RSS feeds several times a day. Finance and technology use prestigious sources only."
+        },
+        "2": {
+          "title": "We classify and display",
+          "body": "Each article enters the feed with topic, source, and summary. Filter by section or search by keyword."
+        },
+        "3": {
+          "title": "You read at the source",
+          "body": "From Veraz you open the full article on the original outlet. Editorial context and responsibility stay there."
+        }
+      }
+    },
+    "features": {
+      "title": "Key features",
+      "description": "Built for people who want context, not just headlines.",
+      "items": {
+        "sources": {
+          "title": "Reference sources",
+          "body": "Finance and tech from recognized outlets; broader coverage in other tabs."
+        },
+        "freshness": {
+          "title": "Frequent updates",
+          "body": "The feed updates automatically so you see what was published hours ago, not days."
+        },
+        "traceability": {
+          "title": "Full traceability",
+          "body": "You know who published each story and when. One click takes you to the original article."
+        },
+        "noNoise": {
+          "title": "No editorial noise",
+          "body": "We don't rewrite headlines for clicks. We show what the source published."
+        }
+      }
+    },
+    "benefits": {
+      "title": "Benefits",
+      "description": "For reading day to day with judgment, not haste.",
+      "items": {
+        "time": {
+          "title": "Less time searching",
+          "body": "One place for finance, tech, and general news instead of jumping between ten homepages."
+        },
+        "trust": {
+          "title": "More confidence",
+          "body": "Every story shows its source. You can verify before sharing or deciding."
+        },
+        "neutrality": {
+          "title": "Neutral presentation",
+          "body": "We classify by topic, not opinion. Veraz doesn't push a single narrative."
+        }
+      }
+    },
+    "categories": {
+      "title": "Stay informed daily in your field",
+      "description": "Veraz aggregates verifiable sources and shows the latest several times a day. Every headline links to the original source.",
+      "finanzas": {
+        "title": "Finance",
+        "description": "Markets, economy, and business from reference outlets.",
+        "cta": "View finance"
+      },
+      "tecnologia": {
+        "title": "Technology",
+        "description": "Innovation, companies, and science from prestigious sources.",
+        "cta": "View technology"
+      },
+      "alsoCover": "We also cover other areas:"
+    },
+    "finalCta": {
+      "title": "Start reading with context",
+      "description": "Enter the feed, pick your section, and open the source when you want to go deeper.",
+      "ctaNews": "Explore news",
+      "ctaMethodology": "View methodology"
+    }
+  },
+  "feed": {
+    "title": "News",
+    "finanzasTitle": "Finance",
+    "tecnologiaTitle": "Technology",
+    "defaultDescription": "Headlines and summaries from reference sources, with links to the original publication.",
+    "finanzasDescription": "Economy and markets from prestigious outlets. Every story links to the original source.",
+    "tecnologiaDescription": "Technology and innovation from prestigious outlets. Every story links to the original source.",
+    "trustBannerTitle": "Reference sources in this section",
+    "trustBannerNote": "Content traceable to the original source. Veraz aggregates and organizes; it does not write or reinterpret the facts.",
+    "searchPlaceholder": "Search news by headline, summary, or topic…",
+    "searchAria": "Search news",
+    "tabsAria": "Feed classification",
+    "allTab": "All",
+    "specificTopics": "Specific topics",
+    "specificTopicsAria": "Filter by specific topic",
+    "emptyTitle": "No news yet",
+    "emptyDescription": "When articles are ingested from RSS, they will appear here sorted by publication date.",
+    "emptyIngestHint": "If you expected news here, check Supabase and run: npm run ingest:run",
+    "languageDisclosureFinance": "Several reference finance sources publish primarily in English. We show headlines as published by the outlet; each story shows its source and original link.",
+    "languageDisclosureTech": "Several reference technology sources publish primarily in English. We show headlines as published by the outlet; each story shows its source and original link.",
+    "loadMore": "Load more",
+    "loading": "Loading…",
+    "endOfFeed": "You've reached the end of the feed.",
+    "categories": {
+      "politica": "Politics",
+      "economia": "Finance",
+      "deportes": "Sports",
+      "internacional": "International",
+      "sociedad": "Society",
+      "cultura": "Culture",
+      "tecnologia": "Technology",
+      "general": "General",
+      "sheinbaum": "Sheinbaum",
+      "trump": "Trump",
+      "unam": "UNAM",
+      "openai": "OpenAI",
+      "google": "Google",
+      "inteligencia-artificial": "Artificial intelligence",
+      "futbol": "Soccer",
+      "nba": "Basketball",
+      "rugby": "Rugby",
+      "messi": "Messi",
+      "ronaldo": "Ronaldo",
+      "mercados": "Markets",
+      "criptomonedas": "Cryptocurrency"
+    }
+  },
+  "article": {
+    "referencesTitle": "References",
+    "readOriginal": "Read original article",
+    "sourceAttribution": "This summary comes from {source}. Read the full article at the original source.",
+    "translatedBadge": "Translated",
+    "originalLanguageNote": "Content in {language}"
+  },
+  "static": {
+    "methodology": {
+      "title": "Methodology",
+      "metaDescription": "How Veraz aggregates, classifies, and presents news with traceability to the original source.",
+      "pageTitle": "How do we verify a story?",
+      "pageDescription": "{name} is not a publisher writing its own headlines. We aggregate information from reference sources and always link you to the original publication.",
+      "intro": "Our goal is simple: help you stay informed clearly and verify every fact at the source. Here's what we do — and what we don't.",
+      "sections": {
+        "sources": {
+          "title": "1. Source selection",
+          "body": "We work with reference media and agencies in finance, technology, and general coverage. Finance and Technology tabs show only prestigious sources curated by the team (CNBC, TechCrunch, El País Economía, etc.). All also includes general front pages for a broader view."
+        },
+        "aggregation": {
+          "title": "2. Automatic aggregation",
+          "body": "Each source is polled periodically via public RSS feeds. We extract headline, summary, date, author when available, and image when the source publishes one. If a feed fails, the rest keeps working: reading the site doesn't depend on a single source."
+        },
+        "classification": {
+          "title": "3. Editorial classification",
+          "body": "We assign each article to a topic (politics, economy, technology, sports, etc.) using classification rules and, when applicable, a fallback based on the source section. Category helps navigation; it doesn't imply judgment on content."
+        },
+        "traceability": {
+          "title": "4. Traceability",
+          "body": "Every story on {name} shows the source, publication date, and a direct link to the original article. The summary you see comes from the feed or excerpt published by the outlet; read the full text at the source."
+        },
+        "whatWeDont": {
+          "title": "5. What we don't do",
+          "items": [
+            "We don't invent facts or rewrite stories as if they were ours.",
+            "We don't hide where information comes from.",
+            "We don't block feed publication because of optional AI enrichment failures (when active, it's complementary)."
+          ]
+        },
+        "corrections": {
+          "title": "6. Errors and corrections",
+          "bodyPrefix": "If you find a broken link, wrong classification, or a source that shouldn't be in the catalog, write to",
+          "bodySuffix": "We review every report and adjust feeds or rules when appropriate."
+        }
+      }
+    },
+    "about": {
+      "title": "About",
+      "metaDescription": "What Veraz is and why it exists.",
+      "pageTitle": "About Veraz",
+      "pageDescription": "{tagline}. {name} is a news platform, not a traditional publisher.",
+      "intro": "{name} exists to solve an everyday problem: staying informed without losing sight of where each fact comes from. In a headline-saturated environment, we summarize and organize what reference sources published — without replacing them or adding opinion disguised as fact.",
+      "sections": {
+        "premise": {
+          "title": "Our premise",
+          "body": "Inform without influencing. That means presenting information with enough context, always linking to the source, and being transparent about how each story reaches the feed."
+        },
+        "whatYouFind": {
+          "title": "What you'll find here",
+          "items": [
+            "Finance and technology feeds with prestigious sources.",
+            "General coverage in politics, international, sports, and society.",
+            "Updates several times a day from configured outlets.",
+            "Detail pages with links to the original article."
+          ]
+        },
+        "contact": {
+          "title": "Team and contact",
+          "bodyPrefix": "{name} is under active development. For suggestions, press, or support:",
+          "bodySuffix": "."
+        }
+      }
+    },
+    "contact": {
+      "title": "Contact",
+      "metaDescription": "Write to us at soporte@veraz.app",
+      "pageTitle": "Contact",
+      "pageDescription": "One channel for support, suggestions, and content reports.",
+      "p1": "For questions about how Veraz works, to report a source issue, or suggest improvements, contact us by email:",
+      "p2": "We respond on business days. If you report an error in a story, include the Veraz item link and, if possible, the original source link."
+    },
+    "privacy": {
+      "title": "Privacy",
+      "metaDescription": "Veraz privacy policy.",
+      "pageTitle": "Privacy policy",
+      "pageDescription": "How we handle minimal data to operate the site and improve the service.",
+      "sections": {
+        "intro": {
+          "title": "Summary",
+          "body": "Veraz collects the minimum information needed to operate the site, measure aggregate usage, and respond to inquiries. We do not sell personal data."
+        },
+        "analytics": {
+          "title": "Analytics",
+          "body": "We may use tools like PostHog to understand aggregate usage (pages visited, language). You can use tracking blockers if you prefer."
+        },
+        "contact": {
+          "title": "Contact",
+          "bodyPrefix": "To exercise rights or ask privacy questions:",
+          "bodySuffix": "."
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms of use",
+      "metaDescription": "Veraz terms of use.",
+      "pageTitle": "Terms of use",
+      "pageDescription": "Basic conditions for using the Veraz platform.",
+      "sections": {
+        "service": {
+          "title": "The service",
+          "body": "Veraz aggregates third-party links and summaries. We are not authors of linked content; editorial responsibility remains with each source."
+        },
+        "use": {
+          "title": "Permitted use",
+          "body": "You may browse the feed for personal use. Aggressive scraping or attempts to compromise infrastructure are not allowed."
+        },
+        "liability": {
+          "title": "Limitation",
+          "body": "The service is provided as is. Verify important information at original sources before making decisions."
+        },
+        "contact": {
+          "title": "Contact",
+          "bodyPrefix": "Legal or usage questions:",
+          "bodySuffix": "."
+        }
+      }
+    }
+  },
+  "languages": {
+    "es": "Spanish",
+    "en": "English",
+    "unknown": "another language"
+  }
+}

@@ -1,21 +1,37 @@
+import { getLocale, getTranslations } from "next-intl/server";
+
 import type { NewsTopicSlug } from "@/features/news/classification/categories";
+import { getTopicGroup } from "@/features/news/classification/categories";
 import { Text } from "@/components/ui/text";
-import { getFeedHeaderDescription } from "@/features/news/utils/get-feed-header-description";
 import {
   isPrestigiousFeedCategory,
-  resolveFeedPageTitle,
+  resolveFeedPageDescriptionKey,
+  resolveFeedPageTitleKey,
   resolvePrestigiousSourcesForFeed,
 } from "@/features/news/utils/feed-vertical-presets";
+import type { Locale } from "@/i18n/routing";
 
 export type FeedHeaderProps = {
   categorySlug?: NewsTopicSlug;
 };
 
-export function FeedHeader({ categorySlug }: FeedHeaderProps) {
-  const description = getFeedHeaderDescription(categorySlug);
-  const title = resolveFeedPageTitle(categorySlug);
-  const prestigiousSources = resolvePrestigiousSourcesForFeed(categorySlug);
+export async function FeedHeader({ categorySlug }: FeedHeaderProps) {
+  const locale = (await getLocale()) as Locale;
+  const t = await getTranslations("feed");
+  const titleKey = resolveFeedPageTitleKey(categorySlug);
+  const title =
+    titleKey === "title" || titleKey === "finanzasTitle" || titleKey === "tecnologiaTitle"
+      ? t(titleKey)
+      : t(titleKey);
+
+  const descriptionKey = resolveFeedPageDescriptionKey(categorySlug);
+  const description = descriptionKey ? t(descriptionKey) : t("defaultDescription");
+
+  const prestigiousSources = resolvePrestigiousSourcesForFeed(categorySlug, locale);
   const showTrustBanner = isPrestigiousFeedCategory(categorySlug);
+  const group = categorySlug ? getTopicGroup(categorySlug) : undefined;
+  const showLanguageDisclosure =
+    locale === "es" && (group === "economia" || group === "tecnologia");
 
   return (
     <header className="mb-8 border-b border-border pb-6">
@@ -26,10 +42,20 @@ export function FeedHeader({ categorySlug }: FeedHeaderProps) {
         {description}
       </Text>
 
+      {showLanguageDisclosure ? (
+        <div className="mt-5 max-w-3xl rounded-lg border border-accent/30 bg-surface px-4 py-3">
+          <Text variant="small" className="text-ink-secondary">
+            {group === "economia"
+              ? t("languageDisclosureFinance")
+              : t("languageDisclosureTech")}
+          </Text>
+        </div>
+      ) : null}
+
       {showTrustBanner && prestigiousSources && prestigiousSources.length > 0 ? (
         <div className="mt-5 max-w-3xl rounded-lg border border-border bg-surface px-4 py-3">
           <Text variant="caption" className="font-medium text-ink">
-            Fuentes de referencia en esta clasificación
+            {t("trustBannerTitle")}
           </Text>
           <ul className="mt-2 flex flex-wrap gap-2">
             {prestigiousSources.map((source) => (
@@ -45,8 +71,7 @@ export function FeedHeader({ categorySlug }: FeedHeaderProps) {
             ))}
           </ul>
           <Text variant="small" className="mt-3 text-ink-muted">
-            Contenido trazable a la fuente original. Veraz agrega y ordena; no redacta ni
-            reinterpreta los hechos.
+            {t("trustBannerNote")}
           </Text>
         </div>
       ) : null}

@@ -46,6 +46,7 @@ export class RssIngestionRunner {
   async run(input: RssIngestionRunInput): Promise<IngestionResult<RssIngestionRunOutput>> {
     const newsConfig = getNewsConfig();
     const limit = input.limit ?? newsConfig.discoverBatchLimit;
+    const feedConfig = newsConfig.rss.feeds.find((feed) => feed.sourceSlug === input.sourceSlug);
 
     const discoverResult = await this.provider.discover({
       providerId: "rss",
@@ -70,6 +71,9 @@ export class RssIngestionRunner {
         updatedAt: new Date().toISOString(),
         retryCount: 0,
       },
+      ...(feedConfig?.defaultLanguageCode
+        ? { defaultLanguageCode: feedConfig.defaultLanguageCode }
+        : {}),
     };
 
     const articles: NormalizedArticle[] = [];

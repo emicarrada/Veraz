@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import type { MouseEvent } from "react";
 
 import { cn } from "@/utils/cn";
+import { stripLocalePrefix } from "@/i18n/paths";
 
 type ArticleBackLinkProps = {
   feedHref: string;
@@ -44,16 +45,15 @@ function cameFromFeed(): boolean {
 
   try {
     const referrer = new URL(document.referrer);
-    return (
-      referrer.origin === window.location.origin &&
-      referrer.pathname === "/noticias"
-    );
+    const referrerPath = stripLocalePrefix(referrer.pathname);
+    return referrer.origin === window.location.origin && referrerPath === "/noticias";
   } catch {
     return false;
   }
 }
 
 export function ArticleBackLink({ feedHref, className }: ArticleBackLinkProps) {
+  const t = useTranslations("common");
   const router = useRouter();
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -75,7 +75,7 @@ export function ArticleBackLink({ feedHref, className }: ArticleBackLinkProps) {
         "veraz-transition veraz-focus-ring",
         className,
       )}
-      aria-label="Volver al feed"
+      aria-label={t("backToFeedAria")}
     >
       <span
         aria-hidden
@@ -83,7 +83,7 @@ export function ArticleBackLink({ feedHref, className }: ArticleBackLinkProps) {
       >
         <ArrowLeftIcon />
       </span>
-      <span>Volver al feed</span>
+      <span>{t("backToFeed")}</span>
     </Link>
   );
 }

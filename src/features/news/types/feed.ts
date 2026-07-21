@@ -20,6 +20,9 @@ export type ArticleFeedItem = {
   sourceName: string;
   sourceSlug: string;
   sourceAttributionName: string;
+  languageCode: string;
+  isTranslated: boolean;
+  showOriginalLanguageNote: boolean;
   byline?: string;
   heroImageUrl?: Url;
 };

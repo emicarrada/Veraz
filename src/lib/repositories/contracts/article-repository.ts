@@ -30,6 +30,7 @@ export type ArticlePersistResult = {
 export type ArticleFeedRecord = {
   article: Article;
   categorySlug: NewsCategorySlug;
+  languageCode: string;
   sourceName: string;
   sourceSlug: string;
   sourceAttributionName: string;
@@ -43,6 +44,10 @@ export type ListFeedArticlesParams = {
   categorySlug?: NewsCategorySlug;
   /** When set, only articles from these source slugs are returned. */
   sourceSlugs?: ReadonlyArray<string>;
+  /** When set, only articles with matching language codes are returned. */
+  languageCodes?: ReadonlyArray<string>;
+  /** When set, articles from these source slugs are excluded. */
+  excludeSourceSlugs?: ReadonlyArray<string>;
 };
 
 export type ListFeedArticlesResult = {
@@ -55,6 +60,7 @@ export type ListFeedArticlesResult = {
 export type ArticleDetailRecord = {
   article: Article;
   categorySlug: NewsCategorySlug;
+  languageCode: string;
   source: Pick<Source, "id" | "slug" | "name" | "attributionName" | "homepageUrl">;
   heroMedia?: Media;
   references: ReadonlyArray<Reference>;

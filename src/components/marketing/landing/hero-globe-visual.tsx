@@ -1,53 +1,7 @@
 "use client";
 
-import { Globe3D, type GlobeMarker } from "@/components/ui/3d-globe";
+import { Globe3D } from "@/components/ui/3d-globe";
 import { cn } from "@/utils/cn";
-
-/** News hubs — avatars from /public/fotosGlobo (prestigious source logos). */
-const NEWS_HUB_MARKERS: GlobeMarker[] = [
-  {
-    lat: 40.7128,
-    lng: -74.006,
-    src: "/fotosGlobo/cnbc.webp",
-    label: "CNBC · Nueva York",
-  },
-  {
-    lat: 37.7749,
-    lng: -122.4194,
-    src: "/fotosGlobo/techcrunch.jpg",
-    label: "TechCrunch · San Francisco",
-  },
-  {
-    lat: 40.758,
-    lng: -73.9855,
-    src: "/fotosGlobo/theverge.webp",
-    label: "The Verge · Nueva York",
-  },
-  {
-    lat: 40.4168,
-    lng: -3.7038,
-    src: "/fotosGlobo/elpais.png",
-    label: "El País · Madrid",
-  },
-  {
-    lat: 40.42,
-    lng: -3.69,
-    src: "/fotosGlobo/expansion.jpg",
-    label: "Expansión · Madrid",
-  },
-  {
-    lat: 19.4326,
-    lng: -99.1332,
-    src: "/fotosGlobo/bloomberg.jpg",
-    label: "Bloomberg Línea · Ciudad de México",
-  },
-  {
-    lat: 42.3601,
-    lng: -71.0589,
-    src: "/fotosGlobo/arstech.jpg",
-    label: "Ars Technica · Boston",
-  },
-];
 
 export type HeroGlobeVisualProps = {
   className?: string;
@@ -65,11 +19,10 @@ export function HeroGlobeVisual({ className }: HeroGlobeVisualProps) {
         className,
       )}
       role="img"
-      aria-label="Globo con hubs de noticias globales"
+      aria-label="Globo terráqueo"
     >
       <div className="pointer-events-none absolute inset-0 landing-grid-mask opacity-40" aria-hidden />
       <Globe3D
-        markers={NEWS_HUB_MARKERS}
         className="h-full w-full"
         config={{
           showAtmosphere: true,

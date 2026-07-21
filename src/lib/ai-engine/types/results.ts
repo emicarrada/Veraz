@@ -54,6 +54,12 @@ export type AIRelatedResult = {
   rationale?: string;
 };
 
+export type AITranslateResult = {
+  title: string;
+  excerpt: string;
+  bodyExcerpt?: string;
+};
+
 /**
  * Discriminated enrichment payload produced by a successful Engine call.
  */

@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+
 import { LandingSectionHeader } from "@/components/marketing/landing/landing-section-header";
 import {
   Card,
@@ -9,25 +11,11 @@ import {
 import { Section } from "@/components/ui/section";
 import { Text } from "@/components/ui/text";
 
-const STEPS = [
-  {
-    step: "01",
-    title: "Agregamos fuentes",
-    body: "Consultamos feeds RSS de medios curados varias veces al día. Finanzas y tecnología usan solo fuentes prestigiosas.",
-  },
-  {
-    step: "02",
-    title: "Clasificamos y mostramos",
-    body: "Cada artículo entra al feed con tema, fuente y resumen. Filtras por rubro o buscas por palabra clave.",
-  },
-  {
-    step: "03",
-    title: "Lees en la fuente",
-    body: "Desde Veraz abres el artículo completo en el medio original. El contexto y la responsabilidad editorial siguen allí.",
-  },
-] as const;
+const STEP_KEYS = ["1", "2", "3"] as const;
 
-export function LandingHowItWorksSection() {
+export async function LandingHowItWorksSection() {
+  const t = await getTranslations("landing.howItWorks");
+
   return (
     <Section
       id="como-funciona"
@@ -37,23 +25,23 @@ export function LandingHowItWorksSection() {
     >
       <LandingSectionHeader
         id="como-funciona-heading"
-        title="Cómo funciona"
-        description="De la fuente a tu pantalla en tres pasos, sin cajas negras."
+        title={t("title")}
+        description={t("description")}
       />
 
       <ol className="mt-12 grid gap-6 md:grid-cols-3">
-        {STEPS.map((item) => (
-          <li key={item.step}>
+        {STEP_KEYS.map((key, index) => (
+          <li key={key}>
             <Card padding="lg" className="h-full bg-surface-muted/60">
               <CardHeader>
                 <Text as="p" variant="label" className="text-accent">
-                  {item.step}
+                  {String(index + 1).padStart(2, "0")}
                 </Text>
-                <CardTitle>{item.title}</CardTitle>
+                <CardTitle>{t(`steps.${key}.title`)}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-ink-muted">
-                  {item.body}
+                  {t(`steps.${key}.body`)}
                 </CardDescription>
               </CardContent>
             </Card>

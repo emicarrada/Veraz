@@ -1,18 +1,22 @@
+import { getTranslations } from "next-intl/server";
+
 import { Text } from "@/components/ui/text";
 import type { ArticleDetailReference } from "@/features/news/types/article-detail";
-
-const REFERENCE_KIND_LABELS: Record<ArticleDetailReference["kind"], string> = {
-  original: "Original",
-  primary_source: "Fuente primaria",
-  supporting: "Referencia",
-  correction: "Corrección",
-};
 
 export type ArticleReferencesProps = {
   references: ReadonlyArray<ArticleDetailReference>;
 };
 
-export function ArticleReferences({ references }: ArticleReferencesProps) {
+export async function ArticleReferences({ references }: ArticleReferencesProps) {
+  const t = await getTranslations("article");
+
+  const kindLabels: Record<ArticleDetailReference["kind"], string> = {
+    original: "Original",
+    primary_source: "Primary source",
+    supporting: "Reference",
+    correction: "Correction",
+  };
+
   if (references.length === 0) {
     return null;
   }
@@ -20,7 +24,7 @@ export function ArticleReferences({ references }: ArticleReferencesProps) {
   return (
     <section aria-labelledby="article-references-heading" className="space-y-4">
       <Text variant="h4" as="h2" id="article-references-heading">
-        Referencias
+        {t("referencesTitle")}
       </Text>
       <ul className="m-0 list-none space-y-3 p-0">
         {references.map((reference, index) => (
@@ -30,7 +34,7 @@ export function ArticleReferences({ references }: ArticleReferencesProps) {
           >
             <div className="flex flex-wrap items-center gap-2">
               <Text variant="caption" className="text-ink-muted">
-                {REFERENCE_KIND_LABELS[reference.kind]}
+                {kindLabels[reference.kind]}
               </Text>
               {reference.publisherName ? (
                 <Text variant="caption" className="text-ink-muted">

@@ -1,42 +1,50 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { MainContainer } from "@/components/layout/main-container";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { Text } from "@/components/ui/text";
-import { FEED_ROUTE } from "@/features/news/constants";
+import { Link } from "@/i18n/navigation";
+import { feedPath, homePath, staticPath } from "@/i18n/paths";
+import { getLocale } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
 
-export default function NotFoundPage() {
+export default async function NotFoundPage() {
+  const t = await getTranslations("errors");
+  const tNav = await getTranslations("nav");
+  const tCommon = await getTranslations("common");
+  const locale = (await getLocale()) as Locale;
+
   return (
     <div className="landing-page flex min-h-dvh flex-col bg-bg text-ink">
       <MainContainer className="flex flex-1 items-center">
         <Container className="py-16 text-center" size="md">
           <Text as="p" variant="label" className="text-ink-muted">
-            Error 404
+            {t("404Label")}
           </Text>
           <Text as="h1" variant="display" className="mt-4">
-            Página no encontrada
+            {t("404Title")}
           </Text>
           <Text as="p" variant="body-lg" className="mx-auto mt-4 max-w-md text-ink-secondary">
-            La ruta que buscas no existe o fue movida. Puedes volver al inicio o
-            explorar el feed de noticias.
+            {t("404Description")}
           </Text>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button href="/" variant="primary" size="lg">
-              Inicio
+            <Button href={homePath(locale)} variant="primary" size="lg">
+              {tNav("home")}
             </Button>
-            <Button href={FEED_ROUTE} variant="secondary" size="lg">
-              Noticias
+            <Button href={feedPath(locale)} variant="secondary" size="lg">
+              {tNav("news")}
             </Button>
           </div>
           <p className="mt-8 text-small text-ink-muted">
-            ¿Crees que es un error?{" "}
+            {t("404Contact")}{" "}
             <Link
-              href="/contacto"
+              href={staticPath(locale, "/contacto")}
               className="text-ink-secondary underline underline-offset-2 hover:text-ink"
             >
-              Contáctanos
+              {tCommon("contactUs")}
             </Link>
           </p>
         </Container>

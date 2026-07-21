@@ -9,9 +9,11 @@ import {
 import { isNewsTopicGroup as isNewsTopicGroupFromCategories } from "@/features/news/classification/categories";
 
 describe("RSS_FEED_CATALOG", () => {
-  it("includes finance and tech verticals", () => {
+  it("includes finance, tech, sports, and culture verticals", () => {
     expect(getCatalogFeedsByVertical("finance").length).toBe(5);
     expect(getCatalogFeedsByVertical("tech").length).toBe(7);
+    expect(getCatalogFeedsByVertical("sports").length).toBe(3);
+    expect(getCatalogFeedsByVertical("culture").length).toBe(3);
   });
 
   it("maps catalog entries to RssFeedConfig", () => {
