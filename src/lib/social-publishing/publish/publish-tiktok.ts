@@ -118,15 +118,22 @@ async function clickPublishWithConfirm(page: Page): Promise<void> {
   await dismissTikTokModals(page);
   await acceptTikTokPublishTerms(page);
 
-  const footerPublish = page
-    .getByRole("button", { name: /^Publicar$|^Post$/i })
-    .filter({ hasNot: page.locator("[disabled]") });
+  const footerPublish = page.getByRole("button", { name: /^Publicar$|^Post$/i });
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     await dismissTikTokModals(page);
     const btn = footerPublish.last();
     await btn.scrollIntoViewIfNeeded().catch(() => undefined);
     await btn.waitFor({ state: "visible", timeout: 40_000 });
+    await page.waitForFunction(
+      (selector) => {
+        const buttons = Array.from(document.querySelectorAll("button"));
+        const post = buttons.find((b) => /^(publicar|post)$/i.test(b.textContent?.trim() ?? ""));
+        return Boolean(post && !(post as HTMLButtonElement).disabled);
+      },
+      undefined,
+      { timeout: 60_000 },
+    ).catch(() => undefined);
     await btn.click({ timeout: 25_000, force: true });
     await page.waitForTimeout(3500);
     await dismissTikTokModals(page);

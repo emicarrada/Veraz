@@ -69,20 +69,34 @@ async function fillReelCaption(page: Page, caption: string): Promise<void> {
 }
 
 /** Sidebar "new post" — must not match profile links like instagram.com/create (@create). */
-function instagramCreateSelectNav(page: Page) {
-  return page.locator('a[href="/create/select/"], a[href*="/create/select/"]');
-}
-
 function instagramReelCreateLink(page: Page) {
-  return page.locator('a[href="/create/reel/"], a[href*="/create/reel"]');
+  return page
+    .getByRole("link", { name: /^Reel$/i })
+    .or(page.getByRole("link", { name: /^Reels$/i }))
+    .or(page.locator('a[href*="/create/"]').filter({ hasText: /^Reel$/i }));
 }
 
 async function openInstagramReelCreate(page: Page): Promise<void> {
-  const createNav = instagramCreateSelectNav(page);
-  if (await createNav.first().isVisible({ timeout: 8000 }).catch(() => false)) {
-    await createNav.first().click({ timeout: 15_000 });
-    await page.waitForTimeout(1200);
-    await instagramReelCreateLink(page).first().click({ timeout: 15_000 });
+  await page.goto("https://www.instagram.com/create/select/", {
+    waitUntil: "domcontentloaded",
+    timeout: 90_000,
+  });
+  await page.waitForTimeout(2000);
+  await dismissCommonDialogs(page);
+
+  if (page.url().includes("/accounts/login")) {
+    return;
+  }
+
+  if (/instagram\.com\/create\/?$/i.test(page.url())) {
+    throw new Error(
+      "Instagram redirigió al perfil @create en lugar del flujo de subida. Usa npm run social:login -- instagram",
+    );
+  }
+
+  const reelEntry = instagramReelCreateLink(page);
+  if (await reelEntry.first().isVisible({ timeout: 12_000 }).catch(() => false)) {
+    await reelEntry.first().click({ timeout: 15_000 });
     await page.waitForTimeout(1500);
     return;
   }
@@ -95,16 +109,7 @@ async function openInstagramReelCreate(page: Page): Promise<void> {
     await page.waitForTimeout(1200);
     await instagramReelCreateLink(page).first().click({ timeout: 15_000 });
     await page.waitForTimeout(1500);
-    return;
   }
-
-  await page.goto("https://www.instagram.com/create/select/", {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000,
-  });
-  await page.waitForTimeout(1200);
-  await instagramReelCreateLink(page).first().click({ timeout: 15_000 });
-  await page.waitForTimeout(1500);
 }
 
 /**
