@@ -1,7 +1,12 @@
-import type { Page } from "playwright";
 import path from "node:path";
 
 import type { SocialNetworkPublishInput, SocialPublishResult } from "@/lib/social-publishing/publish/types";
+import {
+  advanceInstagramPostWizard,
+  clickInstagramShare,
+  fillInstagramCaption,
+  openInstagramCreateFlow,
+} from "@/lib/social-publishing/publish/instagram-create-flow";
 import {
   dismissCommonDialogs,
   launchSocialBrowser,
@@ -9,111 +14,9 @@ import {
 
 const DEBUG_SCREENSHOT = ".social/exports/reels-last-attempt.png";
 
-async function advanceReelEditorSteps(page: Page): Promise<void> {
-  for (let step = 0; step < 6; step += 1) {
-    await dismissCommonDialogs(page);
-    let clicked = false;
-    for (const name of [/^Siguiente$|^Next$/i, /^OK$|^Listo$|^Done$/i, /^Continuar$|^Continue$/i]) {
-      const btn = page.getByRole("button", { name }).first();
-      if (await btn.isVisible({ timeout: 2500 }).catch(() => false)) {
-        await btn.click({ timeout: 12_000 }).catch(() => undefined);
-        clicked = true;
-        await page.waitForTimeout(2200);
-        break;
-      }
-    }
-    if (!clicked) break;
-  }
-}
-
-async function fillReelCaption(page: Page, caption: string): Promise<void> {
-  await dismissCommonDialogs(page);
-
-  const captionField = page
-    .locator(
-      [
-        'textarea[aria-label*="caption" i]',
-        'textarea[aria-label*="Escribe" i]',
-        'textarea[placeholder*="caption" i]',
-        'div[contenteditable="true"][role="textbox"]',
-        'div[contenteditable="true"][aria-label*="caption" i]',
-        'div[contenteditable="true"]',
-      ].join(", "),
-    )
-    .first();
-
-  await captionField.waitFor({ state: "visible", timeout: 60_000 });
-
-  const filled = await page
-    .evaluate((text) => {
-      const el = document.querySelector(
-        'textarea[aria-label*="caption" i], textarea[aria-label*="Escribe" i], div[contenteditable="true"][role="textbox"], div[contenteditable="true"]',
-      ) as HTMLTextAreaElement | HTMLElement | null;
-      if (!el) return false;
-      el.focus();
-      if ("value" in el) {
-        (el as HTMLTextAreaElement).value = text;
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-      } else {
-        el.textContent = text;
-        el.dispatchEvent(new InputEvent("input", { bubbles: true }));
-      }
-      return true;
-    }, caption)
-    .catch(() => false);
-
-  if (!filled) {
-    await captionField.click({ force: true });
-    await captionField.fill(caption);
-  }
-}
-
-/** Sidebar "new post" — must not match profile links like instagram.com/create (@create). */
-function instagramReelCreateLink(page: Page) {
-  return page
-    .getByRole("link", { name: /^Reel$/i })
-    .or(page.getByRole("link", { name: /^Reels$/i }))
-    .or(page.locator('a[href*="/create/"]').filter({ hasText: /^Reel$/i }));
-}
-
-async function openInstagramReelCreate(page: Page): Promise<void> {
-  await page.goto("https://www.instagram.com/create/select/", {
-    waitUntil: "domcontentloaded",
-    timeout: 90_000,
-  });
-  await page.waitForTimeout(2000);
-  await dismissCommonDialogs(page);
-
-  if (page.url().includes("/accounts/login")) {
-    return;
-  }
-
-  if (/instagram\.com\/create\/?$/i.test(page.url())) {
-    throw new Error(
-      "Instagram redirigió al perfil @create en lugar del flujo de subida. Usa npm run social:login -- instagram",
-    );
-  }
-
-  const reelEntry = instagramReelCreateLink(page);
-  if (await reelEntry.first().isVisible({ timeout: 12_000 }).catch(() => false)) {
-    await reelEntry.first().click({ timeout: 15_000 });
-    await page.waitForTimeout(1500);
-    return;
-  }
-
-  const createLink = page
-    .getByRole("link", { name: /^Crear$/i })
-    .or(page.getByRole("link", { name: /^Create$/i }));
-  if (await createLink.first().isVisible({ timeout: 8000 }).catch(() => false)) {
-    await createLink.first().click({ timeout: 15_000 });
-    await page.waitForTimeout(1200);
-    await instagramReelCreateLink(page).first().click({ timeout: 15_000 });
-    await page.waitForTimeout(1500);
-  }
-}
-
 /**
- * Instagram Reels (web). Same session as feed: npm run social:login -- instagram
+ * Instagram Reels vía publicación normal (MP4): IG trata el video vertical como Reel.
+ * Misma sesión que feed: npm run social:login -- instagram
  */
 export async function publishToInstagramReels(
   input: SocialNetworkPublishInput,
@@ -128,7 +31,7 @@ export async function publishToInstagramReels(
     const page = context.pages()[0] ?? (await context.newPage());
 
     await page.goto("https://www.instagram.com/", { waitUntil: "domcontentloaded", timeout: 90_000 });
-    await page.waitForTimeout(2500);
+    await page.waitForTimeout(3000);
     await dismissCommonDialogs(page);
 
     if (page.url().includes("/accounts/login")) {
@@ -138,22 +41,16 @@ export async function publishToInstagramReels(
       };
     }
 
-    await openInstagramReelCreate(page);
+    await openInstagramCreateFlow(page);
 
     const fileInput = page.locator('input[type="file"]').first();
-    await fileInput.waitFor({ state: "attached", timeout: 35_000 });
+    await fileInput.waitFor({ state: "attached", timeout: 45_000 });
     await fileInput.setInputFiles(input.videoPath, { timeout: 120_000 });
-    await page.waitForTimeout(5000);
-    await advanceReelEditorSteps(page);
+    await page.waitForTimeout(6000);
 
-    await fillReelCaption(page, input.caption);
-
-    const shareButton = page
-      .getByRole("button", { name: /^Compartir$|^Share$/i })
-      .or(page.getByRole("button", { name: /^Publicar$|^Publish$/i }))
-      .first();
-    await shareButton.waitFor({ state: "visible", timeout: 30_000 });
-    await shareButton.click({ timeout: 30_000 });
+    await advanceInstagramPostWizard(page, 5);
+    await fillInstagramCaption(page, input.caption);
+    await clickInstagramShare(page);
     await page.waitForTimeout(10_000);
 
     return { ok: true };
