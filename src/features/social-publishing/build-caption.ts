@@ -1,0 +1,128 @@
+import {
+  PLATFORM_CHAR_LIMITS,
+  resolveHashtagsForCategory,
+  type SocialCaptionOptions,
+} from "@/features/social-publishing/caption-options";
+import type { SocialArticleCandidate, SocialPlatform } from "@/features/social-publishing/types";
+
+const TITLE_MAX = 200;
+
+function trimToLength(text: string, max: number): string {
+  if (text.length <= max) return text;
+  return `${text.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
+}
+
+function sourceLine(candidate: SocialArticleCandidate, locale: SocialCaptionOptions["locale"]): string {
+  return locale === "en"
+    ? `Source: ${candidate.sourceAttribution}`
+    : `Fuente: ${candidate.sourceAttribution}`;
+}
+
+function buildBaseBody(candidate: SocialArticleCandidate, includeExcerpt: boolean): string {
+  const title =
+    candidate.title.length > TITLE_MAX
+      ? `${candidate.title.slice(0, TITLE_MAX - 1)}…`
+      : candidate.title;
+
+  const parts = [title];
+  if (includeExcerpt && candidate.excerpt.trim()) {
+    parts.push("", trimToLength(candidate.excerpt.trim(), 280));
+  }
+  parts.push("", `🔗 ${candidate.verazArticleUrl}`, "", sourceLine(candidate, candidate.locale));
+  return parts.join("\n");
+}
+
+function buildForX(candidate: SocialArticleCandidate, includeExcerpt: boolean): string {
+  const link = candidate.verazArticleUrl;
+  const footer = `\n\n${link}\n\n${sourceLine(candidate, candidate.locale)}`;
+  const budget = PLATFORM_CHAR_LIMITS.x - footer.length - 1;
+  let title = candidate.title;
+  if (title.length > budget) {
+    title = trimToLength(title, Math.max(40, budget));
+  }
+  return `${title}${footer}`;
+}
+
+function buildForInstagram(
+  candidate: SocialArticleCandidate,
+  options: SocialCaptionOptions,
+): string {
+  const hashtags = resolveHashtagsForCategory(
+    candidate.categorySlug,
+    options.locale,
+    options.globalHashtags,
+  );
+  const body = buildBaseBody(candidate, options.includeExcerpt);
+  return `${body}\n\n${hashtags.join(" ")}`.trim();
+}
+
+function buildForTikTok(candidate: SocialArticleCandidate, options: SocialCaptionOptions): string {
+  const hashtags = resolveHashtagsForCategory(
+    candidate.categorySlug,
+    options.locale,
+    [...options.globalHashtags, "#VerazApp"],
+  );
+  const title = trimToLength(candidate.title, 120);
+  return `${title}\n\n${sourceLine(candidate, candidate.locale)}\n${candidate.verazArticleUrl}\n\n${hashtags.join(" ")}`;
+}
+
+function buildForInstagramReels(
+  candidate: SocialArticleCandidate,
+  options: SocialCaptionOptions,
+): string {
+  return buildForInstagram(candidate, options);
+}
+
+function buildForYoutube(candidate: SocialArticleCandidate, options: SocialCaptionOptions): string {
+  const hashtags = resolveHashtagsForCategory(
+    candidate.categorySlug,
+    options.locale,
+    [...options.globalHashtags, "#Shorts", "#Veraz"],
+  );
+  const body = buildBaseBody(candidate, options.includeExcerpt);
+  return `${body}\n\n${hashtags.join(" ")}`.trim();
+}
+
+export function buildYoutubeTitle(candidate: SocialArticleCandidate): string {
+  const base = candidate.title.trim();
+  if (base.length <= 95) return base;
+  return `${base.slice(0, 94).trimEnd()}…`;
+}
+
+function buildForPlatform(
+  platform: SocialPlatform,
+  candidate: SocialArticleCandidate,
+  options: SocialCaptionOptions,
+): string {
+  switch (platform) {
+    case "x":
+      return buildForX(candidate, options.includeExcerpt);
+    case "instagram":
+      return buildForInstagram(candidate, options);
+    case "tiktok":
+      return buildForTikTok(candidate, options);
+    case "instagram_reels":
+      return buildForInstagramReels(candidate, options);
+    case "youtube":
+      return buildForYoutube(candidate, options);
+    default:
+      return buildBaseBody(candidate, options.includeExcerpt);
+  }
+}
+
+/** @deprecated Use buildSocialCaptions */
+export function buildSocialCaption(candidate: SocialArticleCandidate): string {
+  return buildBaseBody(candidate, false);
+}
+
+export function buildSocialCaptions(
+  candidate: SocialArticleCandidate,
+  options: SocialCaptionOptions,
+): Record<SocialPlatform, string> {
+  const result = {} as Record<SocialPlatform, string>;
+  for (const platform of options.platforms) {
+    const caption = buildForPlatform(platform, candidate, options);
+    result[platform] = trimToLength(caption, PLATFORM_CHAR_LIMITS[platform]);
+  }
+  return result;
+}

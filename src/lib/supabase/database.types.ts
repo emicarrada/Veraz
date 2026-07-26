@@ -253,6 +253,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      social_publications: {
+        Row: {
+          id: string;
+          article_id: string;
+          platform: string;
+          locale: string;
+          status: string;
+          export_path: string | null;
+          caption: string | null;
+          external_post_id: string | null;
+          error_message: string | null;
+          created_at: string;
+          posted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          article_id: string;
+          platform: string;
+          locale: string;
+          status: string;
+          export_path?: string | null;
+          caption?: string | null;
+          external_post_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          posted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          article_id?: string;
+          platform?: string;
+          locale?: string;
+          status?: string;
+          export_path?: string | null;
+          caption?: string | null;
+          external_post_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          posted_at?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
