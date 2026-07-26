@@ -11,7 +11,13 @@ SSH=(ssh -i "$VPS_KEY" -o StrictHostKeyChecking=accept-new "$VPS_HOST")
 echo "Deploying on $VPS_HOST ($VPS_DIR)…"
 "${SSH[@]}" "set -e
 cd $VPS_DIR
-git pull origin main
+if ! node -v 2>/dev/null | grep -q '^v22'; then
+  echo 'Installing Node.js 22…'
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+fi
+git fetch origin main
+git reset --hard origin/main
 npm ci
 npx playwright install chrome
 sudo npx playwright install-deps chrome 2>/dev/null || true

@@ -29,6 +29,7 @@
     "social:examples:live": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/generate-social-live-examples.ts",
     "social:publish:video": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-social-publish-video.ts",
     "social:youtube-auth": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/youtube-oauth.ts",
+    "social:youtube-check": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/youtube-setup-check.ts",
     "social:reset-tiktok-false-posts": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/reset-false-tiktok-publications.ts",
     "social:vps:deploy": "bash scripts/vps-social-deploy.sh",
     "social:vps:sync-secrets": "bash scripts/vps-social-sync-secrets.sh",

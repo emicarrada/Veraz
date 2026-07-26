@@ -13,7 +13,7 @@ Opciones realistas:
 ## 1. Contratar un VPS pequeño
 
 - 2 vCPU, 4 GB RAM, Ubuntu 22/24
-- Instalar **Google Chrome** y Node 20+
+- Instalar **Google Chrome**, **Node.js 22+** (el deploy `npm run social:vps:deploy` lo instala en AWS)
 
 ## 2. Clonar Veraz en el servidor
 

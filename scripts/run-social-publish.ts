@@ -84,11 +84,12 @@ function isSocialPublishCliEntrypoint(): boolean {
 }
 
 export async function runSocialPublish(): Promise<void> {
-  console.log("[social:publish] starting…");
-  const config = loadSocialPublishConfig();
-  console.log(
-    `[social:publish] enabled=${config.enabled} platforms=${config.platforms.join(",")} dryRun=${config.dryRun}`,
-  );
+  try {
+    console.log("[social:publish] starting…");
+    const config = loadSocialPublishConfig();
+    console.log(
+      `[social:publish] enabled=${config.enabled} platforms=${config.platforms.join(",")} dryRun=${config.dryRun}`,
+    );
 
   if (!config.enabled) {
     console.log("SOCIAL_PUBLISHING_ENABLED is not true — exit.");
@@ -322,6 +323,10 @@ export async function runSocialPublish(): Promise<void> {
   }
 
   console.log("Done.");
+  } catch (error) {
+    console.error("[social:publish] fatal:", error instanceof Error ? error.message : error);
+    throw error;
+  }
 }
 
 if (isSocialPublishCliEntrypoint()) {
