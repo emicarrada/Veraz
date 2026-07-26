@@ -1,6 +1,7 @@
 import {
   PLATFORM_CHAR_LIMITS,
   resolveHashtagsForCategory,
+  resolveHashtagsForTikTok,
   type SocialCaptionOptions,
 } from "@/features/social-publishing/caption-options";
 import type { SocialArticleCandidate, SocialPlatform } from "@/features/social-publishing/types";
@@ -57,13 +58,37 @@ function buildForInstagram(
 }
 
 function buildForTikTok(candidate: SocialArticleCandidate, options: SocialCaptionOptions): string {
-  const hashtags = resolveHashtagsForCategory(
+  const locale = candidate.locale;
+  const hook = trimToLength(candidate.title.replace(/\s+/g, " ").trim(), 150);
+
+  const cta =
+    locale === "en"
+      ? "Read the full story on Veraz:"
+      : "Noticia completa en Veraz:";
+
+  const hashtags = resolveHashtagsForTikTok(
     candidate.categorySlug,
-    options.locale,
-    [...options.globalHashtags, "#VerazApp"],
+    locale,
+    options.globalHashtags,
   );
-  const title = trimToLength(candidate.title, 120);
-  return `${title}\n\n${sourceLine(candidate, candidate.locale)}\n${candidate.verazArticleUrl}\n\n${hashtags.join(" ")}`;
+
+  const lines = [hook];
+
+  if (options.includeExcerpt && candidate.excerpt.trim()) {
+    lines.push("", trimToLength(candidate.excerpt.trim(), 140));
+  }
+
+  lines.push(
+    "",
+    cta,
+    candidate.verazArticleUrl,
+    "",
+    sourceLine(candidate, locale),
+    "",
+    hashtags.join(" "),
+  );
+
+  return lines.join("\n").trim();
 }
 
 function buildForInstagramReels(
