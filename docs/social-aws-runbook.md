@@ -75,7 +75,7 @@ SOCIAL_VIDEO_PLATFORMS=tiktok npm run social:publish:video
 
 ### TikTok (popups / VPS)
 
-TikTok Studio en **headless** suele quedar bloqueado por modales. En el VPS usa **display virtual + headed**:
+TikTok Studio en **headless** suele quedar bloqueado por modales. Tras pulsar **Publicar**, TikTok puede mostrar un diálogo de **derechos de autor / comprobación** con **Publicar de todos modos** — el script debe pulsar ese botón (no Cancelar ni Escape). En el VPS usa **display virtual + headed**:
 
 ```bash
 xvfb-run -a -s "-screen 0 1280x900x24" env SOCIAL_HEADED=true SOCIAL_VIDEO_PLATFORMS=tiktok SOCIAL_MAX_POSTS_PER_RUN=1 npm run social:publish:video

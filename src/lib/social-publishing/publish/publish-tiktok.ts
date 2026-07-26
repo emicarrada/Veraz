@@ -13,6 +13,7 @@ import {
   describeBlockingUi,
   dismissTikTokStudioModals,
   saveTopmostDialogArtifacts,
+  waitForCopyrightChecksAndPublishAnyway,
 } from "@/lib/social-publishing/publish/tiktok-studio-modals";
 
 const UPLOAD_URL = "https://www.tiktok.com/tiktokstudio/upload?lang=es";
@@ -126,17 +127,22 @@ async function clickPublishWithConfirm(page: Page): Promise<void> {
     }
 
     if (clicked) log("Clic en Publicar enviado…");
-    await page.waitForTimeout(3500);
-    await dismissTikTokStudioModals(page);
+    await page.waitForTimeout(2000);
+
+    log("Esperando comprobación de derechos / diálogo Publicar de todos modos…");
+    await waitForCopyrightChecksAndPublishAnyway(page, 120_000);
+    await debugStep(page, "after-copyright-modal");
 
     const confirmButton = page
       .locator("button")
-      .filter({ hasText: /^Publicar ahora$|^Post now$|^Confirmar$|^Confirm$/i });
-    if (await confirmButton.first().isVisible({ timeout: 12_000 }).catch(() => false)) {
+      .filter({ hasText: /^Publicar ahora$|^Post now$|^Publicar de todos modos$|^Publish anyway$/i });
+    if (await confirmButton.first().isVisible({ timeout: 8000 }).catch(() => false)) {
       log("Confirmando publicación (segundo diálogo)…");
       await confirmButton.first().click({ timeout: 20_000, force: true });
       await page.waitForTimeout(4000);
     }
+
+    await waitForCopyrightChecksAndPublishAnyway(page, 30_000);
 
     const stillOnUpload = /\/upload/i.test(page.url());
     const publishVisible = await footerPublish

@@ -4,10 +4,20 @@ import path from "node:path";
 import type { Page } from "playwright";
 
 const DISMISS_BUTTON =
-  /^(entendido|got it|ok|aceptar|continuar|not now|ahora no|skip|omitir|saltar|allow|permitir|cerrar|close|siguiente|next|confirm|confirmar)$/i;
+  /^(entendido|got it|ok|aceptar|continuar|not now|ahora no|skip|omitir|saltar|allow|permitir|cerrar|close|siguiente|next)$/i;
 
 const DISMISS_BUTTON_PARTIAL =
-  /entendido|got it|not now|ahora no|skip|omitir|allow|permitir|continuar|aceptar/i;
+  /entendido|got it|not now|ahora no|skip|omitir|allow|permitir|aceptar/i;
+
+/** TikTok copyright / content-check interstitial after clicking Publicar */
+const COPYRIGHT_MODAL_BODY =
+  /derechos de autor|copyright|comprobación|comprobando|checking|music rights|contenido rápida|content check|revisando/i;
+
+const PUBLISH_ANYWAY_BUTTON =
+  /publicar de todos modos|publish anyway|post anyway|publicar igual|still post|continuar publicando|aceptar y publicar|publish video|publicar ahora|post now|confirmar|confirm/i;
+
+const CANCEL_BUTTON =
+  /^(cancelar|cancel|descartar|discard|volver|back|cerrar|close|no thanks|ahora no|not now)$/i;
 
 type DialogProbe = {
   tag: string;
@@ -203,6 +213,151 @@ async function tryCheckVisibleCheckboxes(page: Page): Promise<boolean> {
   return checkedAny;
 }
 
+/**
+ * Copyright / "checking rights" modal: click Publicar de todos modos — never Cancel or Escape.
+ */
+export async function acceptTikTokPublishInterstitialModals(page: Page): Promise<boolean> {
+  const viaDom = await page
+    .evaluate(
+      ({ bodyPattern, publishPattern, cancelPattern }) => {
+        const bodyRe = new RegExp(bodyPattern, "i");
+        const publishRe = new RegExp(publishPattern, "i");
+        const cancelRe = new RegExp(cancelPattern, "i");
+
+        const containers = Array.from(
+          document.querySelectorAll(
+            '[role="dialog"], [aria-modal="true"], [class*="TUXModal"], [class*="modal-desc"]',
+          ),
+        ).filter((el) => {
+          const style = window.getComputedStyle(el);
+          if (style.display === "none" || style.visibility === "hidden") return false;
+          const rect = el.getBoundingClientRect();
+          return rect.width > 40 && rect.height > 40;
+        });
+
+        containers.sort((a, b) => {
+          const za = Number.parseInt(window.getComputedStyle(a).zIndex, 10) || 0;
+          const zb = Number.parseInt(window.getComputedStyle(b).zIndex, 10) || 0;
+          return zb - za;
+        });
+
+        const pageText = document.body?.innerText ?? "";
+        const looksLikeCopyrightFlow =
+          bodyRe.test(pageText) ||
+          containers.some((c) => bodyRe.test(c.textContent ?? ""));
+
+        if (!looksLikeCopyrightFlow && containers.length === 0) return false;
+
+        const roots = containers.length > 0 ? containers : [document.body];
+
+        for (const root of roots) {
+          const buttons = Array.from(root.querySelectorAll("button, [role='button']")) as HTMLElement[];
+          const publishCandidates = buttons.filter((btn) => {
+            const label = (btn.textContent ?? btn.getAttribute("aria-label") ?? "").trim();
+            if (!label || cancelRe.test(label)) return false;
+            return publishRe.test(label);
+          });
+
+          publishCandidates.sort((a, b) => {
+            const la = (a.textContent ?? "").length;
+            const lb = (b.textContent ?? "").length;
+            return la - lb;
+          });
+
+          for (const btn of publishCandidates) {
+            if ((btn as HTMLButtonElement).disabled) continue;
+            btn.scrollIntoView({ block: "center", inline: "center" });
+            btn.click();
+            return true;
+          }
+        }
+
+        return false;
+      },
+      {
+        bodyPattern: COPYRIGHT_MODAL_BODY.source,
+        publishPattern: PUBLISH_ANYWAY_BUTTON.source,
+        cancelPattern: CANCEL_BUTTON.source,
+      },
+    )
+    .catch(() => false);
+
+  if (viaDom) return true;
+
+  const publishAnyway = page
+    .locator('[role="dialog"] button, [class*="TUXModal"] button, [aria-modal="true"] button')
+    .filter({ hasText: /publicar de todos modos|publish anyway|post anyway|publicar ahora|post now/i });
+
+  const count = await publishAnyway.count().catch(() => 0);
+  for (let i = 0; i < count; i += 1) {
+    const button = publishAnyway.nth(i);
+    if (!(await button.isVisible({ timeout: 400 }).catch(() => false))) continue;
+    const label = ((await button.textContent()) ?? "").trim();
+    if (!label || CANCEL_BUTTON.test(label)) continue;
+    await button.click({ force: true, timeout: 12_000 }).catch(() => undefined);
+    return true;
+  }
+
+  return false;
+}
+
+/** Poll while TikTok runs copyright checks and may show "publish anyway". */
+export async function waitForCopyrightChecksAndPublishAnyway(
+  page: Page,
+  timeoutMs = 120_000,
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const accepted = await acceptTikTokPublishInterstitialModals(page);
+    if (accepted) {
+      await page.waitForTimeout(2500);
+    }
+
+    const confirm = page
+      .locator("button")
+      .filter({ hasText: /^Publicar ahora$|^Post now$|^Publicar de todos modos$|^Publish anyway$/i });
+    if (await confirm.first().isVisible({ timeout: 800 }).catch(() => false)) {
+      await confirm.first().click({ timeout: 15_000, force: true }).catch(() => undefined);
+      await page.waitForTimeout(2000);
+    }
+
+    const stillChecking = await page
+      .evaluate(({ bodyPattern }) => {
+        const text = document.body?.innerText ?? "";
+        return /comprobando|checking|reviewing/i.test(text) && !/no se detectaron problemas|no issues found/i.test(text);
+      }, { bodyPattern: COPYRIGHT_MODAL_BODY.source })
+      .catch(() => false);
+
+    const hasPublishAnywayVisible = await page
+      .locator("button")
+      .filter({ hasText: /publicar de todos modos|publish anyway|post anyway|publicar ahora|post now/i })
+      .first()
+      .isVisible({ timeout: 500 })
+      .catch(() => false);
+
+    if (!stillChecking && !hasPublishAnywayVisible && !accepted) {
+      break;
+    }
+
+    await page.waitForTimeout(1500);
+  }
+}
+
+async function pageHasCopyrightPublishModal(page: Page): Promise<boolean> {
+  return page
+    .evaluate(({ bodyPattern, publishPattern }) => {
+      const text = document.body?.innerText ?? "";
+      const bodyRe = new RegExp(bodyPattern, "i");
+      const publishRe = new RegExp(publishPattern, "i");
+      if (!bodyRe.test(text)) {
+        const buttons = Array.from(document.querySelectorAll("button"));
+        return buttons.some((b) => publishRe.test(b.textContent?.trim() ?? ""));
+      }
+      return true;
+    }, { bodyPattern: COPYRIGHT_MODAL_BODY.source, publishPattern: PUBLISH_ANYWAY_BUTTON.source })
+    .catch(() => false);
+}
+
 async function clickDismissInTopmostDialog(page: Page): Promise<boolean> {
   return page
     .evaluate(({ exactPattern, partialPattern }) => {
@@ -242,12 +397,14 @@ async function clickDismissInTopmostDialog(page: Page): Promise<boolean> {
     .catch(() => false);
 }
 
-async function forceRemoveStaleOverlays(page: Page): Promise<void> {
+async function forceRemoveStaleOverlays(page: Page, includeTux = false): Promise<void> {
   await page
-    .evaluate(() => {
+    .evaluate((stripTux) => {
       document.querySelectorAll("#react-joyride-portal, .react-joyride__overlay").forEach((el) => el.remove());
-      document.querySelectorAll('[class*="TUXModal-overlay"]').forEach((el) => el.remove());
-    })
+      if (stripTux) {
+        document.querySelectorAll('[class*="TUXModal-overlay"]').forEach((el) => el.remove());
+      }
+    }, includeTux)
     .catch(() => undefined);
 }
 
@@ -256,6 +413,11 @@ async function forceRemoveStaleOverlays(page: Page): Promise<void> {
  */
 export async function dismissTikTokStudioModals(page: Page): Promise<void> {
   for (let i = 0; i < 8; i += 1) {
+    if (await acceptTikTokPublishInterstitialModals(page)) {
+      await page.waitForTimeout(500);
+      continue;
+    }
+
     await tryCheckVisibleCheckboxes(page);
 
     const clicked = await clickDismissInTopmostDialog(page);
@@ -276,11 +438,18 @@ export async function dismissTikTokStudioModals(page: Page): Promise<void> {
     const blocking = await hasBlockingOverlay(page);
     if (!blocking) break;
 
+    const copyrightModal = await pageHasCopyrightPublishModal(page);
+    if (copyrightModal) {
+      await acceptTikTokPublishInterstitialModals(page);
+      await page.waitForTimeout(500);
+      continue;
+    }
+
     await page.keyboard.press("Escape").catch(() => undefined);
     await page.waitForTimeout(300);
 
     if (await hasBlockingOverlay(page)) {
-      await forceRemoveStaleOverlays(page);
+      await forceRemoveStaleOverlays(page, false);
     }
 
     await page.waitForTimeout(500);
