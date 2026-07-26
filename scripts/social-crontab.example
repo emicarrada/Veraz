@@ -12,5 +12,5 @@ LOG=$VERAZ_DIR/.social/publish.log
 # Instagram — 3 veces (solo noticias con foto + categoría visual / score ≥ 2)
 0 10,15,20 * * * cd $VERAZ_DIR && SOCIAL_PLATFORMS=instagram SOCIAL_INSTAGRAM_HIGH_IMPACT_ONLY=true SOCIAL_MAX_POSTS_PER_RUN=1 npm run social:publish >> $LOG 2>&1
 
-# Video — TikTok + Reels + YouTube Shorts (2×/día ejemplo)
-30 11,18 * * * cd $VERAZ_DIR && npm run social:publish:video >> $VERAZ_DIR/.social/publish-video.log 2>&1
+# Video — TikTok + Reels + YouTube Shorts (2×/día). Xvfb + headed evita popups de TikTok en headless.
+30 11,18 * * * cd $VERAZ_DIR && xvfb-run -a -s "-screen 0 1280x900x24" env SOCIAL_HEADED=true npm run social:publish:video >> $VERAZ_DIR/.social/publish-video.log 2>&1

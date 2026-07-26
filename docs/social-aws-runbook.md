@@ -73,7 +73,23 @@ SOCIAL_VIDEO_PLATFORMS=instagram_reels npm run social:publish:video
 SOCIAL_VIDEO_PLATFORMS=tiktok npm run social:publish:video
 ```
 
-TikTok: si falla en headless, en PC `SOCIAL_HEADED=true SOCIAL_VIDEO_PLATFORMS=tiktok npm run social:publish:video`, luego `social:vps:sync-secrets`.
+### TikTok (popups / VPS)
+
+TikTok Studio en **headless** suele quedar bloqueado por modales. En el VPS usa **display virtual + headed**:
+
+```bash
+xvfb-run -a -s "-screen 0 1280x900x24" env SOCIAL_HEADED=true SOCIAL_VIDEO_PLATFORMS=tiktok SOCIAL_MAX_POSTS_PER_RUN=1 npm run social:publish:video
+```
+
+Debug (capturas + dump de dialogs por paso):
+
+```bash
+SOCIAL_TIKTOK_DEBUG=1 SOCIAL_VIDEO_PLATFORMS=tiktok npm run social:publish:video
+# Traer artefactos a la PC:
+scp -i ~/Descargas/veraz-social.pem 'ubuntu@3.87.109.197:/home/veraz/Veraz/.social/exports/tiktok-debug-*' .social/exports/
+```
+
+Si falla en headless puro: en PC `SOCIAL_HEADED=true …`, luego `npm run social:vps:sync-secrets` (perfil TikTok).
 
 ## Cron
 
@@ -82,6 +98,8 @@ npm run social:vps:install-cron   # desde PC, instala crontab en VPS
 ```
 
 Logs: `.social/publish.log`, `.social/publish-video.log`
+
+El job de **video** en cron usa `xvfb-run` + `SOCIAL_HEADED=true` (ver `scripts/social-crontab.example`).
 
 ## Ahorro AWS
 

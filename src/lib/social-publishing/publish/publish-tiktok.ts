@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import type { Page } from "playwright";
 
 import type { SocialNetworkPublishInput, SocialPublishResult } from "@/lib/social-publishing/publish/types";
@@ -5,66 +7,27 @@ import {
   dismissCommonDialogs,
   launchSocialBrowser,
 } from "@/lib/social-publishing/publish/playwright-context";
+import {
+  acceptTikTokPublishTerms,
+  captureTikTokDebugStep,
+  describeBlockingUi,
+  dismissTikTokStudioModals,
+  saveTopmostDialogArtifacts,
+} from "@/lib/social-publishing/publish/tiktok-studio-modals";
 
 const UPLOAD_URL = "https://www.tiktok.com/tiktokstudio/upload?lang=es";
+const EXPORTS_DIR = ".social/exports";
 
 function log(step: string): void {
   console.log(`[tiktok] ${step}`);
 }
 
-async function dismissTikTokModals(page: Page): Promise<void> {
-  await page
-    .evaluate(() => {
-      document.querySelectorAll("#react-joyride-portal, .react-joyride__overlay").forEach((el) => el.remove());
-      document
-        .querySelectorAll('[class*="TUXModal-overlay"], [class*="TUXModal"]')
-        .forEach((el) => el.remove());
-    })
-    .catch(() => undefined);
-
-  const skipTour = page.getByRole("button", { name: /skip|omitir|saltar|close|cerrar|got it|entendido/i });
-  if (await skipTour.first().isVisible({ timeout: 2000 }).catch(() => false)) {
-    await skipTour.first().click({ force: true, timeout: 5000 }).catch(() => undefined);
-  }
-
-  const closeModal = page
-    .locator('[class*="TUXModal"] button, [class*="modal-desc"] button')
-    .filter({ hasText: /got it|entendido|ok|aceptar|continuar|not now|ahora no|allow|permitir/i });
-
-  for (let i = 0; i < 4; i += 1) {
-    const overlayVisible = await page
-      .locator('[class*="TUXModal-overlay"], [class*="modal-desc"], .react-joyride__overlay')
-      .first()
-      .isVisible({ timeout: 800 })
-      .catch(() => false);
-
-    if (!overlayVisible) break;
-
-    try {
-      if (await closeModal.first().isVisible({ timeout: 800 })) {
-        await closeModal.first().click({ timeout: 6000, force: true });
-      } else {
-        await page.locator('[class*="TUXModal"] button').first().click({ force: true, timeout: 4000 });
-      }
-    } catch {
-      await page.keyboard.press("Escape").catch(() => undefined);
-    }
-
-    await page
-      .evaluate(() => {
-        document.querySelectorAll("#react-joyride-portal, .react-joyride__overlay").forEach((el) => el.remove());
-        document
-          .querySelectorAll('[class*="TUXModal-overlay"], [class*="TUXModal"]')
-          .forEach((el) => el.remove());
-      })
-      .catch(() => undefined);
-
-    await page.waitForTimeout(400);
-  }
+async function debugStep(page: Page, step: string): Promise<void> {
+  await captureTikTokDebugStep(page, step, EXPORTS_DIR);
 }
 
 async function fillTikTokCaption(page: Page, caption: string): Promise<void> {
-  await dismissTikTokModals(page);
+  await dismissTikTokStudioModals(page);
   const captionField = page
     .locator(
       'div[contenteditable="true"], textarea[placeholder*="caption" i], textarea[placeholder*="descrip" i]',
@@ -104,39 +67,31 @@ async function waitForPostButtonReady(page: Page): Promise<void> {
     .catch(() => undefined);
 }
 
-async function acceptTikTokPublishTerms(page: Page): Promise<void> {
-  const terms = page.locator('input[type="checkbox"]').first();
-  if (await terms.isVisible({ timeout: 2000 }).catch(() => false)) {
-    const checked = await terms.isChecked().catch(() => true);
-    if (!checked) {
-      await terms.check({ force: true }).catch(() => undefined);
-    }
-  }
-}
-
 async function clickPublishWithConfirm(page: Page): Promise<void> {
-  await dismissTikTokModals(page);
+  await dismissTikTokStudioModals(page);
   await acceptTikTokPublishTerms(page);
 
   const footerPublish = page.getByRole("button", { name: /^Publicar$|^Post$/i });
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
-    await dismissTikTokModals(page);
+    await dismissTikTokStudioModals(page);
     const btn = footerPublish.last();
     await btn.scrollIntoViewIfNeeded().catch(() => undefined);
     await btn.waitFor({ state: "visible", timeout: 40_000 });
-    await page.waitForFunction(
-      (selector) => {
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const post = buttons.find((b) => /^(publicar|post)$/i.test(b.textContent?.trim() ?? ""));
-        return Boolean(post && !(post as HTMLButtonElement).disabled);
-      },
-      undefined,
-      { timeout: 60_000 },
-    ).catch(() => undefined);
+    await page
+      .waitForFunction(
+        () => {
+          const buttons = Array.from(document.querySelectorAll("button"));
+          const post = buttons.find((b) => /^(publicar|post)$/i.test(b.textContent?.trim() ?? ""));
+          return Boolean(post && !(post as HTMLButtonElement).disabled);
+        },
+        undefined,
+        { timeout: 60_000 },
+      )
+      .catch(() => undefined);
     await btn.click({ timeout: 25_000, force: true });
     await page.waitForTimeout(3500);
-    await dismissTikTokModals(page);
+    await dismissTikTokStudioModals(page);
 
     const confirmButton = page
       .locator("button")
@@ -159,7 +114,11 @@ async function clickPublishWithConfirm(page: Page): Promise<void> {
   }
 }
 
-async function verifyTikTokPublished(page: Page): Promise<boolean> {
+type VerifyResult = { ok: true } | { ok: false; hint: string | null };
+
+async function verifyTikTokPublished(page: Page): Promise<VerifyResult> {
+  await dismissTikTokStudioModals(page);
+
   const handle = await page
     .waitForFunction(
       () => {
@@ -186,7 +145,10 @@ async function verifyTikTokPublished(page: Page): Promise<boolean> {
     )
     .catch(() => null);
 
-  return Boolean(handle);
+  if (handle) return { ok: true };
+
+  const hint = await describeBlockingUi(page);
+  return { ok: false, hint };
 }
 
 /**
@@ -207,7 +169,8 @@ export async function publishToTikTok(input: SocialNetworkPublishInput): Promise
     await page.goto(UPLOAD_URL, { waitUntil: "domcontentloaded", timeout: 90_000 });
     await page.waitForTimeout(2500);
     await dismissCommonDialogs(page);
-    await dismissTikTokModals(page);
+    await dismissTikTokStudioModals(page);
+    await debugStep(page, "after-goto");
 
     if (page.url().includes("/login")) {
       return {
@@ -220,28 +183,40 @@ export async function publishToTikTok(input: SocialNetworkPublishInput): Promise
     const fileInput = page.locator('input[type="file"]').first();
     await fileInput.waitFor({ state: "attached", timeout: 40_000 });
     await fileInput.setInputFiles(input.videoPath, { timeout: 120_000 });
+    await debugStep(page, "after-upload");
 
     log("Esperando que TikTok procese el video (hasta 3 min)…");
     await page.waitForTimeout(4000);
-    await dismissTikTokModals(page);
+    await dismissTikTokStudioModals(page);
     await waitForPostButtonReady(page);
+    await debugStep(page, "after-processing");
 
     log("Escribiendo caption…");
+    await dismissTikTokStudioModals(page);
     await fillTikTokCaption(page, input.caption);
     await page.waitForTimeout(1000);
-    await dismissTikTokModals(page);
+    await dismissTikTokStudioModals(page);
+    await debugStep(page, "before-publish");
 
     log("Publicando…");
     await clickPublishWithConfirm(page);
+    await debugStep(page, "after-publish");
 
     log("Verificando que TikTok aceptó el video…");
-    const published = await verifyTikTokPublished(page);
-    if (!published) {
-      const debugPath = ".social/exports/tiktok-last-attempt.png";
+    await dismissTikTokStudioModals(page);
+    await debugStep(page, "before-verify");
+    const verified = await verifyTikTokPublished(page);
+
+    if (!verified.ok) {
+      const debugPath = path.join(EXPORTS_DIR, "tiktok-last-attempt.png");
       await page.screenshot({ path: debugPath, fullPage: true }).catch(() => undefined);
+      await saveTopmostDialogArtifacts(page, EXPORTS_DIR, "verify-failed");
+      await debugStep(page, "verify-failed");
+
+      const dialogHint = verified.hint ? ` UI bloqueante: ${verified.hint}` : "";
       return {
         ok: false,
-        error: `No hubo confirmación de publicación en TikTok. Revisa ${debugPath} con SOCIAL_HEADED=true o en TikTok Studio → Contenido.`,
+        error: `No hubo confirmación de publicación en TikTok.${dialogHint} Revisa ${debugPath} y tiktok-debug-*.txt (SOCIAL_TIKTOK_DEBUG=1) o TikTok Studio → Contenido.`,
       };
     }
 
