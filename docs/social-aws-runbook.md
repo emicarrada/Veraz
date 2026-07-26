@@ -75,6 +75,12 @@ SOCIAL_VIDEO_PLATFORMS=tiktok npm run social:publish:video
 
 ### TikTok (popups / VPS)
 
+Debug Instagram Reels:
+
+```bash
+SOCIAL_INSTAGRAM_DEBUG=1 SOCIAL_VIDEO_PLATFORMS=instagram_reels npm run social:publish:video
+```
+
 TikTok Studio en **headless** suele quedar bloqueado por modales. Tras pulsar **Publicar**, TikTok puede mostrar un diálogo de **derechos de autor / comprobación** con **Publicar de todos modos** — el script debe pulsar ese botón (no Cancelar ni Escape). En el VPS usa **display virtual + headed**:
 
 ```bash

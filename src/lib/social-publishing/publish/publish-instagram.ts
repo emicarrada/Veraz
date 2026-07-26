@@ -1,8 +1,10 @@
 import type { SocialNetworkPublishInput, SocialPublishResult } from "@/lib/social-publishing/publish/types";
 import {
   advanceInstagramPostWizard,
+  assertInstagramUploadContext,
   clickInstagramShare,
   fillInstagramCaption,
+  openFreshInstagramPage,
   openInstagramCreateFlow,
 } from "@/lib/social-publishing/publish/instagram-create-flow";
 import {
@@ -20,19 +22,13 @@ export async function publishToInstagram(input: SocialNetworkPublishInput): Prom
   let context;
   try {
     context = await launchSocialBrowser(input.profileDir, input.headed);
-    const page = context.pages()[0] ?? (await context.newPage());
+    const page = await openFreshInstagramPage(context);
 
     await page.goto("https://www.instagram.com/", { waitUntil: "domcontentloaded", timeout: 90_000 });
     await page.waitForTimeout(3000);
     await dismissCommonDialogs(page);
 
-    if (page.url().includes("/accounts/login")) {
-      return {
-        ok: false,
-        error: "Instagram pide login. Ejecuta: npm run social:login -- instagram",
-      };
-    }
-
+    await assertInstagramUploadContext(page);
     await openInstagramCreateFlow(page);
 
     const fileInput = page.locator('input[type="file"]').first();

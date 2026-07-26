@@ -1,4 +1,42 @@
-import type { Page } from "playwright";
+import type { BrowserContext, Page } from "playwright";
+
+const CREATE_PROFILE = /instagram\.com\/create\/?(\?|$)/i;
+
+export function isInstagramCreateProfileUrl(url: string): boolean {
+  return CREATE_PROFILE.test(url);
+}
+
+export async function openFreshInstagramPage(context: BrowserContext): Promise<Page> {
+  for (const page of context.pages()) {
+    await page.close().catch(() => undefined);
+  }
+  return context.newPage();
+}
+
+export async function assertInstagramUploadContext(page: Page): Promise<void> {
+  const url = page.url();
+  if (url.includes("/accounts/login")) {
+    throw new Error("Instagram pide login. Ejecuta: npm run social:login -- instagram");
+  }
+  if (isInstagramCreateProfileUrl(url)) {
+    throw new Error(
+      "Instagram abrió el perfil @create (/create/) en lugar del flujo Crear → Publicación. Re-login o sync de perfil.",
+    );
+  }
+
+  const expectedUser = process.env.SOCIAL_INSTAGRAM_USERNAME?.trim().replace(/^@/, "");
+  if (expectedUser) {
+    const onProfile = await page
+      .evaluate((user) => {
+        const link = document.querySelector(`a[href="/${user}/"], a[href="/${user}"]`);
+        return Boolean(link);
+      }, expectedUser.toLowerCase())
+      .catch(() => true);
+    if (!onProfile && isInstagramCreateProfileUrl(page.url())) {
+      throw new Error(`Sesión Instagram no coincide con @${expectedUser}.`);
+    }
+  }
+}
 
 /** Crear → Publicación (evita enlaces al perfil @create). */
 export async function openInstagramCreateFlow(page: Page): Promise<void> {
@@ -12,37 +50,42 @@ export async function openInstagramCreateFlow(page: Page): Promise<void> {
   if (createVisible) {
     await createLink.first().click({ timeout: 15_000 });
     await page.waitForTimeout(1200);
-
-    const publicacionItem = page
-      .getByRole("link", { name: /^Publicación$/i })
-      .or(page.getByRole("link", { name: /^Post$/i }))
-      .or(page.locator('a[href*="/create/"]').filter({ hasText: /^Publicación$/i }));
-
-    await publicacionItem.first().click({ timeout: 15_000 });
+  } else {
+    await page.goto("https://www.instagram.com/create/select/", {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
     await page.waitForTimeout(1500);
-    return;
   }
 
-  await page.goto("https://www.instagram.com/create/select/", {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000,
-  });
-  await page.waitForTimeout(1500);
+  await assertInstagramUploadContext(page);
 
   const publicacionItem = page
     .getByRole("link", { name: /^Publicación$/i })
     .or(page.getByRole("link", { name: /^Post$/i }))
-    .or(page.locator('a[href*="/create/style"]').filter({ hasText: /^Publicación$/i }));
+    .or(page.locator('a[href*="/create/style"]').filter({ hasText: /^Publicación$|^Post$/i }));
 
-  if (await publicacionItem.first().isVisible({ timeout: 10_000 }).catch(() => false)) {
-    await publicacionItem.first().click({ timeout: 15_000 });
-    await page.waitForTimeout(1500);
-  }
+  await publicacionItem.first().click({ timeout: 20_000 });
+  await page.waitForTimeout(1500);
+  await assertInstagramUploadContext(page);
+}
+
+export async function waitForInstagramVideoProcessing(page: Page, timeoutMs = 180_000): Promise<void> {
+  await page
+    .waitForFunction(
+      () => {
+        const buttons = Array.from(document.querySelectorAll("button"));
+        const next = buttons.find((b) => /^(siguiente|next)$/i.test(b.textContent?.trim() ?? ""));
+        return Boolean(next && !(next as HTMLButtonElement).disabled);
+      },
+      { timeout: timeoutMs },
+    )
+    .catch(() => undefined);
 }
 
 export async function advanceInstagramPostWizard(page: Page, maxSteps: number): Promise<void> {
   const nextButton = page.getByRole("button", {
-    name: /^Siguiente$|^Next$|^OK$|^Listo$|^Done$|^Continuar$|^Continue$|^Recortar$/i,
+    name: /^Siguiente$|^Next$|^OK$|^Listo$|^Done$|^Continuar$|^Continue$|^Recortar$|^Crop$/i,
   });
   for (let step = 0; step < maxSteps; step += 1) {
     try {
@@ -61,11 +104,10 @@ export async function advanceInstagramPostWizard(page: Page, maxSteps: number): 
 
 function instagramCaptionLocator(page: Page) {
   return page.locator(
-    'textarea[aria-label*="caption" i], textarea[aria-label*="Escribe" i], div[contenteditable="true"][role="textbox"]',
+    'textarea[aria-label*="caption" i], textarea[aria-label*="Escribe" i], textarea[aria-label*="descripción" i], div[contenteditable="true"][role="textbox"]',
   );
 }
 
-/** Tras subir video, IG puede tardar en recorte/filtros antes del caption. */
 export async function waitForInstagramCaptionScreen(page: Page, timeoutMs = 120_000): Promise<void> {
   const caption = instagramCaptionLocator(page).first();
   const deadline = Date.now() + timeoutMs;

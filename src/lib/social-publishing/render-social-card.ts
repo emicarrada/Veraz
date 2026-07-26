@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import sharp from "sharp";
+import sharp, { type OverlayOptions } from "sharp";
 
 import {
   DEFAULT_SOCIAL_CARD_VARIANT,
@@ -193,7 +193,7 @@ export async function renderSocialCard(input: RenderSocialCardInput): Promise<vo
           fontPath,
         );
 
-  const composites: sharp.OverlayOptions[] = [
+  const composites: OverlayOptions[] = [
     { input: photoBuffer, left: photo.x, top: photo.y },
     { input: overlay, left: 0, top: 0 },
   ];
