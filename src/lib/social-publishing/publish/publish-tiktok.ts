@@ -67,29 +67,65 @@ async function waitForPostButtonReady(page: Page): Promise<void> {
     .catch(() => undefined);
 }
 
+async function waitForContentChecksReady(page: Page): Promise<void> {
+  await page
+    .waitForFunction(
+      () => {
+        const text = document.body?.innerText ?? "";
+        return (
+          /no se detectaron problemas|no se encontraron problemas|no issues found|no problems detected/i.test(
+            text,
+          ) && !/comprobando|checking/i.test(text)
+        );
+      },
+      { timeout: 120_000 },
+    )
+    .catch(() => undefined);
+}
+
+async function clickPrimaryPublishButton(page: Page): Promise<boolean> {
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)).catch(() => undefined);
+  await page.waitForTimeout(600);
+
+  return page
+    .evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll("button")) as HTMLButtonElement[];
+      const candidates = buttons.filter((b) => /^publicar$|^post$/i.test(b.textContent?.trim() ?? ""));
+      for (let i = candidates.length - 1; i >= 0; i -= 1) {
+        const btn = candidates[i]!;
+        if (btn.disabled) continue;
+        const rect = btn.getBoundingClientRect();
+        if (rect.width < 8 || rect.height < 8) continue;
+        btn.scrollIntoView({ block: "center", inline: "center" });
+        btn.click();
+        return true;
+      }
+      return false;
+    })
+    .catch(() => false);
+}
+
 async function clickPublishWithConfirm(page: Page): Promise<void> {
   await dismissTikTokStudioModals(page);
   await acceptTikTokPublishTerms(page);
+  await waitForContentChecksReady(page);
 
   const footerPublish = page.getByRole("button", { name: /^Publicar$|^Post$/i });
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
     await dismissTikTokStudioModals(page);
-    const btn = footerPublish.last();
-    await btn.scrollIntoViewIfNeeded().catch(() => undefined);
-    await btn.waitFor({ state: "visible", timeout: 40_000 });
-    await page
-      .waitForFunction(
-        () => {
-          const buttons = Array.from(document.querySelectorAll("button"));
-          const post = buttons.find((b) => /^(publicar|post)$/i.test(b.textContent?.trim() ?? ""));
-          return Boolean(post && !(post as HTMLButtonElement).disabled);
-        },
-        undefined,
-        { timeout: 60_000 },
-      )
-      .catch(() => undefined);
-    await btn.click({ timeout: 25_000, force: true });
+    await waitForPostButtonReady(page);
+
+    let clicked = await clickPrimaryPublishButton(page);
+    if (!clicked) {
+      const btn = footerPublish.last();
+      await btn.scrollIntoViewIfNeeded().catch(() => undefined);
+      await btn.waitFor({ state: "visible", timeout: 40_000 });
+      await btn.click({ timeout: 25_000, force: true });
+      clicked = true;
+    }
+
+    if (clicked) log("Clic en Publicar enviado…");
     await page.waitForTimeout(3500);
     await dismissTikTokStudioModals(page);
 
@@ -110,7 +146,7 @@ async function clickPublishWithConfirm(page: Page): Promise<void> {
     if (!stillOnUpload || !publishVisible) {
       return;
     }
-    log("Reintentando Publicar (sigue en pantalla de subida)…");
+    log(`Reintentando Publicar (intento ${attempt + 2}/3, sigue en subida)…`);
   }
 }
 
