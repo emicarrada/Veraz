@@ -7,11 +7,11 @@ VPS_KEY="${VERAZ_VPS_KEY:-$HOME/Descargas/veraz-social.pem}"
 VPS_DIR="${VERAZ_VPS_DIR:-/home/veraz/Veraz}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-scp -i "$VPS_KEY" "$ROOT/scripts/social-crontab.example" "$VPS_HOST:/tmp/veraz-social-crontab"
+scp -i "$VPS_KEY" -o StrictHostKeyChecking=accept-new "$ROOT/scripts/social-crontab.example" "$VPS_HOST:/tmp/veraz-social-crontab"
 
-ssh -i "$VPS_KEY" "$VPS_HOST" "set -e
+ssh -i "$VPS_KEY" -o StrictHostKeyChecking=accept-new "$VPS_HOST" "set -e
 mkdir -p $VPS_DIR/.social
-( crontab -l 2>/dev/null | grep -v veraz-social || true
+( crontab -l 2>/dev/null | grep -v 'npm run social:publish' | grep -v '^VERAZ_DIR=' | grep -v '^LOG=' || true
   sed \"s|VERAZ_DIR=.*|VERAZ_DIR=$VPS_DIR|\" /tmp/veraz-social-crontab | grep -v '^#' | grep -v '^$'
 ) | crontab -
 crontab -l
