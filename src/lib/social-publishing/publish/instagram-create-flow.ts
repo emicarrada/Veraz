@@ -6,9 +6,14 @@ export function isInstagramCreateProfileUrl(url: string): boolean {
   return CREATE_PROFILE.test(url);
 }
 
+/** Reuse one tab; persistent Chrome cannot open a tab after closing the last one. */
 export async function openFreshInstagramPage(context: BrowserContext): Promise<Page> {
-  for (const page of context.pages()) {
-    await page.close().catch(() => undefined);
+  const pages = context.pages();
+  for (const extra of pages.slice(1)) {
+    await extra.close().catch(() => undefined);
+  }
+  if (pages[0]) {
+    return pages[0];
   }
   return context.newPage();
 }
