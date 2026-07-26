@@ -1,10 +1,81 @@
 import type { Page } from "playwright";
+import path from "node:path";
 
 import type { SocialNetworkPublishInput, SocialPublishResult } from "@/lib/social-publishing/publish/types";
 import {
   dismissCommonDialogs,
   launchSocialBrowser,
 } from "@/lib/social-publishing/publish/playwright-context";
+
+const DEBUG_SCREENSHOT = ".social/exports/reels-last-attempt.png";
+
+async function advanceReelEditorSteps(page: Page): Promise<void> {
+  for (let step = 0; step < 6; step += 1) {
+    await dismissCommonDialogs(page);
+    let clicked = false;
+    for (const name of [/^Siguiente$|^Next$/i, /^OK$|^Listo$|^Done$/i, /^Continuar$|^Continue$/i]) {
+      const btn = page.getByRole("button", { name }).first();
+      if (await btn.isVisible({ timeout: 2500 }).catch(() => false)) {
+        await btn.click({ timeout: 12_000 }).catch(() => undefined);
+        clicked = true;
+        await page.waitForTimeout(2200);
+        break;
+      }
+    }
+    if (!clicked) break;
+  }
+}
+
+async function fillReelCaption(page: Page, caption: string): Promise<void> {
+  await dismissCommonDialogs(page);
+
+  const captionField = page
+    .locator(
+      [
+        'textarea[aria-label*="caption" i]',
+        'textarea[aria-label*="Escribe" i]',
+        'textarea[placeholder*="caption" i]',
+        'div[contenteditable="true"][role="textbox"]',
+        'div[contenteditable="true"][aria-label*="caption" i]',
+        'div[contenteditable="true"]',
+      ].join(", "),
+    )
+    .first();
+
+  await captionField.waitFor({ state: "visible", timeout: 60_000 });
+
+  const filled = await page
+    .evaluate((text) => {
+      const el = document.querySelector(
+        'textarea[aria-label*="caption" i], textarea[aria-label*="Escribe" i], div[contenteditable="true"][role="textbox"], div[contenteditable="true"]',
+      ) as HTMLTextAreaElement | HTMLElement | null;
+      if (!el) return false;
+      el.focus();
+      if ("value" in el) {
+        (el as HTMLTextAreaElement).value = text;
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      } else {
+        el.textContent = text;
+        el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+      }
+      return true;
+    }, caption)
+    .catch(() => false);
+
+  if (!filled) {
+    await captionField.click({ force: true });
+    await captionField.fill(caption);
+  }
+}
+
+/** Sidebar "new post" — must not match profile links like instagram.com/create (@create). */
+function instagramCreateSelectNav(page: Page) {
+  return page.locator('a[href="/create/select/"], a[href*="/create/select/"]');
+}
+
+function instagramReelCreateLink(page: Page) {
+  return page.locator('a[href="/create/reel/"], a[href*="/create/reel"]');
+}
 
 async function openInstagramReelCreate(page: Page): Promise<void> {
   await page.goto("https://www.instagram.com/create/reel/", {
@@ -13,20 +84,26 @@ async function openInstagramReelCreate(page: Page): Promise<void> {
   });
   await page.waitForTimeout(2000);
 
-  if (!page.url().includes("/create/reel")) {
-    const createLink = page
-      .getByRole("link", { name: /^Crear$/i })
-      .or(page.getByRole("link", { name: /^Create$/i }));
-    if (await createLink.first().isVisible({ timeout: 8000 }).catch(() => false)) {
-      await createLink.first().click({ timeout: 15_000 });
-      await page.waitForTimeout(1200);
-      const reelItem = page
-        .getByRole("link", { name: /^Reel$/i })
-        .or(page.getByRole("link", { name: /^Reels$/i }));
-      await reelItem.first().click({ timeout: 15_000 });
-      await page.waitForTimeout(1500);
-    }
+  if (page.url().includes("/create/reel")) {
+    return;
   }
+
+  const createNav = instagramCreateSelectNav(page);
+  if (await createNav.first().isVisible({ timeout: 8000 }).catch(() => false)) {
+    await createNav.first().click({ timeout: 15_000 });
+    await page.waitForTimeout(1200);
+    await instagramReelCreateLink(page).first().click({ timeout: 15_000 });
+    await page.waitForTimeout(1500);
+    return;
+  }
+
+  await page.goto("https://www.instagram.com/create/select/", {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  await page.waitForTimeout(1200);
+  await instagramReelCreateLink(page).first().click({ timeout: 15_000 });
+  await page.waitForTimeout(1500);
 }
 
 /**
@@ -60,29 +137,10 @@ export async function publishToInstagramReels(
     const fileInput = page.locator('input[type="file"]').first();
     await fileInput.waitFor({ state: "attached", timeout: 35_000 });
     await fileInput.setInputFiles(input.videoPath, { timeout: 120_000 });
-    await page.waitForTimeout(3500);
+    await page.waitForTimeout(5000);
+    await advanceReelEditorSteps(page);
 
-    const nextButton = page.getByRole("button", { name: /^Siguiente$|^Next$/i });
-    for (let step = 0; step < 3; step += 1) {
-      try {
-        const btn = nextButton.first();
-        if (await btn.isVisible({ timeout: 4000 })) {
-          await btn.click({ timeout: 12_000 });
-          await page.waitForTimeout(2000);
-        }
-      } catch {
-        break;
-      }
-    }
-
-    const captionField = page
-      .locator(
-        'textarea[aria-label*="caption" i], textarea[aria-label*="Escribe" i], div[contenteditable="true"][role="textbox"]',
-      )
-      .first();
-    await captionField.waitFor({ state: "visible", timeout: 35_000 });
-    await captionField.click();
-    await captionField.fill(input.caption);
+    await fillReelCaption(page, input.caption);
 
     const shareButton = page
       .getByRole("button", { name: /^Compartir$|^Share$/i })
@@ -95,6 +153,14 @@ export async function publishToInstagramReels(
     return { ok: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    try {
+      const page = context?.pages()[0];
+      if (page) {
+        await page.screenshot({ path: path.resolve(DEBUG_SCREENSHOT), fullPage: true }).catch(() => undefined);
+      }
+    } catch {
+      /* ignore */
+    }
     if (input.headed && input.pauseOnErrorMs) {
       await new Promise((resolve) => setTimeout(resolve, input.pauseOnErrorMs));
     }

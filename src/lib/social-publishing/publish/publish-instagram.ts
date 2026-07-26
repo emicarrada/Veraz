@@ -7,9 +7,7 @@ import {
 } from "@/lib/social-publishing/publish/playwright-context";
 
 async function openInstagramCreateFlow(page: Page): Promise<void> {
-  const createLink = page
-    .getByRole("link", { name: /^Crear$/i })
-    .or(page.getByRole("link", { name: /^Create$/i }));
+  const createLink = page.locator('a[href="/create/select/"], a[href*="/create/select/"]');
 
   const createVisible = await createLink
     .first()
