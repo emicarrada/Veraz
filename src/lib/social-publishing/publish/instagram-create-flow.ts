@@ -41,7 +41,9 @@ export async function openInstagramCreateFlow(page: Page): Promise<void> {
 }
 
 export async function advanceInstagramPostWizard(page: Page, maxSteps: number): Promise<void> {
-  const nextButton = page.getByRole("button", { name: /^Siguiente$|^Next$|^OK$|^Listo$|^Done$/i });
+  const nextButton = page.getByRole("button", {
+    name: /^Siguiente$|^Next$|^OK$|^Listo$|^Done$|^Continuar$|^Continue$|^Recortar$/i,
+  });
   for (let step = 0; step < maxSteps; step += 1) {
     try {
       const btn = nextButton.first();
@@ -57,12 +59,30 @@ export async function advanceInstagramPostWizard(page: Page, maxSteps: number): 
   }
 }
 
+function instagramCaptionLocator(page: Page) {
+  return page.locator(
+    'textarea[aria-label*="caption" i], textarea[aria-label*="Escribe" i], div[contenteditable="true"][role="textbox"]',
+  );
+}
+
+/** Tras subir video, IG puede tardar en recorte/filtros antes del caption. */
+export async function waitForInstagramCaptionScreen(page: Page, timeoutMs = 120_000): Promise<void> {
+  const caption = instagramCaptionLocator(page).first();
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    if (await caption.isVisible({ timeout: 1500 }).catch(() => false)) {
+      return;
+    }
+    await advanceInstagramPostWizard(page, 1);
+    await page.waitForTimeout(2500);
+  }
+
+  await caption.waitFor({ state: "visible", timeout: 5000 });
+}
+
 export async function fillInstagramCaption(page: Page, caption: string): Promise<void> {
-  const captionField = page
-    .locator(
-      'textarea[aria-label*="caption" i], textarea[aria-label*="Escribe" i], div[contenteditable="true"][role="textbox"]',
-    )
-    .first();
+  const captionField = instagramCaptionLocator(page).first();
   await captionField.waitFor({ state: "visible", timeout: 60_000 });
   await captionField.click();
   await captionField.fill(caption);

@@ -2,10 +2,10 @@ import path from "node:path";
 
 import type { SocialNetworkPublishInput, SocialPublishResult } from "@/lib/social-publishing/publish/types";
 import {
-  advanceInstagramPostWizard,
   clickInstagramShare,
   fillInstagramCaption,
   openInstagramCreateFlow,
+  waitForInstagramCaptionScreen,
 } from "@/lib/social-publishing/publish/instagram-create-flow";
 import {
   dismissCommonDialogs,
@@ -46,9 +46,9 @@ export async function publishToInstagramReels(
     const fileInput = page.locator('input[type="file"]').first();
     await fileInput.waitFor({ state: "attached", timeout: 45_000 });
     await fileInput.setInputFiles(input.videoPath, { timeout: 120_000 });
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(8000);
 
-    await advanceInstagramPostWizard(page, 5);
+    await waitForInstagramCaptionScreen(page, 120_000);
     await fillInstagramCaption(page, input.caption);
     await clickInstagramShare(page);
     await page.waitForTimeout(10_000);
