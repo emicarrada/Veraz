@@ -1,6 +1,6 @@
 import type { SocialPlatform } from "@/features/social-publishing/types";
 
-export const VIDEO_SOCIAL_PLATFORMS: SocialPlatform[] = ["tiktok", "instagram_reels", "youtube"];
+export const VIDEO_SOCIAL_PLATFORMS: SocialPlatform[] = ["tiktok", "instagram_reels"];
 
 export const FEED_IMAGE_PLATFORMS: SocialPlatform[] = ["x", "instagram"];
 

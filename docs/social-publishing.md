@@ -95,7 +95,7 @@ Mismo MP4 9:16 (Pexels + overlay). Comando dedicado:
 npm run social:publish:video
 ```
 
-Por defecto publica en `tiktok`, `instagram_reels`, `youtube` (override con `SOCIAL_PLATFORMS`).
+Por defecto publica en `tiktok` e `instagram_reels` (override con `SOCIAL_VIDEO_PLATFORMS`). YouTube Shorts sigue en código pero no forma parte del flujo por defecto.
 
 ### 1. Migración Supabase
 
