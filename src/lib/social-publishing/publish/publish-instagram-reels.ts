@@ -78,19 +78,20 @@ function instagramReelCreateLink(page: Page) {
 }
 
 async function openInstagramReelCreate(page: Page): Promise<void> {
-  await page.goto("https://www.instagram.com/create/reel/", {
-    waitUntil: "domcontentloaded",
-    timeout: 90_000,
-  });
-  await page.waitForTimeout(2000);
-
-  if (page.url().includes("/create/reel")) {
-    return;
-  }
-
   const createNav = instagramCreateSelectNav(page);
   if (await createNav.first().isVisible({ timeout: 8000 }).catch(() => false)) {
     await createNav.first().click({ timeout: 15_000 });
+    await page.waitForTimeout(1200);
+    await instagramReelCreateLink(page).first().click({ timeout: 15_000 });
+    await page.waitForTimeout(1500);
+    return;
+  }
+
+  const createLink = page
+    .getByRole("link", { name: /^Crear$/i })
+    .or(page.getByRole("link", { name: /^Create$/i }));
+  if (await createLink.first().isVisible({ timeout: 8000 }).catch(() => false)) {
+    await createLink.first().click({ timeout: 15_000 });
     await page.waitForTimeout(1200);
     await instagramReelCreateLink(page).first().click({ timeout: 15_000 });
     await page.waitForTimeout(1500);
