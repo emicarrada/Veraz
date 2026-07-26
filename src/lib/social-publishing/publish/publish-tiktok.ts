@@ -104,25 +104,51 @@ async function waitForPostButtonReady(page: Page): Promise<void> {
     .catch(() => undefined);
 }
 
+async function acceptTikTokPublishTerms(page: Page): Promise<void> {
+  const terms = page.locator('input[type="checkbox"]').first();
+  if (await terms.isVisible({ timeout: 2000 }).catch(() => false)) {
+    const checked = await terms.isChecked().catch(() => true);
+    if (!checked) {
+      await terms.check({ force: true }).catch(() => undefined);
+    }
+  }
+}
+
 async function clickPublishWithConfirm(page: Page): Promise<void> {
   await dismissTikTokModals(page);
+  await acceptTikTokPublishTerms(page);
 
-  const postButton = page
-    .locator("button")
-    .filter({ hasText: /^Publicar$|^Post$/i })
-    .last();
-  await postButton.waitFor({ state: "visible", timeout: 40_000 });
-  await postButton.click({ timeout: 25_000, force: true });
-  await page.waitForTimeout(2500);
-  await dismissTikTokModals(page);
+  const footerPublish = page
+    .getByRole("button", { name: /^Publicar$|^Post$/i })
+    .filter({ hasNot: page.locator("[disabled]") });
 
-  const confirmButton = page
-    .locator("button")
-    .filter({ hasText: /^Publicar ahora$|^Post now$|^Confirmar$|^Confirm$|^Publicar$|^Post$/i });
-  if (await confirmButton.first().isVisible({ timeout: 12_000 }).catch(() => false)) {
-    log("Confirmando publicación (segundo diálogo)…");
-    await confirmButton.first().click({ timeout: 20_000, force: true });
-    await page.waitForTimeout(3000);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await dismissTikTokModals(page);
+    const btn = footerPublish.last();
+    await btn.scrollIntoViewIfNeeded().catch(() => undefined);
+    await btn.waitFor({ state: "visible", timeout: 40_000 });
+    await btn.click({ timeout: 25_000, force: true });
+    await page.waitForTimeout(3500);
+    await dismissTikTokModals(page);
+
+    const confirmButton = page
+      .locator("button")
+      .filter({ hasText: /^Publicar ahora$|^Post now$|^Confirmar$|^Confirm$/i });
+    if (await confirmButton.first().isVisible({ timeout: 12_000 }).catch(() => false)) {
+      log("Confirmando publicación (segundo diálogo)…");
+      await confirmButton.first().click({ timeout: 20_000, force: true });
+      await page.waitForTimeout(4000);
+    }
+
+    const stillOnUpload = /\/upload/i.test(page.url());
+    const publishVisible = await footerPublish
+      .last()
+      .isVisible({ timeout: 1500 })
+      .catch(() => false);
+    if (!stillOnUpload || !publishVisible) {
+      return;
+    }
+    log("Reintentando Publicar (sigue en pantalla de subida)…");
   }
 }
 
@@ -134,10 +160,13 @@ async function verifyTikTokPublished(page: Page): Promise<boolean> {
         const text = document.body?.innerText ?? "";
         if (/\/tiktokstudio\/content|manage\/post/i.test(url)) return true;
         if (
-          /uploaded successfully|video published|publicado|subiendo|being uploaded|manage your posts/i.test(
+          /uploaded successfully|video published|publicado|subiendo|being uploaded|manage your posts|video is being processed|procesando|subido con éxito|publicación programada/i.test(
             text,
           )
         ) {
+          return true;
+        }
+        if (/ya puedes ver|view your post|ver tu video|content uploaded/i.test(text)) {
           return true;
         }
         const stillOnUpload = /\/upload/i.test(url);
