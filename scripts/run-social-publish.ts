@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 
 import { buildSocialCaptions, loadSocialPublishConfig } from "@/features/social-publishing";
 import { buildYoutubeTitle } from "@/features/social-publishing/build-caption";
+import { buildTikTokSoundSearchKeyword } from "@/features/social-publishing/build-tiktok-sound-search";
 import {
   candidateNeedsFeedPng,
   candidateNeedsReelMp4,
@@ -251,6 +252,11 @@ export async function runSocialPublish(): Promise<void> {
       }
 
       console.log(`Publicando en ${platform}…`);
+      const tiktokSoundSearch =
+        platform === "tiktok" ? buildTikTokSoundSearchKeyword(candidate) : undefined;
+      if (tiktokSoundSearch) {
+        console.log(`[tiktok] Palabra clave sonido (noticia): "${tiktokSoundSearch}"`);
+      }
 
       const result = await publishToSocialNetwork({
         platform,
@@ -258,6 +264,7 @@ export async function runSocialPublish(): Promise<void> {
         ...(isFeedImagePlatform(platform) ? { imagePath: exportPath } : {}),
         ...(isVideoSocialPlatform(platform) ? { videoPath } : {}),
         ...(platform === "youtube" ? { youtubeTitle: buildYoutubeTitle(candidate) } : {}),
+        ...(tiktokSoundSearch ? { tiktokSoundSearch } : {}),
         profileDir: profileDirForPlatform(platform, process.env),
         headed: config.headed,
         pauseOnErrorMs:

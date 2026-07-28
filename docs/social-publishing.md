@@ -161,6 +161,15 @@ Cuotas diarias por plataforma en Supabase (`social_publications`).
 
 Implementado vía **TikTok Studio** (Playwright). Si cambia la UI, usa `SOCIAL_HEADED=true`.
 
+**Audio (solo biblioteca TikTok):** el MP4 se sube **sin audio**; antes de publicar el bot abre el selector de **sonidos de TikTok**, busca y aplica una pista de su catálogo (no usa audio de Pexels).
+
+```bash
+SOCIAL_TIKTOK_ADD_SOUND=true
+SOCIAL_TIKTOK_SOUND_SEARCH=noticias
+```
+
+`SOCIAL_TIKTOK_ADD_SOUND=false` desactiva este paso (el video quedaría mudo en TikTok).
+
 ## Supabase
 
 ```bash

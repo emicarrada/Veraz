@@ -13,6 +13,8 @@ export type SocialNetworkPublishInput = {
   profileDir: string;
   headed: boolean;
   pauseOnErrorMs?: number;
+  /** TikTok Studio sound library search (from article keyword). */
+  tiktokSoundSearch?: string;
 };
 
 export type SocialNetworkPublisher = (

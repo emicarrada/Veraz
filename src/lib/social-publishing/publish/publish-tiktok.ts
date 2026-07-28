@@ -15,6 +15,7 @@ import {
   saveTopmostDialogArtifacts,
   waitForCopyrightChecksAndPublishAnyway,
 } from "@/lib/social-publishing/publish/tiktok-studio-modals";
+import { configureTikTokUploadSound } from "@/lib/social-publishing/publish/tiktok-sound-config";
 
 const UPLOAD_URL = "https://www.tiktok.com/tiktokstudio/upload?lang=es";
 const EXPORTS_DIR = ".social/exports";
@@ -232,6 +233,22 @@ export async function publishToTikTok(input: SocialNetworkPublishInput): Promise
     await dismissTikTokStudioModals(page);
     await waitForPostButtonReady(page);
     await debugStep(page, "after-processing");
+
+    log("Configurando sonido de la biblioteca TikTok…");
+    await dismissTikTokStudioModals(page);
+    const sound = await configureTikTokUploadSound(
+      page,
+      process.env,
+      input.tiktokSoundSearch,
+    );
+    if (sound.applied) {
+      log(`Sonido TikTok aplicado (búsqueda: "${sound.query}").`);
+    } else {
+      log(
+        `No se pudo elegir sonido en la UI de TikTok (búsqueda: "${sound.query}"). Revisa tiktok-debug-after-sound.png con SOCIAL_TIKTOK_DEBUG=1.`,
+      );
+    }
+    await debugStep(page, "after-sound");
 
     log("Escribiendo caption…");
     await dismissTikTokStudioModals(page);
