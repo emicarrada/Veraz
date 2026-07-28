@@ -11,7 +11,7 @@ scp -i "$VPS_KEY" -o StrictHostKeyChecking=accept-new "$ROOT/scripts/social-cron
 
 ssh -i "$VPS_KEY" -o StrictHostKeyChecking=accept-new "$VPS_HOST" "set -e
 mkdir -p $VPS_DIR/.social
-( crontab -l 2>/dev/null | grep -v 'npm run social:publish' | grep -v '^VERAZ_DIR=' | grep -v '^LOG=' || true
+( crontab -l 2>/dev/null | grep -v 'npm run social:publish' | grep -v 'npm run social:deliver:video' | grep -v 'npm run social:publish:video' | grep -v '^VERAZ_DIR=' | grep -v '^LOG=' | grep -v '^VIDEO_LOG=' || true
   sed \"s|VERAZ_DIR=.*|VERAZ_DIR=$VPS_DIR|\" /tmp/veraz-social-crontab | grep -v '^#' | grep -v '^$'
 ) | crontab -
 crontab -l

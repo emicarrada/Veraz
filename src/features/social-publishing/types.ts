@@ -10,7 +10,12 @@ export type SocialPlatform =
   | "instagram_reels"
   | "youtube";
 
-export type SocialPublicationStatus = "pending" | "exported" | "posted" | "failed";
+export type SocialPublicationStatus =
+  | "pending"
+  | "exported"
+  | "posted"
+  | "failed"
+  | "delivered";
 
 export type SocialArticleCandidate = {
   articleId: ArticleId;

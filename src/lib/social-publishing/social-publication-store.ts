@@ -51,7 +51,10 @@ export function articleNeedsPlatformWork(
 ): boolean {
   if (platforms.length === 0) return true;
   const byPlatform = index.get(articleId);
-  return platforms.some((platform) => byPlatform?.get(platform) !== "posted");
+  return platforms.some((platform) => {
+    const status = byPlatform?.get(platform);
+    return status !== "posted" && status !== "delivered";
+  });
 }
 
 export function pendingPlatformsForArticle(
@@ -60,7 +63,10 @@ export function pendingPlatformsForArticle(
   index: Map<string, Map<SocialPlatform, SocialPublicationStatus>>,
 ): SocialPlatform[] {
   const byPlatform = index.get(articleId);
-  return platforms.filter((platform) => byPlatform?.get(platform) !== "posted");
+  return platforms.filter((platform) => {
+    const status = byPlatform?.get(platform);
+    return status !== "posted" && status !== "delivered";
+  });
 }
 
 export async function upsertSocialPublication(input: {
@@ -117,6 +123,27 @@ export async function countPostedToday(
 
   if (error) {
     throw new Error(`Failed to count social_publications: ${error.message}`);
+  }
+  return count ?? 0;
+}
+
+export async function countDeliveredToday(
+  platform: SocialPlatform,
+  timeZone: string,
+): Promise<number> {
+  if (!isSupabasePersistenceConfigured()) return 0;
+
+  const client = createSupabaseAdminClient();
+  const since = startOfTodayUtcIso(timeZone);
+  const { count, error } = await client
+    .from("social_publications")
+    .select("*", { count: "exact", head: true })
+    .eq("platform", platform)
+    .eq("status", "delivered")
+    .gte("posted_at", since);
+
+  if (error) {
+    throw new Error(`Failed to count delivered social_publications: ${error.message}`);
   }
   return count ?? 0;
 }

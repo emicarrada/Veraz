@@ -28,6 +28,8 @@
     "social:examples:vertical": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/generate-social-vertical-examples.ts",
     "social:examples:live": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/generate-social-live-examples.ts",
     "social:publish:video": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-social-publish-video.ts",
+    "social:deliver:video": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-social-deliver-video.ts",
+    "social:mark-posted": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/social-mark-manual-posted.ts",
     "social:youtube-auth": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/youtube-oauth.ts",
     "social:youtube-check": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/youtube-setup-check.ts",
     "social:reset-tiktok-false-posts": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/reset-false-tiktok-publications.ts",

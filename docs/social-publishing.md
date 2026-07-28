@@ -86,35 +86,79 @@ PEXELS_API_KEY=tu_clave_gratis
 
 Mismo `.mp4` para Reels y TikTok: video de fondo + overlay Veraz (titular, fuente, logo).
 
-## TikTok / Reels / YouTube Shorts (automático)
+## TikTok / Reels — manual (Telegram)
 
-Mismo MP4 9:16 (Pexels + overlay). Comando dedicado:
+TikTok **no** se publica solo desde el VPS: el bot te manda **MP4 + descripción + hashtags** por **Telegram** y tú subes el video y aplicas sonido en la app.
 
-```bash
-npm run social:publish:video
-```
+X e Instagram feed siguen **automáticos** (cron agresivo en `scripts/social-crontab.example`).
 
-Por defecto publica en **tiktok** (override con `SOCIAL_VIDEO_PLATFORMS`, p. ej. `tiktok,instagram_reels`). Reels y YouTube siguen en código pero no forman parte del cron de ejemplo.
-
-### 1. Migración Supabase
+### 1. Migración Supabase (status `delivered`)
 
 ```bash
 supabase db push
 ```
 
-(Añade plataformas `instagram_reels` y `youtube` en `social_publications`.)
+### 2. Crear bot de Telegram
 
-### 2. Sesiones (una vez en tu PC)
+1. Abre Telegram → **@BotFather** → `/newbot` → copia el **token**.
+2. Inicia chat con tu bot (botón *Start*).
+3. Obtén tu **chat id**:
+   - Envía un mensaje al bot.
+   - Abre en el navegador: `https://api.telegram.org/bot<TOKEN>/getUpdates`
+   - Busca `"chat":{"id":123456789}` → ese número es `TELEGRAM_CHAT_ID`.
+
+**WhatsApp:** no hay API sencilla sin Meta Business. Lo práctico es recibir en Telegram y **reenviar el video** a “Tú mismo” en WhatsApp, o guardarlo en el móvil desde Telegram.
+
+### 3. `.env.local` (VPS y PC)
 
 ```bash
-npm run social:login -- tiktok
-# Reels = misma sesión que Instagram feed
-npm run social:login -- instagram
+SOCIAL_PUBLISHING_ENABLED=true
+SOCIAL_AUTO_PUBLISH=true
+SOCIAL_PLATFORMS=x,instagram
+PEXELS_API_KEY=...
+
+SOCIAL_VIDEO_DELIVERY=telegram
+TELEGRAM_BOT_TOKEN=123456:ABC...
+TELEGRAM_CHAT_ID=987654321
+SOCIAL_VIDEO_DELIVERY_MAX_PER_DAY=8
+SOCIAL_VIDEO_DELIVERY_INCLUDE_REELS_CAPTION=true
 ```
 
-Copia al VPS: `.social/tiktok-profile` y `.social/instagram-profile` (Reels usa Instagram).
+No hace falta `SOCIAL_TIKTOK_ADD_SOUND` ni perfil TikTok en el VPS para este flujo.
 
-### 3. YouTube (API, sin navegador)
+### 4. Probar entrega
+
+```bash
+npm run social:deliver:video
+```
+
+Recibirás: **video** + **mensaje de texto** con la descripción TikTok (copiar/pegar) y la **palabra sugerida** para buscar sonido en TikTok Studio.
+
+### 5. Después de publicar tú en TikTok
+
+```bash
+npm run social:mark-posted -- tiktok <slug-del-articulo>
+```
+
+Así no se reenvía la misma noticia y la cuota diaria cuenta entregas (`delivered`).
+
+### 6. Cron VPS
+
+Ver `scripts/social-crontab.example`: X ~10/día, IG ~6/día, **Telegram ~8 videos/día** (`social:deliver:video`). Instalar:
+
+```bash
+npm run social:vps:install-cron
+```
+
+## TikTok automático (legacy, no recomendado)
+
+`npm run social:publish:video` sigue en el repo (Playwright + sonido TikTok Studio) pero **no** va en el cron de ejemplo. Ver sección anterior para producción.
+
+## Reels / YouTube Shorts (automático opcional)
+
+Mismo MP4 9:16. Para Reels/YouTube automáticos sigue existiendo `SOCIAL_VIDEO_PLATFORMS=instagram_reels` con `social:publish:video` (requiere sesión IG / YouTube API).
+
+### YouTube (API, sin navegador)
 
 1. [Google Cloud Console](https://console.cloud.google.com/) → proyecto → **YouTube Data API v3** activada.
 2. **OAuth client** tipo **Desktop** → `YOUTUBE_CLIENT_ID` y `YOUTUBE_CLIENT_SECRET` en `.env.local`.
@@ -127,49 +171,6 @@ npm run social:youtube-auth
 
 5. Pega `YOUTUBE_REFRESH_TOKEN=...` en `.env.local` y en el VPS (no commitear).
 
-### 4. `.env.local` (video)
-
-```bash
-PEXELS_API_KEY=...
-SOCIAL_TIKTOK_MAX_POSTS_PER_DAY=2
-SOCIAL_INSTAGRAM_REELS_MAX_POSTS_PER_DAY=2
-SOCIAL_YOUTUBE_MAX_POSTS_PER_DAY=2
-SOCIAL_TIKTOK_PROFILE_DIR=.social/tiktok-profile
-YOUTUBE_CLIENT_ID=
-YOUTUBE_CLIENT_SECRET=
-YOUTUBE_REFRESH_TOKEN=
-# YOUTUBE_PRIVACY=public
-```
-
-### 5. Probar
-
-```bash
-SOCIAL_HEADED=true SOCIAL_PLATFORMS=tiktok npm run social:publish:video
-```
-
-Luego una red cada vez o las tres. En VPS: `ffmpeg` instalado (`sudo apt install -y ffmpeg`).
-
-### 6. Cron en VPS (ejemplo)
-
-```cron
-30 11,18 * * * cd /home/veraz/Veraz && npm run social:publish:video >> .social/publish-video.log 2>&1
-```
-
-Cuotas diarias por plataforma en Supabase (`social_publications`).
-
-## TikTok (publicación)
-
-Implementado vía **TikTok Studio** (Playwright). Si cambia la UI, usa `SOCIAL_HEADED=true`.
-
-**Audio (solo biblioteca TikTok):** el MP4 se sube **sin audio**; antes de publicar el bot abre el selector de **sonidos de TikTok**, busca y aplica una pista de su catálogo (no usa audio de Pexels).
-
-```bash
-SOCIAL_TIKTOK_ADD_SOUND=true
-SOCIAL_TIKTOK_SOUND_SEARCH=noticias
-```
-
-`SOCIAL_TIKTOK_ADD_SOUND=false` desactiva este paso (el video quedaría mudo en TikTok).
-
 ## Supabase
 
 ```bash
@@ -180,5 +181,6 @@ supabase db push
 
 - `npm run social:login -- instagram` (sesión caducada)
 - **`npm run social:watch:instagram`** — abre Chrome en tu PC, publica 1 post de prueba, guarda capturas `instagram-debug-*.png` en `.social/exports/` y deja la ventana **2 min** abierta si falla para ver en qué botón se atora
-- `SOCIAL_HEADED=true` en el VPS solo con `xvfb-run` (igual que TikTok); en tu PC basta el modo watch
+- `SOCIAL_HEADED=true` en el VPS solo con `xvfb-run` para Instagram feed
 - Revisa filas `status=failed` en `social_publications`
+- Telegram: revisa token, chat id y que hayas pulsado *Start* en el bot
