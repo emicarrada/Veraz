@@ -1,6 +1,11 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import {
+  SOCIAL_REEL_HEIGHT,
+  SOCIAL_REEL_WIDTH,
+} from "@/lib/social-publishing/social-reel-dimensions";
+
 const TELEGRAM_MESSAGE_MAX = 4096;
 
 export type TelegramDeliverVideoInput = {
@@ -74,6 +79,8 @@ export async function sendTelegramVideoPackage(
   const form = new FormData();
   form.append("chat_id", chatId);
   form.append("supports_streaming", "true");
+  form.append("width", String(SOCIAL_REEL_WIDTH));
+  form.append("height", String(SOCIAL_REEL_HEIGHT));
   form.append("video", new Blob([new Uint8Array(videoBytes)]), path.basename(videoPath));
 
   const videoResult = await telegramPost(botToken, "sendVideo", form);

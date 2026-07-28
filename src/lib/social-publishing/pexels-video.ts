@@ -33,20 +33,19 @@ function pickBestFile(files: PexelsVideoFile[]): PexelsVideoFile | null {
   const mp4 = files.filter((f) => f.file_type === "video/mp4" || f.link.endsWith(".mp4"));
   if (mp4.length === 0) return null;
 
-  const portrait = mp4.filter((f) => f.height >= f.width);
-  const pool = portrait.length > 0 ? portrait : mp4;
+  const portrait = mp4.filter((f) => f.height > f.width);
+  if (portrait.length === 0) return null;
 
-  pool.sort((a, b) => {
+  portrait.sort((a, b) => {
     const score = (f: PexelsVideoFile) => {
-      const portraitBonus = f.height >= f.width ? 500 : 0;
       const heightTarget = Math.abs(f.height - 1920);
       const widthOk = f.width >= 720 ? 200 : 0;
-      return portraitBonus + widthOk - heightTarget * 0.1;
+      return widthOk - heightTarget * 0.1;
     };
     return score(b) - score(a);
   });
 
-  return pool[0] ?? null;
+  return portrait[0] ?? null;
 }
 
 export async function searchPexelsVideo(

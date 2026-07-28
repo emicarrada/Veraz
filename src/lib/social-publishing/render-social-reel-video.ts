@@ -2,6 +2,13 @@ import { execFile } from "node:child_process";
 import { access } from "node:fs/promises";
 import { promisify } from "node:util";
 
+import {
+  SOCIAL_REEL_HEIGHT,
+  SOCIAL_REEL_SCALE_CROP_VF,
+  SOCIAL_REEL_WIDTH,
+  assertReelMp4Dimensions,
+} from "@/lib/social-publishing/social-reel-dimensions";
+
 const execFileAsync = promisify(execFile);
 
 async function pickH264Encoder(): Promise<string> {
@@ -39,7 +46,7 @@ export async function isFfmpegAvailable(): Promise<boolean> {
 }
 
 /**
- * Stock / hero video background + Veraz overlay. No zoom or motion effects on the plate.
+ * Stock / hero video background + Veraz overlay. Output always 1080×1920 (9:16).
  */
 export async function renderSocialReelFromVideo(
   input: RenderSocialReelFromVideoInput,
@@ -51,8 +58,9 @@ export async function renderSocialReelFromVideo(
   const encoder = await pickH264Encoder();
 
   const filter = [
-    `[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,setpts=PTS-STARTPTS[bg]`,
-    `[bg][1:v]overlay=0:0:format=auto,format=yuv420p[out]`,
+    `[0:v]${SOCIAL_REEL_SCALE_CROP_VF},setpts=PTS-STARTPTS[bg]`,
+    `[1:v]scale=${SOCIAL_REEL_WIDTH}:${SOCIAL_REEL_HEIGHT}[ov]`,
+    `[bg][ov]overlay=0:0:format=auto,format=yuv420p[out]`,
   ].join(";");
 
   await execFileAsync(
@@ -80,9 +88,11 @@ export async function renderSocialReelFromVideo(
     ],
     { maxBuffer: 24 * 1024 * 1024 },
   );
+
+  await assertReelMp4Dimensions(input.outputMp4Path);
 }
 
-/** Fallback: single PNG held static (no Ken Burns). */
+/** Fallback: vertical PNG or photo — cover-crop to 9:16 (no square letterbox). */
 export async function renderSocialReelStaticImage(
   input: RenderSocialReelStaticImageInput,
 ): Promise<void> {
@@ -99,7 +109,7 @@ export async function renderSocialReelStaticImage(
       "-i",
       input.framePngPath,
       "-vf",
-      "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,setsar=1,format=yuv420p",
+      `${SOCIAL_REEL_SCALE_CROP_VF},format=yuv420p`,
       "-c:v",
       encoder,
       "-t",
@@ -112,4 +122,6 @@ export async function renderSocialReelStaticImage(
     ],
     { maxBuffer: 16 * 1024 * 1024 },
   );
+
+  await assertReelMp4Dimensions(input.outputMp4Path);
 }

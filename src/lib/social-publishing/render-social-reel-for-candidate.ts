@@ -13,6 +13,7 @@ import {
   renderSocialReelStaticImage,
 } from "@/lib/social-publishing/render-social-reel-video";
 import { renderVideoReelOverlay } from "@/lib/social-publishing/render-video-reel-overlay";
+import { SOCIAL_REEL_HEIGHT, SOCIAL_REEL_WIDTH } from "@/lib/social-publishing/social-reel-dimensions";
 
 export type RenderSocialReelResult = {
   mp4Path: string;
@@ -69,6 +70,7 @@ export async function renderSocialReelForCandidate(
       });
       usedPexels = true;
       pexelsPageUrl = pick.pageUrl;
+      console.log(`[reel] MP4 ${SOCIAL_REEL_WIDTH}×${SOCIAL_REEL_HEIGHT} (9:16) Pexels ${pick.width}×${pick.height}`);
       return { mp4Path, overlayPath, usedPexels, ...(pexelsPageUrl ? { pexelsPageUrl } : {}) };
     }
   }
@@ -89,5 +91,6 @@ export async function renderSocialReelForCandidate(
     durationSec: input.durationSec ?? 15,
   });
 
+  console.log(`[reel] MP4 ${SOCIAL_REEL_WIDTH}×${SOCIAL_REEL_HEIGHT} (9:16) imagen estática`);
   return { mp4Path, overlayPath, usedPexels };
 }
