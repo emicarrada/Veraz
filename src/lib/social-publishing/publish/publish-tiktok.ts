@@ -15,7 +15,7 @@ import {
   saveTopmostDialogArtifacts,
   waitForCopyrightChecksAndPublishAnyway,
 } from "@/lib/social-publishing/publish/tiktok-studio-modals";
-import { configureTikTokUploadSound } from "@/lib/social-publishing/publish/tiktok-sound-config";
+import { configureTikTokUploadSound, isTikTokSoundRequired } from "@/lib/social-publishing/publish/tiktok-sound-config";
 
 const UPLOAD_URL = "https://www.tiktok.com/tiktokstudio/upload?lang=es";
 const EXPORTS_DIR = ".social/exports";
@@ -240,9 +240,14 @@ export async function publishToTikTok(input: SocialNetworkPublishInput): Promise
     if (sound.applied) {
       log(`Sonido TikTok aplicado (búsqueda: "${sound.query}").`);
     } else {
-      log(
-        `No se pudo elegir sonido en TikTok (palabra: "${sound.query}"). Se publica sin música de biblioteca.`,
-      );
+      log(`No se pudo aplicar sonido TikTok (palabra: "${sound.query}").`);
+      if (isTikTokSoundRequired(process.env)) {
+        await debugStep(page, "sound-failed");
+        return {
+          ok: false,
+          error: `Video no publicado: falta sonido de la biblioteca TikTok (palabra "${sound.query}"). Usa SOCIAL_TIKTOK_DEBUG=1 y revisa tiktok-debug-sound-*.png en el VPS.`,
+        };
+      }
     }
     await dismissTikTokStudioModals(page);
     await debugStep(page, "after-sound");
