@@ -5,6 +5,7 @@ import {
   type SocialCardVariant,
 } from "@/features/social-publishing/templates/card-variants";
 import type { SocialPublishConfig, SocialPlatform } from "@/features/social-publishing/types";
+import { parseTier1SourceSlugs } from "@/features/social-publishing/social-reach-score";
 
 function parseBool(value: string | undefined, defaultValue: boolean): boolean {
   if (value === undefined || value.trim() === "") return defaultValue;
@@ -62,6 +63,17 @@ export function loadSocialPublishConfig(env: NodeJS.ProcessEnv = process.env): S
 
   const autoPublish = parseBool(env.SOCIAL_AUTO_PUBLISH, false);
 
+  const highReachOnly = env.SOCIAL_HIGH_REACH_ONLY?.trim()
+    ? parseBool(env.SOCIAL_HIGH_REACH_ONLY, true)
+    : parseBool(env.SOCIAL_INSTAGRAM_HIGH_IMPACT_ONLY, true);
+
+  const minReachScore = parseIntEnv(
+    env.SOCIAL_MIN_REACH_SCORE ?? env.SOCIAL_INSTAGRAM_MIN_IMPACT_SCORE,
+    3,
+    0,
+    15,
+  );
+
   return {
     enabled: parseBool(env.SOCIAL_PUBLISHING_ENABLED, false),
     dryRun: autoPublish ? false : parseBool(env.SOCIAL_DRY_RUN, true),
@@ -79,8 +91,12 @@ export function loadSocialPublishConfig(env: NodeJS.ProcessEnv = process.env): S
     maxPostsPerDayTiktok: parseIntEnv(env.SOCIAL_TIKTOK_MAX_POSTS_PER_DAY, 2, 1, 12),
     maxPostsPerDayInstagramReels: parseIntEnv(env.SOCIAL_INSTAGRAM_REELS_MAX_POSTS_PER_DAY, 2, 1, 12),
     maxPostsPerDayYoutube: parseIntEnv(env.SOCIAL_YOUTUBE_MAX_POSTS_PER_DAY, 2, 1, 12),
-    instagramHighImpactOnly: parseBool(env.SOCIAL_INSTAGRAM_HIGH_IMPACT_ONLY, true),
-    instagramMinImpactScore: parseIntEnv(env.SOCIAL_INSTAGRAM_MIN_IMPACT_SCORE, 2, 1, 5),
+    instagramHighImpactOnly: highReachOnly,
+    instagramMinImpactScore: minReachScore,
+    highReachOnly,
+    minReachScore,
+    reachTier1SourceSlugs: parseTier1SourceSlugs(env.SOCIAL_REACH_TIER1_SOURCES),
+    reachRequireHeroForVisual: parseBool(env.SOCIAL_REACH_REQUIRE_HERO_FOR_VIDEO, true),
     publishTimeZone: env.SOCIAL_PUBLISH_TIMEZONE?.trim() || "America/Mexico_City",
     assetsDir: env.SOCIAL_ASSETS_DIR?.trim() || ".social/assets",
     exportsDir: env.SOCIAL_EXPORTS_DIR?.trim() || ".social/exports",

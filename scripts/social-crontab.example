@@ -1,5 +1,5 @@
 # Ritmo agresivo: ~10 X, ~6 IG feed, ~8 videos/día a Telegram (TikTok/Reels manual).
-# Zona horaria del servidor: America/Mexico_City (SOCIAL_PUBLISH_TIMEZONE en .env.local)
+# Reach en .env.local: SOCIAL_HIGH_REACH_ONLY=true SOCIAL_MIN_REACH_SCORE=3
 
 VERAZ_DIR=/home/veraz/Veraz
 LOG=$VERAZ_DIR/.social/publish.log
@@ -9,7 +9,7 @@ VIDEO_LOG=$VERAZ_DIR/.social/deliver-video.log
 0 7,9,11,13,15,17,19,21,23 * * * cd $VERAZ_DIR && SOCIAL_PLATFORMS=x SOCIAL_MAX_POSTS_PER_RUN=1 SOCIAL_X_MAX_POSTS_PER_DAY=10 npm run social:publish >> $LOG 2>&1
 
 # Instagram feed — 6×/día (xvfb + headed)
-0 8,11,14,17,20,23 * * * cd $VERAZ_DIR && xvfb-run -a -s "-screen 0 1280x900x24" env SOCIAL_HEADED=true SOCIAL_PLATFORMS=instagram SOCIAL_INSTAGRAM_HIGH_IMPACT_ONLY=true SOCIAL_MAX_POSTS_PER_RUN=1 SOCIAL_INSTAGRAM_MAX_POSTS_PER_DAY=6 npm run social:publish >> $LOG 2>&1
+0 8,11,14,17,20,23 * * * cd $VERAZ_DIR && xvfb-run -a -s "-screen 0 1280x900x24" env SOCIAL_HEADED=true SOCIAL_PLATFORMS=instagram SOCIAL_MAX_POSTS_PER_RUN=1 SOCIAL_INSTAGRAM_MAX_POSTS_PER_DAY=6 npm run social:publish >> $LOG 2>&1
 
 # Video → Telegram (sin Playwright TikTok): 8×/día, desfasado 20 min
 20 7,9,11,13,15,17,19,21 * * * cd $VERAZ_DIR && SOCIAL_MAX_POSTS_PER_RUN=1 SOCIAL_VIDEO_DELIVERY_MAX_PER_DAY=8 npm run social:deliver:video >> $VIDEO_LOG 2>&1

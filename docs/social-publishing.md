@@ -44,7 +44,20 @@ Ver **`docs/social-vps.md`** y **`scripts/social-crontab.example`** (VPS 24/7; V
 0 */3 * * * cd /ruta/Veraz && npm run social:publish >> .social/publish.log 2>&1
 ```
 
-Ritmo sugerido: **6×/día X**, **3×/día IG** (impacto alto) con cuotas `SOCIAL_X_MAX_POSTS_PER_DAY` / `SOCIAL_INSTAGRAM_MAX_POSTS_PER_DAY`.
+Ritmo sugerido: **6×/día X**, **3×/día IG** con cuotas `SOCIAL_X_MAX_POSTS_PER_DAY` / `SOCIAL_INSTAGRAM_MAX_POSTS_PER_DAY`.
+
+### Alcance social (reach score)
+
+X, Instagram y entrega Telegram usan la **misma puntuación** (`social-reach-score.ts`): categoría, foto hero, gancho del titular, fuente tier‑1, penalización por titular muy local. Si ninguna noticia del batch llega a `SOCIAL_MIN_REACH_SCORE` (default **3**), **ese slot no publica** (mejor esperar al siguiente cron).
+
+```bash
+SOCIAL_HIGH_REACH_ONLY=true
+SOCIAL_MIN_REACH_SCORE=3
+SOCIAL_REACH_REQUIRE_HERO_FOR_VIDEO=true
+SOCIAL_REACH_TIER1_SOURCES=infobae,la-nacion,el-pais,bbc-mundo,expansion,bloomberg-linea
+```
+
+Legacy: `SOCIAL_INSTAGRAM_HIGH_IMPACT_ONLY` sigue mapeando a `SOCIAL_HIGH_REACH_ONLY` si no defines el nuevo flag.
 
 ## Flags (alternativa a AUTO_PUBLISH)
 

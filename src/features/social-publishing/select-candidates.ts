@@ -8,10 +8,13 @@ import type { SocialArticleCandidate, SocialPublishConfig, SocialPlatform } from
 import type { ArticleFeedRecord } from "@/lib/repositories/contracts/article-repository";
 import type { ArticleRepository } from "@/lib/repositories/contracts/article-repository";
 import {
+  meetsSocialReachThreshold,
+  socialReachScore,
+} from "@/features/social-publishing/social-reach-score";
+import {
   articleNeedsPlatformWork,
   loadPublicationIndex,
 } from "@/lib/social-publishing/social-publication-store";
-import { meetsInstagramImpactThreshold } from "@/features/social-publishing/instagram-impact";
 
 function mapFeedRecordToCandidate(
   record: ArticleFeedRecord,
@@ -36,6 +39,26 @@ function mapFeedRecordToCandidate(
   };
 }
 
+function needsHeroForPlatforms(platforms: SocialPlatform[], config: SocialPublishConfig): boolean {
+  if (!config.reachRequireHeroForVisual) return false;
+  return platforms.some((p) => p === "instagram" || p === "instagram_reels" || p === "tiktok");
+}
+
+function passesReachGate(
+  candidate: SocialArticleCandidate,
+  config: SocialPublishConfig,
+  platforms: SocialPlatform[],
+): boolean {
+  if (!config.highReachOnly) {
+    return true;
+  }
+  return meetsSocialReachThreshold(candidate, {
+    minScore: config.minReachScore,
+    requireHeroForVisual: needsHeroForPlatforms(platforms, config),
+    tier1SourceSlugs: config.reachTier1SourceSlugs,
+  });
+}
+
 export async function selectSocialCandidates(
   repository: ArticleRepository,
   config: SocialPublishConfig,
@@ -45,35 +68,42 @@ export async function selectSocialCandidates(
   const sourceSlugs = resolveFeedSourceSlugs(config.locale);
   const platforms: SocialPlatform[] = config.platforms;
 
-  const limit = Math.max(config.maxPostsPerRun * 3, DEFAULT_FEED_PAGE_SIZE);
+  const limit = Math.max(config.maxPostsPerRun * 12, DEFAULT_FEED_PAGE_SIZE, 48);
   const result = await repository.listForFeed({
     limit,
     ...(sourceSlugs?.length ? { sourceSlugs: [...sourceSlugs] } : {}),
     ...(languageCodes?.length ? { languageCodes: [...languageCodes] } : {}),
   });
 
-  const candidates: SocialArticleCandidate[] = [];
-  for (const record of result.items) {
+  const scored: { candidate: SocialArticleCandidate; score: number; order: number }[] = [];
+
+  for (let order = 0; order < result.items.length; order += 1) {
+    const record = result.items[order]!;
     const id = record.article.id as ArticleId;
     if (!articleNeedsPlatformWork(id, platforms, publicationIndex)) continue;
+
     const candidate = mapFeedRecordToCandidate(record, config);
-    if (
-      config.instagramHighImpactOnly &&
-      platforms.includes("instagram") &&
-      platforms.every((p) => p === "instagram") &&
-      !meetsInstagramImpactThreshold(candidate, config.instagramMinImpactScore)
-    ) {
-      continue;
-    }
-    if (
-      config.instagramHighImpactOnly &&
-      platforms.includes("instagram_reels") &&
-      !meetsInstagramImpactThreshold(candidate, config.instagramMinImpactScore)
-    ) {
-      continue;
-    }
-    candidates.push(candidate);
-    if (candidates.length >= config.maxPostsPerRun) break;
+    if (!passesReachGate(candidate, config, platforms)) continue;
+
+    scored.push({
+      candidate,
+      score: socialReachScore(candidate, { tier1SourceSlugs: config.reachTier1SourceSlugs }),
+      order,
+    });
+  }
+
+  scored.sort((a, b) => b.score - a.score || a.order - b.order);
+
+  const candidates = scored.slice(0, config.maxPostsPerRun).map((row) => row.candidate);
+
+  if (config.highReachOnly && candidates.length === 0 && scored.length === 0) {
+    console.log(
+      `[social:reach] Ningún candidato alcanza score≥${config.minReachScore} (hero visual=${needsHeroForPlatforms(platforms, config)}) — slot vacío.`,
+    );
+  } else if (candidates[0]) {
+    const top = candidates[0];
+    const score = socialReachScore(top, { tier1SourceSlugs: config.reachTier1SourceSlugs });
+    console.log(`[social:reach] Elegido score=${score} slug=${top.slug} cat=${top.categorySlug}`);
   }
 
   return candidates;
@@ -96,11 +126,25 @@ export async function selectLatestSocialCandidateForCategory(
     ...(languageCodes?.length ? { languageCodes: [...languageCodes] } : {}),
   });
 
-  for (const record of result.items) {
+  let best: { candidate: SocialArticleCandidate; score: number; order: number } | null = null;
+
+  for (let order = 0; order < result.items.length; order += 1) {
+    const record = result.items[order]!;
     const id = record.article.id as ArticleId;
     if (!articleNeedsPlatformWork(id, platforms, publicationIndex)) continue;
-    return mapFeedRecordToCandidate(record, config);
+
+    const candidate = mapFeedRecordToCandidate(record, config);
+    if (!passesReachGate(candidate, config, platforms)) continue;
+
+    const row = {
+      candidate,
+      score: socialReachScore(candidate, { tier1SourceSlugs: config.reachTier1SourceSlugs }),
+      order,
+    };
+    if (!best || row.score > best.score || (row.score === best.score && row.order < best.order)) {
+      best = row;
+    }
   }
 
-  return null;
+  return best?.candidate ?? null;
 }

@@ -52,6 +52,10 @@ export type SocialPublishConfig = {
   maxPostsPerDayYoutube: number;
   instagramHighImpactOnly: boolean;
   instagramMinImpactScore: number;
+  highReachOnly: boolean;
+  minReachScore: number;
+  reachTier1SourceSlugs: string[];
+  reachRequireHeroForVisual: boolean;
   publishTimeZone: string;
   assetsDir: string;
   exportsDir: string;
