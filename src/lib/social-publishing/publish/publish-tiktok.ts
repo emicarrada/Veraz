@@ -236,18 +236,15 @@ export async function publishToTikTok(input: SocialNetworkPublishInput): Promise
 
     log("Configurando sonido de la biblioteca TikTok…");
     await dismissTikTokStudioModals(page);
-    const sound = await configureTikTokUploadSound(
-      page,
-      process.env,
-      input.tiktokSoundSearch,
-    );
+    const sound = await configureTikTokUploadSound(page, process.env, input.tiktokSoundSearch);
     if (sound.applied) {
       log(`Sonido TikTok aplicado (búsqueda: "${sound.query}").`);
     } else {
       log(
-        `No se pudo elegir sonido en la UI de TikTok (búsqueda: "${sound.query}"). Revisa tiktok-debug-after-sound.png con SOCIAL_TIKTOK_DEBUG=1.`,
+        `No se pudo elegir sonido en TikTok (palabra: "${sound.query}"). Se publica sin música de biblioteca.`,
       );
     }
+    await dismissTikTokStudioModals(page);
     await debugStep(page, "after-sound");
 
     log("Escribiendo caption…");

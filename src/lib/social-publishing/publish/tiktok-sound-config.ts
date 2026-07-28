@@ -48,27 +48,47 @@ async function openSoundLibrary(page: Page): Promise<boolean> {
 }
 
 async function searchSoundLibrary(page: Page, query: string): Promise<void> {
-  const search = page
-    .locator(
-      [
-        'input[placeholder*="Buscar sonidos" i]',
-        'input[placeholder*="Search sounds" i]',
-        'input[placeholder*="Buscar" i]',
-        'input[placeholder*="Search" i]',
-        'input[type="search"]',
-      ].join(", "),
-    )
-    .first();
+  await page.keyboard.press("Escape").catch(() => undefined);
+  await page.waitForTimeout(400);
 
-  if (!(await search.isVisible({ timeout: 8000 }).catch(() => false))) {
+  const filled = await page
+    .evaluate((q) => {
+      const inputs = Array.from(document.querySelectorAll('input[type="search"], input[type="text"], input[role="input"]'));
+      const soundInput = inputs.find((inp) => {
+        const ph = (inp.getAttribute("placeholder") ?? "").toLowerCase();
+        const aria = (inp.getAttribute("aria-label") ?? "").toLowerCase();
+        const combined = `${ph} ${aria}`;
+        if (/ubicaci|location|hashtag|tag|lugar|place/i.test(combined)) return false;
+        return /sonido|sound|música|music|audio|canción|song/i.test(combined);
+      }) as HTMLInputElement | undefined;
+
+      if (!soundInput) return false;
+      soundInput.focus();
+      soundInput.value = q;
+      soundInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+      soundInput.dispatchEvent(new Event("change", { bubbles: true }));
+      return true;
+    }, query)
+    .catch(() => false);
+
+  if (filled) {
+    await page.keyboard.press("Enter").catch(() => undefined);
+    await page.waitForTimeout(2800);
     return;
   }
 
-  await search.click();
-  await search.fill("");
-  await search.fill(query);
-  await page.keyboard.press("Enter").catch(() => undefined);
-  await page.waitForTimeout(2800);
+  const search = page
+    .locator(
+      'input[placeholder*="sonido" i], input[placeholder*="sound" i], input[placeholder*="música" i], input[placeholder*="music" i]',
+    )
+    .first();
+
+  if (await search.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await search.click({ force: true });
+    await search.fill(query);
+    await page.keyboard.press("Enter").catch(() => undefined);
+    await page.waitForTimeout(2800);
+  }
 }
 
 async function selectFirstSoundResult(page: Page): Promise<boolean> {
@@ -131,24 +151,29 @@ export async function configureTikTokUploadSound(
     return { applied: false, query };
   }
 
-  await page.evaluate(() => window.scrollTo(0, 0)).catch(() => undefined);
-  await page.waitForTimeout(600);
+  try {
+    await page.evaluate(() => window.scrollTo(0, 0)).catch(() => undefined);
+    await page.waitForTimeout(600);
 
-  const opened = await openSoundLibrary(page);
-  if (!opened) {
+    const opened = await openSoundLibrary(page);
+    if (!opened) {
+      return { applied: false, query };
+    }
+
+    await page.waitForTimeout(1200);
+    await searchSoundLibrary(page, query);
+
+    const selected = await selectFirstSoundResult(page);
+    if (!selected) {
+      return { applied: false, query };
+    }
+
+    await page.waitForTimeout(1000);
+    await confirmSoundSelection(page);
+
+    return { applied: true, query };
+  } catch {
+    await page.keyboard.press("Escape").catch(() => undefined);
     return { applied: false, query };
   }
-
-  await page.waitForTimeout(1200);
-  await searchSoundLibrary(page, query);
-
-  const selected = await selectFirstSoundResult(page);
-  if (!selected) {
-    return { applied: false, query };
-  }
-
-  await page.waitForTimeout(1000);
-  await confirmSoundSelection(page);
-
-  return { applied: true, query };
 }
