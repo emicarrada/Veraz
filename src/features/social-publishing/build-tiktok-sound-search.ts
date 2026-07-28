@@ -76,12 +76,9 @@ export function buildTikTokSoundSearchKeyword(candidate: SocialArticleCandidate)
   }
 
   const fromTitle = significantKeywordFromTitle(candidate.title);
-  if (fromTitle && fromTitle.length >= 5) {
-    return fromTitle.slice(0, 32);
-  }
-
   const fromCategory = CATEGORY_KEYWORD[candidate.categorySlug] ?? CATEGORY_KEYWORD.general ?? "noticias";
-  if (fromTitle) {
+
+  if (fromTitle && fromTitle.length >= 4 && fromTitle.length <= 10) {
     return fromTitle.slice(0, 32);
   }
 

@@ -91,47 +91,70 @@ async function searchSoundLibrary(page: Page, query: string): Promise<boolean> {
   return false;
 }
 
-/** Clicks first track row in the Sonidos panel (e.g. "01:00 · Artist"). */
+/** Clicks first track in Sonidos list (title line before "MM:SS · artist"). */
 async function selectFirstSoundResult(page: Page): Promise<boolean> {
-  const picked = await page
+  const title = await page
     .evaluate(() => {
-      const candidates = Array.from(document.querySelectorAll("div, li, button, span"));
+      const lines = (document.body?.innerText ?? "")
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+      for (let i = 1; i < lines.length; i += 1) {
+        if (!/^\d{1,2}:\d{2}\s·/.test(lines[i]!)) continue;
+        const candidate = lines[i - 1]!;
+        if (candidate.length < 3 || candidate.length > 70) continue;
+        if (/para ti|favoritos|reciente|sin límites|sonidos|plantillas|cancelar|guardar|editar|texto/i.test(candidate)) {
+          continue;
+        }
+        return candidate;
+      }
+      return null;
+    })
+    .catch(() => null);
+
+  if (title) {
+    const clicked = await page
+      .getByText(title, { exact: true })
+      .first()
+      .click({ timeout: 12_000, force: true })
+      .then(() => true)
+      .catch(() => false);
+    if (clicked) {
+      await page.waitForTimeout(1200);
+      return true;
+    }
+  }
+
+  return page
+    .evaluate(() => {
+      const candidates = Array.from(document.querySelectorAll("div, li, button"));
       for (const node of candidates) {
         const text = (node.textContent ?? "").replace(/\s+/g, " ").trim();
         if (!/\d{1,2}:\d{2}\s·/.test(text)) continue;
         if (text.length < 8 || text.length > 140) continue;
-        if (/para ti|favoritos|reciente|sin límites|plantillas|cancelar|guardar/i.test(text)) {
-          continue;
-        }
         const el = node as HTMLElement;
         const r = el.getBoundingClientRect();
-        if (r.width < 80 || r.height < 24 || r.x < 200) continue;
+        if (r.width < 100 || r.height < 28 || r.x < 200) continue;
         el.click();
         return true;
       }
       return false;
     })
     .catch(() => false);
-
-  if (picked) return true;
-
-  const firstTitle = page.getByText(/\d{1,2}:\d{2}\s·/).first();
-  if (await firstTitle.isVisible({ timeout: 4000 }).catch(() => false)) {
-    await firstTitle.click({ timeout: 10_000, force: true });
-    return true;
-  }
-
-  return false;
 }
 
 async function saveSoundEditor(page: Page): Promise<boolean> {
   const save = page.getByRole("button", { name: /^Guardar$|^Save$/i }).last();
   if (await save.isVisible({ timeout: 8000 }).catch(() => false)) {
     await save.click({ timeout: 12_000, force: true });
-    await page.waitForTimeout(2000);
-    return true;
+    await page.waitForTimeout(2500);
   }
-  return false;
+
+  const stillOriginal = await page
+    .evaluate(() => /Sonido original\s*-\s*Veraz/i.test(document.body?.innerText ?? ""))
+    .catch(() => true);
+
+  return !stillOriginal;
 }
 
 async function confirmSoundSelection(page: Page): Promise<void> {
