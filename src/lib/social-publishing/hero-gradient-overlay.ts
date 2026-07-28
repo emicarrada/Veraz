@@ -36,6 +36,24 @@ export function getHeroLogoPlacement(width: number): HeroLogoPlacement {
   };
 }
 
+/** Logo on 9:16 reel overlay (larger, lower than feed card badge). */
+export function getVideoReelLogoPlacement(width: number, height: number): HeroLogoPlacement {
+  const margin = 48;
+  const logoSize = 132;
+  const badgePad = 24;
+  const badgeSize = logoSize + badgePad * 2;
+  const badgeLeft = width - margin - badgeSize;
+  const badgeTop = Math.min(height * 0.22, 360);
+  return {
+    badgeLeft,
+    badgeTop,
+    badgeSize,
+    logoLeft: badgeLeft + badgePad,
+    logoTop: badgeTop + badgePad,
+    logoSize,
+  };
+}
+
 function escapeXml(value: string): string {
   return value
     .replace(/&/g, "&amp;")

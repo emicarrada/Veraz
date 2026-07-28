@@ -4,7 +4,7 @@ import {
   SOCIAL_CARD_VARIANTS,
   type SocialCardVariant,
 } from "@/features/social-publishing/templates/card-variants";
-import type { SocialPublishConfig, SocialRenderer, SocialPlatform } from "@/features/social-publishing/types";
+import type { SocialPublishConfig, SocialPlatform } from "@/features/social-publishing/types";
 
 function parseBool(value: string | undefined, defaultValue: boolean): boolean {
   if (value === undefined || value.trim() === "") return defaultValue;
@@ -13,13 +13,6 @@ function parseBool(value: string | undefined, defaultValue: boolean): boolean {
 
 function parseLocale(value: string | undefined): Locale {
   return value?.trim().toLowerCase() === "en" ? "en" : "es";
-}
-
-function parseRenderer(env: NodeJS.ProcessEnv): SocialRenderer {
-  const raw = env.SOCIAL_RENDERER?.trim().toLowerCase();
-  if (raw === "canva") return "canva";
-  if (parseBool(env.SOCIAL_CANVA_ENABLED, false)) return "canva";
-  return "internal";
 }
 
 function parseCardVariant(value: string | undefined): SocialCardVariant {
@@ -67,7 +60,6 @@ export function loadSocialPublishConfig(env: NodeJS.ProcessEnv = process.env): S
   const maxRaw = env.SOCIAL_MAX_POSTS_PER_RUN?.trim();
   const maxPostsPerRun = maxRaw ? Math.max(1, Math.min(20, Number.parseInt(maxRaw, 10) || 3)) : 3;
 
-  const renderer = parseRenderer(env);
   const autoPublish = parseBool(env.SOCIAL_AUTO_PUBLISH, false);
 
   return {
@@ -78,9 +70,7 @@ export function loadSocialPublishConfig(env: NodeJS.ProcessEnv = process.env): S
     includeExcerptInCaption: parseBool(env.SOCIAL_CAPTION_INCLUDE_EXCERPT, false),
     globalHashtags: parseHashtags(env.SOCIAL_HASHTAGS),
     platforms: parsePlatforms(env.SOCIAL_PLATFORMS),
-    renderer,
     cardVariant: parseCardVariant(env.SOCIAL_CARD_VARIANT),
-    canvaEnabled: renderer === "canva",
     headed: parseBool(env.SOCIAL_HEADED, false),
     locale: parseLocale(env.SOCIAL_LOCALE),
     maxPostsPerRun,
@@ -92,11 +82,6 @@ export function loadSocialPublishConfig(env: NodeJS.ProcessEnv = process.env): S
     instagramHighImpactOnly: parseBool(env.SOCIAL_INSTAGRAM_HIGH_IMPACT_ONLY, true),
     instagramMinImpactScore: parseIntEnv(env.SOCIAL_INSTAGRAM_MIN_IMPACT_SCORE, 2, 1, 5),
     publishTimeZone: env.SOCIAL_PUBLISH_TIMEZONE?.trim() || "America/Mexico_City",
-    ...(env.CANVA_TEMPLATE_URL?.trim()
-      ? { canvaTemplateUrl: env.CANVA_TEMPLATE_URL.trim() }
-      : {}),
-    canvaStoragePath: env.CANVA_STORAGE_PATH?.trim() || ".social/canva-storage.json",
-    canvaProfileDir: env.CANVA_PROFILE_DIR?.trim() || ".social/canva-profile",
     assetsDir: env.SOCIAL_ASSETS_DIR?.trim() || ".social/assets",
     exportsDir: env.SOCIAL_EXPORTS_DIR?.trim() || ".social/exports",
     siteUrl: (env.NEXT_PUBLIC_SITE_URL?.trim() || "https://www.veraz.app").replace(/\/$/, ""),

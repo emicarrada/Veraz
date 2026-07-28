@@ -1,4 +1,8 @@
-import type { BrowserContext, Page } from "playwright";
+import type { Page } from "playwright";
+
+import { captureInstagramDebugStep } from "@/lib/social-publishing/publish/instagram-publish-debug";
+
+const EXPORTS_DIR = process.env.SOCIAL_EXPORTS_DIR?.trim() || ".social/exports";
 
 const CREATE_PROFILE = /instagram\.com\/create\/?(\?|$)/i;
 
@@ -7,7 +11,7 @@ export function isInstagramCreateProfileUrl(url: string): boolean {
 }
 
 /** Reuse one tab; persistent Chrome cannot open a tab after closing the last one. */
-export async function openFreshInstagramPage(context: BrowserContext): Promise<Page> {
+export async function openFreshInstagramPage(context: import("playwright").BrowserContext): Promise<Page> {
   const pages = context.pages();
   for (const extra of pages.slice(1)) {
     await extra.close().catch(() => undefined);
@@ -16,6 +20,10 @@ export async function openFreshInstagramPage(context: BrowserContext): Promise<P
     return pages[0];
   }
   return context.newPage();
+}
+
+async function debugSnap(page: Page, step: string): Promise<void> {
+  await captureInstagramDebugStep(page, step, EXPORTS_DIR);
 }
 
 export async function assertInstagramUploadContext(page: Page): Promise<void> {
@@ -43,36 +51,81 @@ export async function assertInstagramUploadContext(page: Page): Promise<void> {
   }
 }
 
-/** Crear → Publicación (evita enlaces al perfil @create). */
-export async function openInstagramCreateFlow(page: Page): Promise<void> {
-  const createLink = page.locator('a[href="/create/select/"], a[href*="/create/select/"]');
+async function openCreateSelect(page: Page): Promise<void> {
+  const createNav = page
+    .locator(
+      'a[href="/create/select/"], a[href*="/create/select"], [aria-label="New post"], [aria-label="Nueva publicación"], [aria-label="Create"], [aria-label="Crear"]',
+    )
+    .first();
 
-  const createVisible = await createLink
-    .first()
-    .isVisible({ timeout: 12_000 })
-    .catch(() => false);
-
-  if (createVisible) {
-    await createLink.first().click({ timeout: 15_000 });
-    await page.waitForTimeout(1200);
-  } else {
-    await page.goto("https://www.instagram.com/create/select/", {
-      waitUntil: "domcontentloaded",
-      timeout: 60_000,
-    });
+  if (await createNav.isVisible({ timeout: 10_000 }).catch(() => false)) {
+    await createNav.click({ timeout: 15_000 });
     await page.waitForTimeout(1500);
+    return;
   }
 
-  await assertInstagramUploadContext(page);
+  await page.goto("https://www.instagram.com/create/select/", {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  await page.waitForTimeout(1500);
+}
+
+async function openPostComposerFromSelect(page: Page): Promise<void> {
+  const styleLink = page.locator('a[href="/create/style/"], a[href*="/create/style/"]').first();
+  if (await styleLink.isVisible({ timeout: 10_000 }).catch(() => false)) {
+    await styleLink.click({ timeout: 15_000 });
+    await page.waitForTimeout(1500);
+    return;
+  }
 
   const publicacionItem = page
-    .getByRole("link", { name: /^Publicación$/i })
-    .or(page.getByRole("link", { name: /^Post$/i }))
-    .or(page.locator('a[href*="/create/style"]').filter({ hasText: /^Publicación$|^Post$/i }));
+    .getByRole("link", { name: /^(Publicación|Post|Create new post)$/i })
+    .or(page.getByRole("button", { name: /^(Publicación|Post)$/i }))
+    .or(page.locator('a[href*="/create/style"]'))
+    .or(page.getByText(/^Publicación$|^Post$/i));
 
-  await publicacionItem.first().click({ timeout: 20_000 });
+  const clicked = await publicacionItem
+    .first()
+    .click({ timeout: 12_000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (clicked) {
+    await page.waitForTimeout(1500);
+    return;
+  }
+
+  await debugSnap(page, "ig-fallback-goto-style");
+  await page.goto("https://www.instagram.com/create/style/", {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
   await page.waitForTimeout(1500);
+}
+
+/** Crear → Publicación (evita enlaces al perfil @create). */
+export async function openInstagramCreateFlow(page: Page): Promise<void> {
+  await debugSnap(page, "ig-before-create");
+
+  await openCreateSelect(page);
+  await debugSnap(page, "ig-create-select");
   await assertInstagramUploadContext(page);
+
+  await openPostComposerFromSelect(page);
+  await debugSnap(page, "ig-after-create-flow");
+  await assertInstagramUploadContext(page);
+
+  await page
+    .locator('input[type="file"]')
+    .first()
+    .waitFor({ state: "attached", timeout: 25_000 })
+    .catch(async () => {
+      await debugSnap(page, "ig-no-file-input");
+      throw new Error(
+        "No apareció el selector de archivo tras Crear → Publicación. Revisa instagram-debug-*.png en .social/exports/",
+      );
+    });
 }
 
 export async function waitForInstagramVideoProcessing(page: Page, timeoutMs = 180_000): Promise<void> {

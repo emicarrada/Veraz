@@ -1,4 +1,4 @@
--- Tracks social posts per article/platform (idempotency for Canva + X/IG/TikTok workers).
+-- Tracks social posts per article/platform (idempotency for X/IG/TikTok workers).
 CREATE TABLE IF NOT EXISTS social_publications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   article_id UUID NOT NULL REFERENCES articles(id) ON DELETE CASCADE,

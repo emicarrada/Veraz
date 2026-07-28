@@ -18,7 +18,6 @@ Solo **iniciar sesión** y cerrar Chrome. **No publiques nada a mano.**
 ```bash
 SOCIAL_PUBLISHING_ENABLED=true
 SOCIAL_AUTO_PUBLISH=true
-SOCIAL_RENDERER=internal
 SOCIAL_CARD_VARIANT=hero-gradient
 SOCIAL_PLATFORMS=x,instagram
 SOCIAL_MAX_POSTS_PER_RUN=1
@@ -72,7 +71,7 @@ npm run social:examples:vertical
 
 Salida: `.social/examples/reels-tiktok/` (`*-vertical.png` + `*-reels-tiktok.mp4`).
 
-Variante: `hero-gradient-vertical` (1080×1920). **Auto-upload**: `npm run social:publish:video` (TikTok, Reels, YouTube).
+Variante: `hero-gradient-vertical` (1080×1920). **Auto-upload**: `npm run social:publish:video` (TikTok por defecto).
 
 ### Fondo de video (Pexels)
 
@@ -95,7 +94,7 @@ Mismo MP4 9:16 (Pexels + overlay). Comando dedicado:
 npm run social:publish:video
 ```
 
-Por defecto publica en `tiktok` e `instagram_reels` (override con `SOCIAL_VIDEO_PLATFORMS`). YouTube Shorts sigue en código pero no forma parte del flujo por defecto.
+Por defecto publica en **tiktok** (override con `SOCIAL_VIDEO_PLATFORMS`, p. ej. `tiktok,instagram_reels`). Reels y YouTube siguen en código pero no forman parte del cron de ejemplo.
 
 ### 1. Migración Supabase
 
@@ -170,10 +169,7 @@ supabase db push
 
 ## Si falla
 
-- `npm run social:login -- x` (sesión caducada)
-- `SOCIAL_HEADED=true` para ver dónde se rompe la UI
+- `npm run social:login -- instagram` (sesión caducada)
+- **`npm run social:watch:instagram`** — abre Chrome en tu PC, publica 1 post de prueba, guarda capturas `instagram-debug-*.png` en `.social/exports/` y deja la ventana **2 min** abierta si falla para ver en qué botón se atora
+- `SOCIAL_HEADED=true` en el VPS solo con `xvfb-run` (igual que TikTok); en tu PC basta el modo watch
 - Revisa filas `status=failed` en `social_publications`
-
-## Canva
-
-Legacy: `SOCIAL_RENDERER=canva` — no necesario con hero-gradient interno.

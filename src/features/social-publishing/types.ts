@@ -28,8 +28,6 @@ export type SocialArticleCandidate = {
   verazArticleUrl: string;
 };
 
-export type SocialRenderer = "internal" | "canva";
-
 export type SocialPublishConfig = {
   enabled: boolean;
   dryRun: boolean;
@@ -38,9 +36,7 @@ export type SocialPublishConfig = {
   includeExcerptInCaption: boolean;
   globalHashtags: string[];
   platforms: SocialPlatform[];
-  renderer: SocialRenderer;
   cardVariant: SocialCardVariant;
-  canvaEnabled: boolean;
   headed: boolean;
   locale: Locale;
   maxPostsPerRun: number;
@@ -52,9 +48,6 @@ export type SocialPublishConfig = {
   instagramHighImpactOnly: boolean;
   instagramMinImpactScore: number;
   publishTimeZone: string;
-  canvaTemplateUrl?: string;
-  canvaStoragePath: string;
-  canvaProfileDir: string;
   assetsDir: string;
   exportsDir: string;
   siteUrl: string;

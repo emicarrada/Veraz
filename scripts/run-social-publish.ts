@@ -17,10 +17,6 @@ import {
 } from "@/features/social-publishing/platform-media";
 import { selectSocialCandidates } from "@/features/social-publishing/select-candidates";
 import { resolveSocialImageUrl } from "@/features/social-publishing/resolve-image-url";
-import {
-  assertCanvaConfig,
-  exportCanvaDesign,
-} from "@/lib/social-publishing/canva-export";
 import { downloadSocialImage } from "@/lib/social-publishing/download-social-image";
 import {
   countPostedToday,
@@ -108,14 +104,6 @@ export async function runSocialPublish(): Promise<void> {
     process.exit(1);
   }
 
-  if (config.canvaEnabled && !config.dryRun) {
-    const canvaError = assertCanvaConfig(config);
-    if (canvaError) {
-      console.error(canvaError);
-      process.exit(1);
-    }
-  }
-
   const platformsForRun = await resolvePlatformsForRun(config);
   console.log(`[social:publish] platformsForRun=${platformsForRun.join(",") || "(none)"}`);
   if (platformsForRun.length === 0) {
@@ -199,37 +187,19 @@ export async function runSocialPublish(): Promise<void> {
         continue;
       }
 
-      if (config.renderer === "internal") {
-        try {
-          await renderSocialCard({
-            title: candidate.title,
-            sourceLabel: candidate.sourceAttribution,
-            photoPath: assetPath,
-            outputPath: exportPath,
-            variant: config.cardVariant,
-            projectRoot: path.resolve(import.meta.dirname, ".."),
-          });
-          console.log(`PNG: ${exportPath}`);
-        } catch (error) {
-          console.error(`Render failed: ${error instanceof Error ? error.message : error}`);
-          continue;
-        }
-      } else if (config.canvaEnabled) {
-        console.log("Starting Canva export…");
-        const canvaResult = await exportCanvaDesign({
-          templateUrl: config.canvaTemplateUrl!,
-          profileDir: config.canvaProfileDir,
+      try {
+        await renderSocialCard({
           title: candidate.title,
           sourceLabel: candidate.sourceAttribution,
-          localImagePath: assetPath,
-          exportPath,
-          headed: config.headed,
-          pauseOnErrorMs: config.headed ? 60_000 : 0,
+          photoPath: assetPath,
+          outputPath: exportPath,
+          variant: config.cardVariant,
+          projectRoot: path.resolve(import.meta.dirname, ".."),
         });
-        if (!canvaResult.ok) {
-          console.error(`Canva: ${canvaResult.error}`);
-          continue;
-        }
+        console.log(`PNG: ${exportPath}`);
+      } catch (error) {
+        console.error(`Render failed: ${error instanceof Error ? error.message : error}`);
+        continue;
       }
     }
 
@@ -290,7 +260,12 @@ export async function runSocialPublish(): Promise<void> {
         ...(platform === "youtube" ? { youtubeTitle: buildYoutubeTitle(candidate) } : {}),
         profileDir: profileDirForPlatform(platform, process.env),
         headed: config.headed,
-        pauseOnErrorMs: config.headed ? 60_000 : 0,
+        pauseOnErrorMs:
+          config.headed && process.env.SOCIAL_INSTAGRAM_DEBUG?.trim()
+            ? 120_000
+            : config.headed
+              ? 60_000
+              : 0,
       });
 
       if (result.ok) {

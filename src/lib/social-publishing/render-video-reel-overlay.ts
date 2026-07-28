@@ -6,7 +6,7 @@ import sharp from "sharp";
 import { SOCIAL_CARD_VARIANTS } from "@/features/social-publishing/templates/card-variants";
 import {
   buildHeroGradientOverlay,
-  getHeroLogoPlacement,
+  getVideoReelLogoPlacement,
 } from "@/lib/social-publishing/hero-gradient-overlay";
 
 export type RenderVideoReelOverlayInput = {
@@ -28,7 +28,7 @@ export async function renderVideoReelOverlay(input: RenderVideoReelOverlayInput)
 
   await mkdir(path.dirname(input.outputPath), { recursive: true });
 
-  const { width } = layout;
+  const { width, height } = layout;
   const overlaySvg = buildHeroGradientOverlay(
     input.title,
     input.sourceLabel,
@@ -38,8 +38,8 @@ export async function renderVideoReelOverlay(input: RenderVideoReelOverlayInput)
     "stock-video",
   );
 
-  const logo = await sharp(logoPath).resize(96, 96).png().toBuffer();
-  const heroLogo = getHeroLogoPlacement(width);
+  const heroLogo = getVideoReelLogoPlacement(width, height);
+  const logo = await sharp(logoPath).resize(heroLogo.logoSize, heroLogo.logoSize).png().toBuffer();
 
   await sharp(overlaySvg)
     .ensureAlpha()

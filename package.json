@@ -35,7 +35,7 @@
     "social:vps:sync-secrets": "bash scripts/vps-social-sync-secrets.sh",
     "social:vps:install-cron": "bash scripts/vps-social-install-cron.sh",
     "social:login": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/open-social-login.ts",
-    "social:canva-login": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/open-canva-login.ts"
+    "social:watch:instagram": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/watch-instagram-publish.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
