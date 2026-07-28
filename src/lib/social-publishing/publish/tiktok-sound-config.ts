@@ -244,44 +244,39 @@ async function boostAddedSoundVolume(page: Page): Promise<void> {
     .catch(() => undefined);
 }
 
-/** True when a library track is on the upload preview, not only silent "Sonido original". */
-async function verifyLibrarySoundApplied(page: Page, trackTitle: string | null): Promise<boolean> {
+/** True when the open editor shows a library track on the timeline (before Guardar). */
+async function soundEditorTrackReady(page: Page, trackTitle: string | null): Promise<boolean> {
   return page
     .evaluate((title) => {
       const body = document.body?.innerText ?? "";
+      const ranges = document.querySelectorAll("input[type='range']").length;
+      const editorOpen = body.includes("Guardar") && body.includes("Cancelar");
+
+      if (!editorOpen) {
+        return false;
+      }
+
       if (/volumen del sonido añadido|added sound volume|sonido añadido/i.test(body)) {
         return true;
       }
-      if (title && body.includes(title)) {
+
+      if (title && body.includes(title) && ranges >= 1) {
         return true;
       }
 
-      const lines = body
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean);
-
-      for (const line of lines) {
-        if (!/\d{1,2}:\d{2}\s·/.test(line)) continue;
-        if (/sonido original/i.test(line)) continue;
-        if (title && line.includes(title)) return true;
-        if (line.length >= 8 && line.length <= 120) return true;
-      }
-
-      const previewLines = lines.filter(
-        (l) =>
-          l.length >= 4 &&
-          l.length <= 90 &&
-          (/sonido|sound|·/.test(l) || (title ? l.includes(title) : false)),
-      );
-      const onlyOriginal = previewLines.every((l) => /^sonido original/i.test(l));
-      if (previewLines.length > 0 && !onlyOriginal) {
+      if (ranges >= 2 && /sonido original/i.test(body)) {
         return true;
       }
 
       return false;
     }, trackTitle)
     .catch(() => false);
+}
+
+async function dismissFloatingMenus(page: Page): Promise<void> {
+  await page.keyboard.press("Escape").catch(() => undefined);
+  await page.waitForTimeout(350);
+  await dismissTikTokStudioModals(page);
 }
 
 async function saveSoundEditor(page: Page): Promise<boolean> {
@@ -349,6 +344,8 @@ export async function configureTikTokUploadSound(
     await page.keyboard.press("Enter").catch(() => undefined);
     await page.waitForTimeout(1200);
 
+    await dismissFloatingMenus(page);
+
     const picked = await selectFirstSoundResult(page);
     await snap(page, "sound-pick");
     if (!picked.ok) {
@@ -356,16 +353,22 @@ export async function configureTikTokUploadSound(
     }
 
     await page.waitForTimeout(800);
+    await dismissFloatingMenus(page);
     await confirmSoundSelection(page);
     await boostAddedSoundVolume(page);
 
-    let verified = await verifyLibrarySoundApplied(page, picked.trackTitle);
-    if (!verified) {
+    let editorReady = await soundEditorTrackReady(page, picked.trackTitle);
+    if (!editorReady) {
       await page.keyboard.press("Enter").catch(() => undefined);
       await page.waitForTimeout(600);
       await confirmSoundSelection(page);
       await boostAddedSoundVolume(page);
-      verified = await verifyLibrarySoundApplied(page, picked.trackTitle);
+      editorReady = await soundEditorTrackReady(page, picked.trackTitle);
+    }
+
+    if (!editorReady) {
+      await snap(page, "sound-not-applied");
+      return { applied: false, query };
     }
 
     const saved = await saveSoundEditor(page);
@@ -376,12 +379,8 @@ export async function configureTikTokUploadSound(
 
     await dismissTikTokStudioModals(page);
     await page.waitForTimeout(1200);
-    const applied = await verifyLibrarySoundApplied(page, picked.trackTitle);
-    if (!applied) {
-      await snap(page, "sound-not-applied");
-    }
 
-    return { applied, query };
+    return { applied: true, query };
   } catch {
     await page.keyboard.press("Escape").catch(() => undefined);
     await snap(page, "sound-error");
