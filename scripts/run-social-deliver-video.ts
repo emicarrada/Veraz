@@ -24,38 +24,24 @@ import { createContentRepositories } from "@/lib/repositories/factory";
 import { isSupabasePersistenceConfigured } from "@/lib/supabase";
 
 function buildDeliveryMessage(input: {
-  title: string;
   slug: string;
   tiktokCaption: string;
   reelsCaption?: string;
   soundKeyword?: string;
-}): { videoCaption: string; fullText: string } {
-  const videoCaption = `Veraz · ${input.title.slice(0, 120)}`;
-
-  const parts = [
-    "🎬 Video listo — publica tú en TikTok (y Reels si quieres)",
-    "",
-    input.title,
-    "",
-    "——— Descripción TikTok (copiar y pegar) ———",
-    input.tiktokCaption,
-  ];
-
-  if (input.reelsCaption && input.reelsCaption !== input.tiktokCaption) {
-    parts.push("", "——— Descripción Instagram Reels ———", input.reelsCaption);
-  }
-
+}): { copyCaption: string; notes: string } {
+  const noteLines: string[] = [];
   if (input.soundKeyword) {
-    parts.push(
-      "",
-      `🎵 En TikTok Studio → Sonidos, busca: ${input.soundKeyword}`,
-      "(Elige una pista de la biblioteca; el MP4 va sin audio a propósito.)",
-    );
+    noteLines.push(`🎵 TikTok → Sonidos → busca: ${input.soundKeyword}`);
   }
+  if (input.reelsCaption && input.reelsCaption !== input.tiktokCaption) {
+    noteLines.push("", "—— Reels (copiar) ——", input.reelsCaption);
+  }
+  noteLines.push("", `slug: ${input.slug}`);
 
-  parts.push("", `slug: ${input.slug}`);
-
-  return { videoCaption, fullText: parts.join("\n") };
+  return {
+    copyCaption: input.tiktokCaption.trim(),
+    notes: noteLines.join("\n").trim(),
+  };
 }
 
 async function main(): Promise<void> {
@@ -146,8 +132,7 @@ async function main(): Promise<void> {
     for (const file of files) console.log(`Caption file: ${file}`);
   }
 
-  const { videoCaption, fullText } = buildDeliveryMessage({
-    title: candidate.title,
+  const { copyCaption, notes } = buildDeliveryMessage({
     slug: candidate.slug,
     tiktokCaption,
     reelsCaption: delivery.includeInstagramReelsCaption ? reelsCaption : undefined,
@@ -159,8 +144,8 @@ async function main(): Promise<void> {
     botToken: delivery.telegramBotToken,
     chatId: delivery.telegramChatId,
     videoPath: reel.mp4Path,
-    videoCaption,
-    fullText,
+    copyCaption,
+    notes,
   });
 
   if (!sent.ok) {

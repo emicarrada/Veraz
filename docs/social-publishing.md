@@ -132,7 +132,7 @@ No hace falta `SOCIAL_TIKTOK_ADD_SOUND` ni perfil TikTok en el VPS para este flu
 npm run social:deliver:video
 ```
 
-Recibirás: **video** + **mensaje de texto** con la descripción TikTok (copiar/pegar) y la **palabra sugerida** para buscar sonido en TikTok Studio.
+Recibirás: **1)** el video (sin texto largo) **2)** un mensaje solo con la descripción TikTok para copiar/pegar **3)** otro mensaje con sonido sugerido y slug.
 
 ### 5. Después de publicar tú en TikTok
 
