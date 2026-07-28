@@ -22,41 +22,34 @@ async function snap(page: Page, step: string): Promise<void> {
   }
 }
 
-/** Clicks "Sonidos" tab on upload editor (Editar | Sonidos | Texto), not sidebar "Sonidos sin regalías". */
+/** Opens video editor and the Sonidos panel (Editar → Sonidos). */
 async function openSoundEditorTab(page: Page): Promise<boolean> {
   await dismissTikTokStudioModals(page);
 
-  const exact = page.getByText("Sonidos", { exact: true });
-  const count = await exact.count().catch(() => 0);
-
-  for (let i = 0; i < count; i += 1) {
-    const el = exact.nth(i);
+  const editButtons = page.getByText("Editar", { exact: true });
+  const editCount = await editButtons.count().catch(() => 0);
+  for (let i = 0; i < editCount; i += 1) {
+    const el = editButtons.nth(i);
     const box = await el.boundingBox().catch(() => null);
-    if (!box || box.x < 180) continue;
+    if (!box || box.y < 280 || box.x < 350) continue;
+    await el.click({ timeout: 10_000, force: true });
+    await page.waitForTimeout(1500);
+    break;
+  }
+
+  const sonidos = page.getByText("Sonidos", { exact: true });
+  const count = await sonidos.count().catch(() => 0);
+  for (let i = 0; i < count; i += 1) {
+    const el = sonidos.nth(i);
+    const box = await el.boundingBox().catch(() => null);
+    if (!box || box.x < 200) continue;
     await el.scrollIntoViewIfNeeded().catch(() => undefined);
     await el.click({ timeout: 12_000, force: true });
     await page.waitForTimeout(1200);
     return true;
   }
 
-  const viaEvaluate = await page
-    .evaluate(() => {
-      const nodes = Array.from(document.querySelectorAll("button, div, span, a"));
-      for (const node of nodes) {
-        if ((node.textContent ?? "").trim() !== "Sonidos") continue;
-        const el = node as HTMLElement;
-        const r = el.getBoundingClientRect();
-        if (r.x < 180 || r.width < 20) continue;
-        const row = el.parentElement?.textContent ?? "";
-        if (!/Editar|Texto|Sonido original/i.test(row)) continue;
-        el.click();
-        return true;
-      }
-      return false;
-    })
-    .catch(() => false);
-
-  return viaEvaluate;
+  return false;
 }
 
 async function searchSoundLibrary(page: Page, query: string): Promise<boolean> {
@@ -113,12 +106,38 @@ async function selectFirstSoundResult(page: Page): Promise<boolean> {
     .catch(() => null);
 
   if (title) {
+    const durationLine = await page
+      .evaluate((trackTitle) => {
+        const lines = (document.body?.innerText ?? "").split("\n").map((l) => l.trim());
+        for (const line of lines) {
+          if (line.startsWith(trackTitle) && /\d{1,2}:\d{2}\s·/.test(line)) return line;
+          if (/\d{1,2}:\d{2}\s·/.test(line) && lines[lines.indexOf(line) - 1] === trackTitle) {
+            return line;
+          }
+        }
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i] === trackTitle && lines[i + 1] && /\d{1,2}:\d{2}\s·/.test(lines[i + 1]!)) {
+            return lines[i + 1]!;
+          }
+        }
+        return null;
+      }, title)
+      .catch(() => null);
+
+    const clickText = durationLine ?? title;
     const clicked = await page
-      .getByText(title, { exact: true })
+      .getByText(clickText, { exact: true })
       .first()
-      .click({ timeout: 12_000, force: true })
+      .dblclick({ timeout: 12_000, force: true })
       .then(() => true)
-      .catch(() => false);
+      .catch(async () =>
+        page
+          .getByText(title, { exact: true })
+          .first()
+          .dblclick({ timeout: 12_000, force: true })
+          .then(() => true)
+          .catch(() => false),
+      );
     if (clicked) {
       await page.waitForTimeout(1200);
       return true;
@@ -148,13 +167,13 @@ async function saveSoundEditor(page: Page): Promise<boolean> {
   if (await save.isVisible({ timeout: 8000 }).catch(() => false)) {
     await save.click({ timeout: 12_000, force: true });
     await page.waitForTimeout(2500);
+    return true;
   }
-
-  const stillOriginal = await page
-    .evaluate(() => /Sonido original\s*-\s*Veraz/i.test(document.body?.innerText ?? ""))
-    .catch(() => true);
-
-  return !stillOriginal;
+  return !(await page
+    .getByRole("button", { name: /^Guardar$|^Save$/i })
+    .first()
+    .isVisible()
+    .catch(() => false));
 }
 
 async function confirmSoundSelection(page: Page): Promise<void> {
@@ -191,10 +210,17 @@ export async function configureTikTokUploadSound(
       return { applied: false, query };
     }
 
-    const searched = await searchSoundLibrary(page, query);
+    await page.waitForTimeout(800);
+    await searchSoundLibrary(page, query);
     await snap(page, "sound-search");
 
-    const selected = await selectFirstSoundResult(page);
+    await page.keyboard.press("Tab").catch(() => undefined);
+    await page.keyboard.press("ArrowDown").catch(() => undefined);
+    await page.waitForTimeout(400);
+    await page.keyboard.press("Enter").catch(() => undefined);
+    await page.waitForTimeout(1200);
+
+    let selected = await selectFirstSoundResult(page);
     await snap(page, "sound-pick");
     if (!selected) {
       return { applied: false, query };
