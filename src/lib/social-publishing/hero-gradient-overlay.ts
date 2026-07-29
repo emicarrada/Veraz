@@ -1,4 +1,5 @@
 import type { SocialCardLayout } from "@/features/social-publishing/templates/card-variants";
+import { fitTitleLayout } from "@/lib/social-publishing/wrap-title-lines";
 
 const COLORS = {
   bg: "#0a0a0a",
@@ -62,32 +63,6 @@ function escapeXml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function wrapTitle(title: string, maxCharsPerLine: number, maxLines: number): string[] {
-  const words = title.trim().split(/\s+/);
-  const lines: string[] = [];
-  let current = "";
-
-  for (const word of words) {
-    const next = current ? `${current} ${word}` : word;
-    if (next.length <= maxCharsPerLine) {
-      current = next;
-      continue;
-    }
-    if (current) lines.push(current);
-    current = word;
-    if (lines.length >= maxLines - 1) break;
-  }
-  if (current && lines.length < maxLines) lines.push(current);
-  if (lines.length === 0) lines.push(title.slice(0, maxCharsPerLine));
-
-  const joined = lines.join(" ");
-  if (joined.length < title.length && lines.length > 0) {
-    const last = lines[lines.length - 1]!;
-    lines[lines.length - 1] = `${last.slice(0, maxCharsPerLine - 1)}…`;
-  }
-  return lines.slice(0, maxLines);
-}
-
 export function buildHeroGradientOverlay(
   title: string,
   sourceLabel: string,
@@ -103,13 +78,20 @@ export function buildHeroGradientOverlay(
   const reelUiSafeInset = isVertical ? (stockVideo ? 280 : 240) : 0;
   const marginX = 64;
   const marginBottom = (isVertical ? 72 : 56) + reelUiSafeInset;
-  const titleFontSize = isVertical ? 56 : 54;
-  const titleLineHeight = titleFontSize * 1.12;
-  const titleLines = wrapTitle(title, isVertical ? 22 : 26, isVertical ? 4 : 3);
-  const titleBlockHeight = titleLines.length * titleLineHeight;
   const sourceRowHeight = 56;
   const footerCaptionHeight = 36;
   const contentGap = 28;
+
+  const { lines: titleLines, titleFontSize, titleLineHeight } = fitTitleLayout({
+    title,
+    isVertical,
+    height,
+    marginBottom,
+    footerCaptionHeight,
+    sourceRowHeight,
+    contentGap,
+  });
+  const titleBlockHeight = titleLines.length * titleLineHeight;
 
   const contentBottom = marginBottom + footerCaptionHeight;
   const sourceY = height - contentBottom - sourceRowHeight;

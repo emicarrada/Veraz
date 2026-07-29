@@ -6,8 +6,6 @@ import {
 } from "@/features/social-publishing/caption-options";
 import type { SocialArticleCandidate, SocialPlatform } from "@/features/social-publishing/types";
 
-const TITLE_MAX = 200;
-
 function trimToLength(text: string, max: number): string {
   if (text.length <= max) return text;
   return `${text.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
@@ -20,12 +18,7 @@ function sourceLine(candidate: SocialArticleCandidate, locale: SocialCaptionOpti
 }
 
 function buildBaseBody(candidate: SocialArticleCandidate, includeExcerpt: boolean): string {
-  const title =
-    candidate.title.length > TITLE_MAX
-      ? `${candidate.title.slice(0, TITLE_MAX - 1)}…`
-      : candidate.title;
-
-  const parts = [title];
+  const parts = [candidate.title];
   if (includeExcerpt && candidate.excerpt.trim()) {
     parts.push("", trimToLength(candidate.excerpt.trim(), 280));
   }
@@ -33,15 +26,22 @@ function buildBaseBody(candidate: SocialArticleCandidate, includeExcerpt: boolea
   return parts.join("\n");
 }
 
-function buildForX(candidate: SocialArticleCandidate, includeExcerpt: boolean): string {
+function buildForX(candidate: SocialArticleCandidate): string {
   const link = candidate.verazArticleUrl;
-  const footer = `\n\n${link}\n\n${sourceLine(candidate, candidate.locale)}`;
-  const budget = PLATFORM_CHAR_LIMITS.x - footer.length - 1;
-  let title = candidate.title;
-  if (title.length > budget) {
-    title = trimToLength(title, Math.max(40, budget));
-  }
-  return `${title}${footer}`;
+  const source = sourceLine(candidate, candidate.locale);
+  const title = candidate.title;
+  const limit = PLATFORM_CHAR_LIMITS.x;
+
+  const withSource = `${title}\n\n${link}\n\n${source}`;
+  if (withSource.length <= limit) return withSource;
+
+  const withLink = `${title}\n\n${link}`;
+  if (withLink.length <= limit) return withLink;
+
+  const compact = `${title}\n${link}`;
+  if (compact.length <= limit) return compact;
+
+  return title.length <= limit ? title : trimToLength(title, limit);
 }
 
 function buildForInstagram(
@@ -121,7 +121,7 @@ function buildForPlatform(
 ): string {
   switch (platform) {
     case "x":
-      return buildForX(candidate, options.includeExcerpt);
+      return buildForX(candidate);
     case "instagram":
       return buildForInstagram(candidate, options);
     case "tiktok":
@@ -147,7 +147,13 @@ export function buildSocialCaptions(
   const result = {} as Record<SocialPlatform, string>;
   for (const platform of options.platforms) {
     const caption = buildForPlatform(platform, candidate, options);
-    result[platform] = trimToLength(caption, PLATFORM_CHAR_LIMITS[platform]);
+    const limit = PLATFORM_CHAR_LIMITS[platform];
+    result[platform] =
+      platform === "x" || platform === "instagram" || platform === "instagram_reels"
+        ? caption.length <= limit
+          ? caption
+          : trimToLength(caption, limit)
+        : trimToLength(caption, limit);
   }
   return result;
 }

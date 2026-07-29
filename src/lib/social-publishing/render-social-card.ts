@@ -13,6 +13,7 @@ import {
   buildHeroGradientOverlay,
   getHeroLogoPlacement,
 } from "@/lib/social-publishing/hero-gradient-overlay";
+import { wrapTitleLines } from "@/lib/social-publishing/wrap-title-lines";
 
 export type RenderSocialCardInput = {
   title: string;
@@ -41,30 +42,8 @@ function escapeXml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function wrapTitle(title: string, maxCharsPerLine: number, maxLines: number): string[] {
-  const words = title.trim().split(/\s+/);
-  const lines: string[] = [];
-  let current = "";
-
-  for (const word of words) {
-    const next = current ? `${current} ${word}` : word;
-    if (next.length <= maxCharsPerLine) {
-      current = next;
-      continue;
-    }
-    if (current) lines.push(current);
-    current = word;
-    if (lines.length >= maxLines - 1) break;
-  }
-  if (current && lines.length < maxLines) lines.push(current);
-  if (lines.length === 0) lines.push(title.slice(0, maxCharsPerLine));
-
-  const joined = lines.join(" ");
-  if (joined.length < title.length && lines.length > 0) {
-    const last = lines[lines.length - 1]!;
-    lines[lines.length - 1] = `${last.slice(0, maxCharsPerLine - 1)}…`;
-  }
-  return lines.slice(0, maxLines);
+function wrapTitle(title: string, maxCharsPerLine: number): string[] {
+  return wrapTitleLines(title, maxCharsPerLine);
 }
 
 function buildStandardOverlaySvg(
@@ -75,7 +54,7 @@ function buildStandardOverlaySvg(
   fontFilePath: string,
 ): Buffer {
   const { width, height } = layout;
-  const titleLines = wrapTitle(title, 32, 3);
+  const titleLines = wrapTitle(title, 32);
   const titleFontSize = 46;
   const titleLineHeight = titleFontSize * 1.15;
   const titleStartY =
