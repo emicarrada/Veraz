@@ -1,6 +1,13 @@
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
+import { SOCIAL_CARD_VARIANTS } from "@/features/social-publishing/templates/card-variants";
+import { buildHeroGradientOverlay } from "@/lib/social-publishing/hero-gradient-overlay";
 import { fitTitleLayout, wrapTitleLines } from "@/lib/social-publishing/wrap-title-lines";
+
+const LONG_TITLE =
+  "El gobierno anunció medidas económicas tras la reunión con el FMI y los gobernadores provinciales";
 
 describe("wrapTitleLines", () => {
   it("wraps all words without ellipsis", () => {
@@ -31,5 +38,21 @@ describe("fitTitleLayout", () => {
     });
     expect(lines.join(" ")).toBe(title);
     expect(lines.length).toBeGreaterThan(3);
+  });
+});
+
+describe("buildHeroGradientOverlay", () => {
+  it("embeds the full headline without ellipsis on feed cards", () => {
+    const root = process.cwd();
+    const svg = buildHeroGradientOverlay(
+      LONG_TITLE,
+      "Infobae",
+      SOCIAL_CARD_VARIANTS["hero-gradient"],
+      path.join(root, "public/fonts/font/HelveticaNowDisplay-Bold.woff2"),
+      path.join(root, "public/fonts/font/HelveticaNowDisplay-Medium.woff2"),
+    ).toString("utf8");
+
+    expect(svg).not.toContain("…");
+    expect(svg).toContain("gobernadores provinciales");
   });
 });

@@ -22,7 +22,7 @@ function parseIntEnv(value: string | undefined, defaultValue: number, min: numbe
 
 export function loadSocialVideoDeliveryConfig(env: NodeJS.ProcessEnv = process.env): SocialVideoDeliveryConfig {
   const base = loadSocialPublishConfig(env);
-  const channelRaw = env.SOCIAL_VIDEO_DELIVERY?.trim().toLowerCase() ?? "telegram";
+  const channelRaw = env.SOCIAL_VIDEO_DELIVERY?.trim().toLowerCase() ?? "none";
   const channel: SocialVideoDeliveryChannel =
     channelRaw === "none" || channelRaw === "off" || channelRaw === "false" ? "none" : "telegram";
 

@@ -8,6 +8,3 @@ PATH=/usr/bin:/bin
 
 # Instagram feed — 6/día
 0 8,11,14,17,20,23 * * * cd /home/veraz/Veraz && xvfb-run -a -s "-screen 0 1280x900x24" env SOCIAL_HEADED=true SOCIAL_PLATFORMS=instagram SOCIAL_MAX_POSTS_PER_RUN=1 SOCIAL_INSTAGRAM_MAX_POSTS_PER_DAY=6 npm run social:publish >> /home/veraz/Veraz/.social/publish.log 2>&1
-
-# Video → Telegram — 8/día
-20 7,9,11,13,15,17,19,21 * * * cd /home/veraz/Veraz && SOCIAL_MAX_POSTS_PER_RUN=1 SOCIAL_VIDEO_DELIVERY_MAX_PER_DAY=8 npm run social:deliver:video >> /home/veraz/Veraz/.social/deliver-video.log 2>&1
