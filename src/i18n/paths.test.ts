@@ -26,7 +26,7 @@ describe("i18n paths", () => {
     expect(feedPathnameWithQuery({ categoria: "economia", q: "fed" })).toBe(
       "/noticias?categoria=economia&q=fed",
     );
-    expect(feedReturnPathname("tecnologia")).toBe("/noticias?categoria=tecnologia");
+    expect(feedReturnPathname("tecnologia")).toBe("/noticias/tecnologia");
   });
 
   it("strips locale prefix for nav matching", () => {

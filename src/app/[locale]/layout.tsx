@@ -8,7 +8,8 @@ import { PostHogAnalytics } from "@/components/analytics/posthog-analytics";
 import { HtmlLang } from "@/components/layout/html-lang";
 import { SitePillNav } from "@/components/layout/site-pill-nav";
 import { ThemeProvider } from "@/components/layout/theme-provider";
-import { getAnalyticsConfig } from "@/config/accessors";
+import { getAnalyticsConfig, getAppConfig } from "@/config/accessors";
+import { buildSiteVerificationMetadata } from "@/features/seo/build-page-metadata";
 import { routing, type Locale } from "@/i18n/routing";
 
 type LocaleLayoutProps = {
@@ -20,12 +21,30 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export const metadata: Metadata = {
-  icons: {
-    icon: "/veraztrans.png",
-    apple: "/veraztrans.png",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { name, siteUrl } = getAppConfig();
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: name,
+      template: `%s · ${name}`,
+    },
+    applicationName: name,
+    verification: buildSiteVerificationMetadata(),
+    other:
+      locale === "es"
+        ? {
+            "content-language": "es-MX",
+          }
+        : undefined,
+  };
+}
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale } = await params;

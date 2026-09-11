@@ -10,7 +10,7 @@ import type { SocialPlatform } from "@/features/social-publishing/types";
 import { loadSocialPublishConfig } from "@/features/social-publishing/load-config";
 import { upsertSocialPublication } from "@/lib/social-publishing/social-publication-store";
 import { createContentRepositories } from "@/lib/repositories/factory";
-import { isSupabasePersistenceConfigured } from "@/lib/supabase";
+import { isContentPersistenceEnabled } from "@/lib/repositories/factory";
 
 const VALID: SocialPlatform[] = ["x", "instagram", "tiktok", "instagram_reels", "youtube"];
 
@@ -23,8 +23,8 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  if (!isSupabasePersistenceConfigured()) {
-    console.error("Supabase not configured.");
+  if (!isContentPersistenceEnabled()) {
+    console.error("Content persistence is not configured.");
     process.exit(1);
   }
 

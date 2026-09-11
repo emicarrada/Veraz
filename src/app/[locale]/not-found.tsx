@@ -11,6 +11,10 @@ import { feedPath, homePath, staticPath } from "@/i18n/paths";
 import { getLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function NotFoundPage() {
   const t = await getTranslations("errors");
   const tNav = await getTranslations("nav");

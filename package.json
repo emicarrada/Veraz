@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "db:migrate": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/migrate-postgres.ts",
     "ingest:discover": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-scheduler-job.ts discover_feeds",
     "ingest:run": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-scheduler-job.ts run_ingestion",
     "ingest:health": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-scheduler-job.ts health_check",
@@ -47,6 +48,7 @@
     "next": "^15.5.22",
     "next-intl": "^4.13.2",
     "ogl": "^1.0.11",
+    "pg": "^8.23.0",
     "posthog-js": "^1.404.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -55,6 +57,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.32",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/three": "^0.185.1",

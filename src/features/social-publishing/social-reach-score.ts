@@ -44,7 +44,6 @@ const LOCAL_TOPONYM_TITLE =
   /\b(bolivia|santa cruz|cochabamba|la paz|oruro|potos[ií]|sucre|tarija|beni|pando|chubut|misiones|formosa|jujuy|salta|tucum[aá]n|mendoza|neuqu[eé]n|municipio|intendente|gobernador|diputad|concejo municipal|barrio)\b/i;
 
 const DEFAULT_TIER1_SOURCES = [
-  "infobae",
   "la-nacion",
   "el-pais",
   "bbc-mundo",

@@ -8,6 +8,7 @@
  */
 import type { Locale } from "@/i18n/routing";
 import { locales } from "@/i18n/routing";
+import { isNewsTopicGroup } from "@/features/news/classification/categories";
 
 const FEED_SEGMENT = "/noticias";
 
@@ -48,10 +49,14 @@ export function feedPathnameWithQuery(query?: FeedPathnameQuery): string {
   return search ? `${FEED_SEGMENT}?${search}` : FEED_SEGMENT;
 }
 
-/** @deprecated Prefer feedPathnameWithQuery */
+/** @deprecated Prefer feedReturnPath(locale, categorySlug) */
 export function feedReturnPathname(categorySlug?: string): string {
   if (!categorySlug || categorySlug === "general") {
     return FEED_SEGMENT;
+  }
+
+  if (isNewsTopicGroup(categorySlug)) {
+    return `${FEED_SEGMENT}/${categorySlug}`;
   }
 
   return `${FEED_SEGMENT}?categoria=${encodeURIComponent(categorySlug)}`;
@@ -65,6 +70,10 @@ export function feedPath(locale: Locale): string {
   return `/${locale}${FEED_SEGMENT}`;
 }
 
+export function feedCategoryPath(locale: Locale, categorySlug: string): string {
+  return `${feedPath(locale)}/${categorySlug}`;
+}
+
 export function articleDetailPath(locale: Locale, slug: string): string {
   return `${feedPath(locale)}/${slug}`;
 }
@@ -72,6 +81,10 @@ export function articleDetailPath(locale: Locale, slug: string): string {
 export function feedReturnPath(locale: Locale, categorySlug?: string): string {
   if (!categorySlug || categorySlug === "general") {
     return feedPath(locale);
+  }
+
+  if (isNewsTopicGroup(categorySlug)) {
+    return feedCategoryPath(locale, categorySlug);
   }
 
   return `${feedPath(locale)}?categoria=${encodeURIComponent(categorySlug)}`;

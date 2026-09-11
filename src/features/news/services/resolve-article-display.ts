@@ -2,8 +2,7 @@ import type { ArticleId } from "@/domain/shared/ids";
 import { isAIEnabled } from "@/lib/ai-engine/config";
 import { translateArticleContent } from "@/lib/ai-engine/translate";
 import type { ArticleTranslationRepository, ArticleTranslation } from "@/lib/repositories/contracts/article-translation-repository";
-import { SupabaseArticleTranslationRepository } from "@/lib/repositories/supabase/supabase-article-translation-repository";
-import { createSupabaseAdminClient, isSupabasePersistenceConfigured } from "@/lib/supabase";
+import { createContentRepositories } from "@/lib/repositories/factory";
 import type { Locale } from "@/i18n/routing";
 
 export type ArticleSourceContent = {
@@ -28,8 +27,7 @@ function normalizeLanguageCode(code: string): string {
 }
 
 function createTranslationRepository(): ArticleTranslationRepository | null {
-  if (!isSupabasePersistenceConfigured()) return null;
-  return new SupabaseArticleTranslationRepository(createSupabaseAdminClient());
+  return createContentRepositories()?.translationRepository ?? null;
 }
 
 async function loadCachedTranslations(

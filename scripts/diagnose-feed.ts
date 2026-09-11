@@ -1,12 +1,13 @@
 #!/usr/bin/env tsx
 /**
- * Read-only feed diagnostics — run with: npx tsx scripts/diagnose-feed.ts
- * Requires NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in env.
+ * Read-only feed diagnostics — run with: npm run diagnose:feed
+ * Requires DATABASE_URL, or legacy Supabase env vars.
  */
 import {
   PRESTIGIOUS_FINANCE_SOURCES,
   PRESTIGIOUS_TECH_SOURCES,
 } from "@/features/news/config/prestigious-sources";
+import { createPostgresPool, isPostgresPersistenceConfigured } from "@/lib/postgres";
 import { createSupabaseAdminClient, isSupabasePersistenceConfigured } from "@/lib/supabase";
 
 const FEED_STATUSES = ["ingested", "published"] as const;
@@ -17,12 +18,61 @@ type ArticleLanguageJoinRow = {
   languages: { code: string } | null;
 };
 
-async function main(): Promise<void> {
-  if (!isSupabasePersistenceConfigured()) {
-    console.error("Supabase not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
-    process.exit(1);
-  }
+async function diagnosePostgres(): Promise<void> {
+  const pool = createPostgresPool();
+  const visible = await pool.query<{ count: string }>(
+    "SELECT COUNT(*)::text AS count FROM articles WHERE status = ANY($1::text[])",
+    [[...FEED_STATUSES]],
+  );
+  const statuses = await pool.query<{ status: string; count: string }>(
+    "SELECT status, COUNT(*)::text AS count FROM articles GROUP BY status ORDER BY status",
+  );
+  const orphans = await pool.query<{ count: string }>(
+    `
+    SELECT COUNT(*)::text AS count
+    FROM articles a
+    LEFT JOIN languages l ON l.id = a.language_id
+    WHERE a.status = ANY($1::text[]) AND l.code IS NULL
+    `,
+    [[...FEED_STATUSES]],
+  );
+  const languages = await pool.query<{ code: string }>("SELECT code FROM languages ORDER BY code");
+  const english = await pool.query<{ count: string }>(
+    `
+    SELECT COUNT(*)::text AS count
+    FROM articles a
+    INNER JOIN languages l ON l.id = a.language_id
+    WHERE a.status = ANY($1::text[]) AND l.code = 'en'
+    `,
+    [[...FEED_STATUSES]],
+  );
+  const translations = await pool.query(
+    "SELECT 1 FROM information_schema.tables WHERE table_name = 'article_translations'",
+  );
 
+  const prestigiousSlugs = [
+    ...PRESTIGIOUS_FINANCE_SOURCES.map((s) => s.slug),
+    ...PRESTIGIOUS_TECH_SOURCES.map((s) => s.slug),
+  ];
+  const sources = await pool.query<{ slug: string }>(
+    "SELECT slug FROM sources WHERE slug = ANY($1::text[])",
+    [prestigiousSlugs],
+  );
+  const foundSlugs = new Set(sources.rows.map((row) => row.slug));
+  const missingSlugs = prestigiousSlugs.filter((slug) => !foundSlugs.has(slug));
+
+  printDiagnostics({
+    visibleCount: Number(visible.rows[0]?.count ?? 0),
+    statusCounts: statuses.rows.map((row) => [row.status, Number(row.count)] as const),
+    orphanCount: Number(orphans.rows[0]?.count ?? 0),
+    languageCodes: languages.rows.map((row) => row.code),
+    englishCount: Number(english.rows[0]?.count ?? 0),
+    hasTranslationsTable: (translations.rowCount ?? 0) > 0,
+    missingSlugs,
+  });
+}
+
+async function diagnoseSupabase(): Promise<void> {
   const client = createSupabaseAdminClient();
 
   const { count: visibleCount, error: visibleError } = await client
@@ -31,17 +81,12 @@ async function main(): Promise<void> {
     .in("status", [...FEED_STATUSES]);
 
   if (visibleError) {
-    console.error("Failed to count visible articles:", visibleError.message);
-    process.exit(1);
+    throw new Error(`Failed to count visible articles: ${visibleError.message}`);
   }
 
-  const { data: statusRows, error: statusError } = await client
-    .from("articles")
-    .select("status");
-
+  const { data: statusRows, error: statusError } = await client.from("articles").select("status");
   if (statusError) {
-    console.error("Failed to load article statuses:", statusError.message);
-    process.exit(1);
+    throw new Error(`Failed to load article statuses: ${statusError.message}`);
   }
 
   const statusCounts = new Map<string, number>();
@@ -73,18 +118,15 @@ async function main(): Promise<void> {
     .in("slug", prestigiousSlugs);
 
   if (sourceError) {
-    console.error("Failed to load prestigious sources:", sourceError.message);
-    process.exit(1);
+    throw new Error(`Failed to load prestigious sources: ${sourceError.message}`);
   }
 
   const foundSlugs = new Set((sourceRows ?? []).map((row) => row.slug));
   const missingSlugs = prestigiousSlugs.filter((slug) => !foundSlugs.has(slug));
 
   const { data: langRows, error: langError } = await client.from("languages").select("code");
-
   if (langError) {
-    console.error("Failed to load languages catalog:", langError.message);
-    process.exit(1);
+    throw new Error(`Failed to load languages catalog: ${langError.message}`);
   }
 
   const { data: enArticles, error: enError } = await client
@@ -97,37 +139,70 @@ async function main(): Promise<void> {
     console.warn("Could not count EN articles:", enError.message);
   }
 
-  const { data: translationTable, error: translationError } = await client
+  const { error: translationError } = await client
     .from("article_translations")
     .select("article_id")
     .limit(1);
 
-  const hasTranslationsTable = !translationError;
+  printDiagnostics({
+    visibleCount: visibleCount ?? 0,
+    statusCounts: [...statusCounts.entries()].sort(),
+    orphanCount,
+    languageCodes: (langRows ?? []).map((row) => row.code),
+    englishCount: enError ? undefined : (enArticles ?? []).length,
+    hasTranslationsTable: !translationError,
+    missingSlugs,
+  });
+}
 
+function printDiagnostics(input: {
+  visibleCount: number;
+  statusCounts: ReadonlyArray<readonly [string, number]>;
+  orphanCount: number;
+  languageCodes: string[];
+  englishCount?: number;
+  hasTranslationsTable: boolean;
+  missingSlugs: string[];
+}): void {
   console.log("\n=== Veraz feed diagnostics ===\n");
-  console.log(`Visible feed articles (ingested|published): ${visibleCount ?? 0}`);
+  console.log(`Visible feed articles (ingested|published): ${input.visibleCount}`);
   console.log("Articles by status:");
-  for (const [status, count] of [...statusCounts.entries()].sort()) {
+  for (const [status, count] of input.statusCounts) {
     console.log(`  ${status}: ${count}`);
   }
-  console.log(`Articles with broken language join: ${orphanCount}`);
-  console.log(`Languages in catalog: ${(langRows ?? []).map((r) => r.code).join(", ") || "(none)"}`);
-  console.log(`English articles in feed: ${enError ? "unknown" : (enArticles ?? []).length}`);
-  console.log(`article_translations table: ${hasTranslationsTable ? "present" : "MISSING — run migration 20250721120000"}`);
-  if (missingSlugs.length > 0) {
-    console.log(`Missing prestigious source slugs in DB: ${missingSlugs.join(", ")}`);
+  console.log(`Articles with broken language join: ${input.orphanCount}`);
+  console.log(`Languages in catalog: ${input.languageCodes.join(", ") || "(none)"}`);
+  console.log(`English articles in feed: ${input.englishCount ?? "unknown"}`);
+  console.log(
+    `article_translations table: ${
+      input.hasTranslationsTable ? "present" : "MISSING — run npm run db:migrate"
+    }`,
+  );
+  if (input.missingSlugs.length > 0) {
+    console.log(`Missing prestigious source slugs in DB: ${input.missingSlugs.join(", ")}`);
   } else {
     console.log("All prestigious source slugs found in DB.");
   }
 
-  if ((visibleCount ?? 0) === 0) {
+  if (input.visibleCount === 0) {
     console.log("\nHint: run `npm run ingest:run` after configuring NEWS_RSS_FEEDS.");
   }
-  if (orphanCount > 0) {
+  if (input.orphanCount > 0) {
     console.log("\nHint: run `npx tsx scripts/backfill-article-language.ts` to fix language_id.");
   }
-
   console.log("");
+}
+
+async function main(): Promise<void> {
+  if (isPostgresPersistenceConfigured()) {
+    await diagnosePostgres();
+    return;
+  }
+  if (!isSupabasePersistenceConfigured()) {
+    console.error("Set DATABASE_URL, or NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.");
+    process.exit(1);
+  }
+  await diagnoseSupabase();
 }
 
 main().catch((error) => {

@@ -25,5 +25,7 @@ export {
   type ContentRepositories,
 } from "@/lib/repositories/factory";
 
+export { PostgresArticleRepository } from "@/lib/repositories/postgres/postgres-article-repository";
+export { PostgresSourceRepository } from "@/lib/repositories/postgres/postgres-source-repository";
 export { SupabaseArticleRepository } from "@/lib/repositories/supabase/supabase-article-repository";
 export { SupabaseSourceRepository } from "@/lib/repositories/supabase/supabase-source-repository";

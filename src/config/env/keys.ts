@@ -11,7 +11,10 @@ export const ENV_KEYS = {
   NEXT_PUBLIC_SITE_URL: "NEXT_PUBLIC_SITE_URL",
   NEXT_PUBLIC_APP_NAME: "NEXT_PUBLIC_APP_NAME",
 
-  /** Supabase (future) */
+  /** Direct Postgres (preferred persistence) */
+  DATABASE_URL: "DATABASE_URL",
+
+  /** Supabase (legacy persistence) */
   NEXT_PUBLIC_SUPABASE_URL: "NEXT_PUBLIC_SUPABASE_URL",
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   SUPABASE_SERVICE_ROLE_KEY: "SUPABASE_SERVICE_ROLE_KEY",
@@ -51,6 +54,12 @@ export const ENV_KEYS = {
 
   /** Security (cron / internal jobs) */
   CRON_SECRET: "CRON_SECRET",
+
+  /** SEO / search engine verification */
+  GOOGLE_SITE_VERIFICATION: "GOOGLE_SITE_VERIFICATION",
+  BING_SITE_VERIFICATION: "BING_SITE_VERIFICATION",
+  YANDEX_SITE_VERIFICATION: "YANDEX_SITE_VERIFICATION",
+  INDEXNOW_KEY: "INDEXNOW_KEY",
 } as const;
 
 export type EnvKey = (typeof ENV_KEYS)[keyof typeof ENV_KEYS];

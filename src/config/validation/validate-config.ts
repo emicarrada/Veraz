@@ -79,10 +79,10 @@ export function runBuiltInValidators(
       });
     }
 
-    if (!hasEnv(ENV_KEYS.SUPABASE_SERVICE_ROLE_KEY)) {
+    if (!hasEnv(ENV_KEYS.DATABASE_URL) && !hasEnv(ENV_KEYS.SUPABASE_SERVICE_ROLE_KEY)) {
       issues.push({
-        path: "supabase.serviceRoleKey",
-        message: "SUPABASE_SERVICE_ROLE_KEY is required in staging/production.",
+        path: "persistence",
+        message: "DATABASE_URL or SUPABASE_SERVICE_ROLE_KEY is required in staging/production.",
         severity: "error",
       });
     }

@@ -15,6 +15,9 @@ import type {
   ArticleRepository,
   ListFeedArticlesParams,
   ListFeedArticlesResult,
+  ListPublishedForSitemapParams,
+  ListPublishedForSitemapResult,
+  SitemapArticleRecord,
 } from "@/lib/repositories/contracts/article-repository";
 import {
   mapArticleRow,
@@ -161,6 +164,91 @@ export class SupabaseArticleRepository implements ArticleRepository {
       },
       references: (row.article_references ?? []).map(mapReferenceRow),
       ...(heroMedia ? { heroMedia } : {}),
+    };
+  }
+
+  async listPublishedForSitemap(
+    params: ListPublishedForSitemapParams,
+  ): Promise<ListPublishedForSitemapResult> {
+    const limit = Math.max(1, Math.min(params.limit, 500));
+
+    let query = this.client
+      .from("articles")
+      .select(
+        `
+        id,
+        slug,
+        title,
+        published_at,
+        ingested_at,
+        category_slug,
+        sources!inner (
+          slug
+        ),
+        languages (
+          code
+        )
+      `,
+      )
+      .in("status", [...FEED_STATUSES]);
+
+    if (params.cursor) {
+      const { publishedAt, ingestedAt, id } = params.cursor;
+      query = query.or(
+        `published_at.lt.${publishedAt},and(published_at.eq.${publishedAt},ingested_at.lt.${ingestedAt}),and(published_at.eq.${publishedAt},ingested_at.eq.${ingestedAt},id.lt.${id})`,
+      );
+    }
+
+    query = query
+      .order("published_at", { ascending: false })
+      .order("ingested_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(limit + 1);
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Failed to list sitemap articles: ${error.message}`);
+    }
+
+    type SitemapRow = {
+      id: string;
+      slug: string;
+      title: string;
+      published_at: string;
+      ingested_at: string;
+      category_slug: string;
+      sources: { slug: string };
+      languages: { code: string } | null;
+    };
+
+    const rows = (data ?? []) as SitemapRow[];
+    const hasMore = rows.length > limit;
+    const pageRows = hasMore ? rows.slice(0, limit) : rows;
+
+    const items: SitemapArticleRecord[] = pageRows.map((row) => ({
+      slug: row.slug,
+      title: row.title,
+      publishedAt: row.published_at,
+      sourceSlug: row.sources.slug,
+      categorySlug: parseCategorySlug(row.category_slug) ?? "general",
+      languageCode: resolveLanguageCode(row),
+    }));
+
+    const last = pageRows.at(-1);
+    const nextCursor =
+      hasMore && last
+        ? {
+            publishedAt: last.published_at,
+            ingestedAt: last.ingested_at,
+            id: last.id as ArticleId,
+          }
+        : undefined;
+
+    return {
+      items,
+      ...(nextCursor ? { nextCursor } : {}),
+      hasMore,
     };
   }
 

@@ -79,6 +79,7 @@ describe("NormalizedArticlePersistenceService", () => {
         };
       }),
       listForFeed: vi.fn(async () => ({ items: [], hasMore: false })),
+      listPublishedForSitemap: vi.fn(),
     };
 
     const service = new NormalizedArticlePersistenceService({

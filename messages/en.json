@@ -190,7 +190,28 @@
     "readOriginal": "Read original article",
     "sourceAttribution": "This summary comes from {source}. Read the full article at the original source.",
     "translatedBadge": "Translated",
-    "originalLanguageNote": "Content in {language}"
+    "originalLanguageNote": "Content in {language}",
+    "factualSummaryTitle": "At a glance",
+    "factualSummaryAria": "Factual article summary",
+    "factualSourceLabel": "Primary source",
+    "factualPublishedLabel": "Published",
+    "factualTopicLabel": "Topic",
+    "relatedInCategory": "More in {category}"
+  },
+  "seo": {
+    "category": {
+      "pageTitle": "{category} news",
+      "metaDescription": "Curated {category} news from reference sources. Traceability to the original publication.",
+      "intro": {
+        "economia": "Finance, markets, and economy coverage from reference outlets in English and Spanish. Every headline links to the original source.",
+        "tecnologia": "Technology news from specialized global reference media. Veraz aggregates headlines and summaries without rewriting or inventing facts.",
+        "politica": "Politics and government news from verifiable sources, with direct links to original articles.",
+        "internacional": "International coverage curated from reference agencies and media, with clear source attribution.",
+        "deportes": "Sports news from specialized sources. Read full details at the original outlet.",
+        "sociedad": "Society, education, and community topics with visible source and date.",
+        "cultura": "Culture, entertainment, and arts news from curated sources linking to original publications."
+      }
+    }
   },
   "static": {
     "methodology": {
@@ -229,6 +250,14 @@
           "bodyPrefix": "If you find a broken link, wrong classification, or a source that shouldn't be in the catalog, write to",
           "bodySuffix": "We review every report and adjust feeds or rules when appropriate."
         }
+      },
+      "faq": {
+        "q1": "Where do the news stories come from?",
+        "a1": "From public RSS feeds of curated media outlets. Veraz extracts headline, summary, and metadata; the full article stays at the original source.",
+        "q2": "Does Veraz invent content?",
+        "a2": "No. We don't generate facts or rewrite stories as our own. Each item shows the source and links to the original article.",
+        "q3": "How do I verify a source?",
+        "a3": "Each story shows the outlet name, date, and a button to read the full article on the source site."
       }
     },
     "about": {
@@ -310,6 +339,21 @@
           "bodyPrefix": "Legal or usage questions:",
           "bodySuffix": "."
         }
+      }
+    },
+    "sources": {
+      "title": "Sources",
+      "metaDescription": "RSS source catalog curated by Veraz for verifiable news.",
+      "pageTitle": "Curated sources",
+      "pageDescription": "{name} aggregates news only from sources listed here. Each feed is validated and monitored periodically.",
+      "intro": "{name} doesn't accept any URL: we select outlets and sections with editorial criteria. This page documents the active catalog for transparency.",
+      "methodologyNote": "To understand how we process each source, see our methodology page.",
+      "sections": {
+        "general": { "title": "General news", "body": "Front pages and general coverage in Spanish and English." },
+        "finance": { "title": "Finance", "body": "Reference outlets for markets, economy, and finance." },
+        "tech": { "title": "Technology", "body": "Specialized innovation and technology media." },
+        "sports": { "title": "Sports", "body": "International sports coverage." },
+        "culture": { "title": "Culture", "body": "Entertainment, arts, and culture." }
       }
     }
   },

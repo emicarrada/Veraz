@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   RSS_FEED_CATALOG,
   getCatalogFeedsByVertical,
+  isBlockedRssFeed,
   isNewsTopicGroup,
   toRssFeedConfig,
 } from "@/config/domains/rss-feed-catalog";
@@ -16,6 +17,11 @@ describe("RSS_FEED_CATALOG", () => {
     expect(getCatalogFeedsByVertical("culture").length).toBe(3);
   });
 
+  it("does not include Infobae", () => {
+    expect(RSS_FEED_CATALOG.some((entry) => entry.sourceSlug === "infobae")).toBe(false);
+    expect(RSS_FEED_CATALOG.some((entry) => entry.feedUrl.includes("infobae.com"))).toBe(false);
+  });
+
   it("maps catalog entries to RssFeedConfig", () => {
     const [first] = RSS_FEED_CATALOG;
     expect(first).toBeDefined();
@@ -23,6 +29,27 @@ describe("RSS_FEED_CATALOG", () => {
     expect(config.sourceSlug).toBe(first!.sourceSlug);
     expect(config.feedUrl).toBe(first!.feedUrl);
     expect(config).not.toHaveProperty("label");
+  });
+
+  it("blocks Infobae slug and host even if present in env", () => {
+    expect(
+      isBlockedRssFeed({
+        sourceSlug: "infobae",
+        feedUrl: "https://www.infobae.com/arc/outboundfeeds/rss/?outputType=xml",
+      }),
+    ).toBe(true);
+    expect(
+      isBlockedRssFeed({
+        sourceSlug: "other",
+        feedUrl: "https://www.infobae.com/rss.xml",
+      }),
+    ).toBe(true);
+    expect(
+      isBlockedRssFeed({
+        sourceSlug: "la-nacion",
+        feedUrl: "https://www.lanacion.com.ar/arc/outboundfeeds/rss/?outputType=xml",
+      }),
+    ).toBe(false);
   });
 
   it("validates topic groups", () => {

@@ -45,7 +45,7 @@
   },
   "landing": {
     "metaDescription": "Noticias agregadas de fuentes de referencia, con trazabilidad a la publicación original. Informar sin influenciar.",
-    "keywords": "Veraz, noticias, finanzas, tecnología, información verificable, fuentes de referencia",
+    "keywords": "Veraz, noticias México, noticias verificadas, actualidad LATAM, finanzas, tecnología, información verificable, fuentes de referencia",
     "hero": {
       "headline": "Una forma clara de informarte cada día",
       "subcopy": "Agregamos noticias de fuentes de referencia, con trazabilidad a la publicación original. Sin inventar hechos ni empujar una agenda.",
@@ -190,7 +190,28 @@
     "readOriginal": "Leer artículo original",
     "sourceAttribution": "Este resumen proviene de {source}. Lee el artículo completo en la fuente original.",
     "translatedBadge": "Traducido",
-    "originalLanguageNote": "Contenido en {language}"
+    "originalLanguageNote": "Contenido en {language}",
+    "factualSummaryTitle": "En resumen",
+    "factualSummaryAria": "Resumen factual del artículo",
+    "factualSourceLabel": "Fuente primaria",
+    "factualPublishedLabel": "Publicado",
+    "factualTopicLabel": "Tema",
+    "relatedInCategory": "Más en {category}"
+  },
+  "seo": {
+    "category": {
+      "pageTitle": "Noticias de {category}",
+      "metaDescription": "Noticias de {category} curadas de fuentes de referencia en México y LATAM. Trazabilidad a la publicación original.",
+      "intro": {
+        "economia": "Cobertura de finanzas, mercados y economía desde medios de referencia en español e inglés. Cada titular enlaza a la fuente original para que verifiques el contexto completo.",
+        "tecnologia": "Actualidad tecnológica de medios especializados y de referencia global. Veraz agrega titulares y resúmenes sin reescribir ni inventar hechos.",
+        "politica": "Noticias de política y gobierno en México y el mundo, agregadas de fuentes verificables con enlace directo al artículo original.",
+        "internacional": "Cobertura internacional curada de agencias y medios de referencia. Información clara con trazabilidad a la fuente primaria.",
+        "deportes": "Resultados, análisis y actualidad deportiva de fuentes especializadas. Lee el detalle completo en el medio original.",
+        "sociedad": "Temas de sociedad, educación y comunidad en México y LATAM, presentados con fuente y fecha visibles.",
+        "cultura": "Noticias de cultura, entretenimiento y artes desde medios curados. Cada ficha enlaza a la publicación original."
+      }
+    }
   },
   "static": {
     "methodology": {
@@ -229,6 +250,14 @@
           "bodyPrefix": "Si detectas un enlace roto, una clasificación incorrecta o una fuente que no debería estar en el catálogo, escríbenos a",
           "bodySuffix": "Revisamos cada reporte y ajustamos feeds o reglas cuando corresponda."
         }
+      },
+      "faq": {
+        "q1": "¿De dónde vienen las noticias?",
+        "a1": "De feeds RSS públicos de medios curados. Veraz extrae titular, resumen y metadatos; el artículo completo permanece en la fuente original.",
+        "q2": "¿Veraz inventa contenido?",
+        "a2": "No. No generamos hechos ni reescribimos noticias como propias. Cada ficha muestra la fuente y enlaza al artículo original.",
+        "q3": "¿Cómo verifico una fuente?",
+        "a3": "En cada noticia verás el nombre del medio, la fecha y un botón para leer el artículo completo en el sitio de la fuente."
       }
     },
     "about": {
@@ -309,6 +338,36 @@
           "title": "Contacto",
           "bodyPrefix": "Consultas legales o de uso:",
           "bodySuffix": "."
+        }
+      }
+    },
+    "sources": {
+      "title": "Fuentes",
+      "metaDescription": "Catálogo de fuentes RSS curadas por Veraz para noticias verificables en México y LATAM.",
+      "pageTitle": "Fuentes curadas",
+      "pageDescription": "{name} agrega noticias solo de fuentes listadas aquí. Cada feed se valida y monitoriza de forma periódica.",
+      "intro": "{name} no acepta cualquier URL: seleccionamos medios y secciones con criterios editoriales. Esta página documenta el catálogo activo para transparencia y SEO.",
+      "methodologyNote": "Para entender cómo procesamos cada fuente, consulta nuestra metodología.",
+      "sections": {
+        "general": {
+          "title": "Actualidad general",
+          "body": "Portadas y cobertura general en español e inglés para el feed Todas."
+        },
+        "finance": {
+          "title": "Finanzas",
+          "body": "Medios de referencia en mercados, economía y finanzas."
+        },
+        "tech": {
+          "title": "Tecnología",
+          "body": "Medios especializados en innovación, empresas y tecnología."
+        },
+        "sports": {
+          "title": "Deportes",
+          "body": "Cobertura deportiva internacional."
+        },
+        "culture": {
+          "title": "Cultura",
+          "body": "Entretenimiento, artes y cultura."
         }
       }
     }

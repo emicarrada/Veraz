@@ -46,7 +46,7 @@ describe("buildHeroGradientOverlay", () => {
     const root = process.cwd();
     const svg = buildHeroGradientOverlay(
       LONG_TITLE,
-      "Infobae",
+      "La Nación",
       SOCIAL_CARD_VARIANTS["hero-gradient"],
       path.join(root, "public/fonts/font/HelveticaNowDisplay-Bold.woff2"),
       path.join(root, "public/fonts/font/HelveticaNowDisplay-Medium.woff2"),

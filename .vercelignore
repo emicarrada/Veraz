@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.social
+*.log
+coverage
+.cursor
+.agent
+docs/case-study-chioko-estudio-creativo.md

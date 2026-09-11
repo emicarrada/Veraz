@@ -10,7 +10,7 @@ Documento de referencia: qué es el producto, por qué existe, cómo está const
 
 - Consumir noticias sin perder **trazabilidad** a la fuente original.
 - Evitar que la plataforma **invente hechos** o dependa de un relato generado por IA como si fuera periodismo.
-- Ofrecer una experiencia de lectura **clara, rápida y multilingüe**, con agregación de medios reconocibles (Infobae, La Nación, El País, BBC Mundo, TechCrunch, CNBC, etc.).
+- Ofrecer una experiencia de lectura **clara, rápida y multilingüe**, con agregación de medios reconocibles (La Nación, El País, BBC Mundo, TechCrunch, CNBC, etc.).
 
 ### Propuesta de valor (producto)
 
@@ -30,9 +30,9 @@ Documento de referencia: qué es el producto, por qué existe, cómo está const
 | Capa | Tecnología | Función |
 |------|------------|---------|
 | **Web pública** | Next.js 15 App Router, React, TypeScript, Tailwind | Landing, feed `/noticias`, artículo `[slug]`, i18n es/en |
-| **Datos** | Supabase (PostgreSQL + Auth + RLS) | Artículos, fuentes, estado de publicaciones sociales |
+| **Datos** | PostgreSQL en EC2 (`DATABASE_URL`) | Artículos, fuentes, estado de publicaciones sociales |
 | **Ingesta** | News Ingestion Engine (`src/lib/news-ingestion`) | RSS → normalizar → persistir |
-| **Scheduler ingesta** | GitHub Actions (+ rutas cron Vercel opcionales) | Discover / run / health sobre Supabase |
+| **Scheduler ingesta** | GitHub Actions (+ rutas cron Vercel opcionales) | Discover / run / health sobre Postgres |
 | **IA (opcional)** | AI Engine (`src/lib/ai-engine`) | Contratos; default `disabled` |
 | **Redes sociales** | Feature `social-publishing` + Playwright | X, IG feed; video 9:16 + Telegram |
 | **Hosting web** | **Vercel** | SSR, ISR, API routes |
@@ -67,7 +67,7 @@ src/
 
 ### 3.2 Modelo de dominio (resumen)
 
-- **Source** → medio (Infobae, …).
+- **Source** → medio (La Nación, …).
 - **Article** → noticia ingerida (título, excerpt, slug, hero, categoría).
 - **Media / Reference** → imagen y citas trazables.
 - **Story** (diseño) → agrupación multi-fuente del mismo hecho.
@@ -84,7 +84,7 @@ Pipeline conceptual:
 **Implementado hoy:**
 
 - Proveedor **RSS** (fetch XML, parse, `NormalizedArticle`).
-- Persistencia en Supabase con idempotencia por URL/fingerprint.
+- Persistencia en PostgreSQL (`DATABASE_URL`) con idempotencia por URL/fingerprint.
 - Jobs: `npm run ingest:discover`, `ingest:run`, `ingest:health` (GitHub Actions en prod).
 - Catálogo de feeds en config (`NEWS_RSS_FEEDS` / catálogo documentado).
 
@@ -137,7 +137,7 @@ TikTok automático vía TikTok Studio existió en código; en producción se pre
 Unificado en `social-reach-score.ts`:
 
 - Peso por categoría (deportes, internacional, tech, …).
-- Bonus: foto hero, titular con gancho, fuente tier‑1 (Infobae, La Nación, …).
+- Bonus: foto hero, titular con gancho, fuente tier‑1 (La Nación, El País, …).
 - Penalización: titulares hiperlocales sin categoría de alcance.
 - Umbral: `SOCIAL_MIN_REACH_SCORE=3` — si no hay candidato, el slot no publica.
 
@@ -174,7 +174,7 @@ Tabla `social_publications`: evita duplicados, cuotas diarias por plataforma, es
 **División acordada:**
 
 - **Vercel** = sitio [veraz.app](https://www.veraz.app), API de cron de ingesta (debug), despliegue continuo desde `main`.
-- **Supabase** = base de datos única (web + workers leen/escriben con service role).
+- **PostgreSQL en EC2** = base de datos única (web + workers leen/escriben con `DATABASE_URL`).
 - **AWS EC2** = **único** ejecutor de jobs sociales 24/7.
 
 Veraz en AWS **no** despliega la web Next en EC2 en el flujo estándar; EC2 es un **worker** que clona el mismo repo Git para ejecutar scripts Node.
@@ -264,7 +264,7 @@ Límites actuales:
 
 - No hay ECS/Lambda para social (monolito script en una VM).
 - No S3 como CDN de medios sociales (archivos locales en `.social/exports`).
-- No RDS propio (Supabase hosted Postgres).
+- Postgres en el mismo EC2 del worker social (`DATABASE_URL`). Supabase queda como fallback legado.
 - No CloudFront delante del worker (solo IP pública SSH).
 
 Ampliable en el futuro: S3 para archivos, SSM en lugar de SCP, API oficial X/Meta para prescindir de Playwright en serverless.
@@ -274,7 +274,7 @@ Ampliable en el futuro: S3 para archivos, SSM en lugar de SCP, API oficial X/Met
 ## 7. Ingesta y web en Vercel / GitHub (complemento)
 
 - **Build:** `next build` en Vercel; variables sincronizadas con `sync-vercel-env.sh`.
-- **Ingesta prod:** GitHub Actions ejecuta CLI contra Supabase (Hobby no permite cron frecuente en Vercel).
+- **Ingesta prod:** GitHub Actions ejecuta CLI contra Postgres (Hobby no permite cron frecuente en Vercel).
 - **Seguridad:** `CRON_SECRET` en rutas `/api/cron/ingest/*`; RLS en tablas de usuario; service role solo en servidor.
 
 ---

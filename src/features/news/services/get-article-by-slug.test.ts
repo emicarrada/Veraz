@@ -41,10 +41,10 @@ const detailRecord: ArticleDetailRecord = {
   languageCode: "es",
   source: {
     id: "source-1" as SourceId,
-    slug: "infobae",
-    name: "Infobae",
-    attributionName: "Infobae",
-    homepageUrl: "https://www.infobae.com",
+    slug: "la-nacion",
+    name: "La Nación",
+    attributionName: "La Nación",
+    homepageUrl: "https://www.lanacion.com.ar",
   },
   references: [],
 };
@@ -55,6 +55,7 @@ function createRepository(record: ArticleDetailRecord | null): ArticleRepository
     findBySlug: vi.fn(async () => record),
     save: vi.fn(),
     listForFeed: vi.fn(),
+    listPublishedForSitemap: vi.fn(),
   };
 }
 
@@ -143,10 +144,10 @@ describe("article detail SEO helpers", () => {
     isTranslated: false,
     showOriginalLanguageNote: false,
     source: {
-      name: "Infobae",
-      slug: "infobae",
-      attributionName: "Infobae",
-      homepageUrl: "https://www.infobae.com",
+      name: "La Nación",
+      slug: "la-nacion",
+      attributionName: "La Nación",
+      homepageUrl: "https://www.lanacion.com.ar",
     },
     references: [],
   };
@@ -154,7 +155,7 @@ describe("article detail SEO helpers", () => {
   it("builds metadata with canonical and open graph fields", () => {
     const metadata = buildArticleDetailMetadata(item, "http://localhost:3000", "es");
 
-    expect(metadata.title).toContain("Demo Post");
+    expect(metadata.title).toBe("Demo Post");
     expect(metadata.alternates?.canonical).toBe("/es/noticias/demo-post-abc12345");
     expect(metadata.openGraph?.type).toBe("article");
     expect(metadata.twitter?.card).toBe("summary");
@@ -166,6 +167,6 @@ describe("article detail SEO helpers", () => {
     expect(jsonLd["@type"]).toBe("NewsArticle");
     expect(jsonLd.headline).toBe("Demo Post");
     expect(jsonLd.isBasedOn).toBe("https://example.com/post");
-    expect(jsonLd.inLanguage).toBe("es");
+    expect(jsonLd.inLanguage).toBe("es-MX");
   });
 });

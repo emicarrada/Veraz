@@ -4,7 +4,7 @@ Fuentes curadas para ingesta vía `NEWS_RSS_FEEDS`. Mezcla **español + inglés*
 
 La fuente de verdad en código es [`src/config/domains/rss-feed-catalog.ts`](../src/config/domains/rss-feed-catalog.ts).
 
-Las pestañas **Finanzas** y **Tecnología** en `/noticias` solo muestran artículos de fuentes de referencia definidas en [`src/features/news/config/prestigious-sources.ts`](../src/features/news/config/prestigious-sources.ts). Infobae, La Nación y medios generales aparecen solo en **Todas**.
+Las pestañas **Finanzas** y **Tecnología** en `/noticias` solo muestran artículos de fuentes de referencia definidas en [`src/features/news/config/prestigious-sources.ts`](../src/features/news/config/prestigious-sources.ts). La Nación, El País, BBC Mundo y demás portadas generales aparecen solo en **Todas**.
 
 ## Cómo activar
 
@@ -35,7 +35,7 @@ En **Settings → Secrets and variables → Actions** del repo, o con el script:
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role (ingesta) |
-| `NEWS_RSS_FEEDS` | JSON del catálogo (22 feeds) |
+| `NEWS_RSS_FEEDS` | JSON del catálogo (21 feeds) |
 
 ### Workflows (`.github/workflows/`)
 
@@ -107,7 +107,6 @@ Portadas generales — visibles en **Todas**, no en Finanzas/Tecnología:
 |------------|--------|--------|
 | `bbc-mundo` | BBC Mundo | ES |
 | `el-pais` | El País | ES |
-| `infobae` | Infobae | ES |
 | `la-nacion` | La Nación | ES |
 
 ## Rutas de producto por rubro
@@ -150,6 +149,7 @@ Causa habitual post-i18n: artículos con `language_id` huérfano (excluidos por 
 
 | Fuente | Motivo |
 |--------|--------|
+| Infobae | Excluido del catálogo, la web y las publicaciones sociales |
 | Reuters Business RSS | Feed legacy caído / bloqueado |
 | El Economista (MX) | HTTP 403 en RSS público |
 | Xataka, Genbeta, Hipertextual | Blogs — no entran en pestaña Tecnología (referencia global) |

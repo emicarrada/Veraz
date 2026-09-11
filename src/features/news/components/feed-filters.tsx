@@ -9,20 +9,27 @@ import { Text } from "@/components/ui/text";
 import {
   NEWS_FILTER_GROUPS,
   NEWS_SPECIFIC_FILTER_TOPICS,
+  isNewsTopicGroup,
   parseCategorySlug,
 } from "@/features/news/classification/categories";
-import { useRouter } from "@/i18n/navigation";
-import { feedPathnameWithQuery } from "@/i18n/paths";
+import { useRouter, usePathname } from "@/i18n/navigation";
+import { feedPathnameWithQuery, stripLocalePrefix } from "@/i18n/paths";
 import { cn } from "@/utils/cn";
 import { useSearchParams } from "next/navigation";
 
 export function FeedFilters() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const t = useTranslations("feed");
 
-  const activeCategory = parseCategorySlug(searchParams.get("categoria") ?? undefined);
+  const internalPath = stripLocalePrefix(pathname);
+  const pathCategoryMatch = internalPath.match(/^\/noticias\/([^/?]+)/);
+  const pathCategory = pathCategoryMatch?.[1];
+  const activeCategory = parseCategorySlug(
+    searchParams.get("categoria") ?? pathCategory ?? undefined,
+  );
   const queryParam = searchParams.get("q") ?? "";
   const [query, setQuery] = useState(queryParam);
 
@@ -32,6 +39,16 @@ export function FeedFilters() {
 
   const applyFilters = (nextQuery: string, category?: string) => {
     const trimmed = nextQuery.trim();
+
+    if (category && isNewsTopicGroup(category)) {
+      const path = trimmed
+        ? `/noticias/${category}?q=${encodeURIComponent(trimmed)}`
+        : `/noticias/${category}`;
+      startTransition(() => {
+        router.push(path);
+      });
+      return;
+    }
 
     const path = feedPathnameWithQuery({
       ...(trimmed ? { q: trimmed } : {}),

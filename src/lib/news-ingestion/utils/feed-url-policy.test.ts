@@ -16,4 +16,9 @@ describe("isExcludedFeedArticleUrl", () => {
       false,
     );
   });
+
+  it("excludes Infobae article URLs", () => {
+    expect(isExcludedFeedArticleUrl("https://www.infobae.com/politica/nota/")).toBe(true);
+    expect(isExcludedFeedArticleUrl("https://infobae.com/america/nota/")).toBe(true);
+  });
 });

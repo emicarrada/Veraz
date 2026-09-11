@@ -4,6 +4,7 @@ import type {
   SocialPlatform,
   SocialPublicationStatus,
 } from "@/features/social-publishing/types";
+import { createPostgresPool, isPostgresPersistenceConfigured } from "@/lib/postgres";
 import { createSupabaseAdminClient, isSupabasePersistenceConfigured } from "@/lib/supabase";
 import { startOfTodayUtcIso } from "@/lib/social-publishing/publish-day-boundary";
 
@@ -18,30 +19,57 @@ export type SocialPublicationRow = {
   error_message: string | null;
 };
 
+function isPersistenceReady(): boolean {
+  return isPostgresPersistenceConfigured() || isSupabasePersistenceConfigured();
+}
+
+function isUndefinedTableError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const code = "code" in error ? String(error.code) : "";
+  const message = "message" in error ? String(error.message) : "";
+  return code === "42P01" || message.includes("social_publications");
+}
+
 export async function loadPublicationIndex(): Promise<Map<string, Map<SocialPlatform, SocialPublicationStatus>>> {
   const index = new Map<string, Map<SocialPlatform, SocialPublicationStatus>>();
-  if (!isSupabasePersistenceConfigured()) return index;
+  if (!isPersistenceReady()) return index;
 
-  const client = createSupabaseAdminClient();
-  const { data, error } = await client
-    .from("social_publications")
-    .select("article_id, platform, status");
-
-  if (error) {
-    if (error.message.includes("social_publications") || error.code === "42P01") {
+  try {
+    if (isPostgresPersistenceConfigured()) {
+      const { rows } = await createPostgresPool().query<{
+        article_id: string;
+        platform: SocialPlatform;
+        status: SocialPublicationStatus;
+      }>("SELECT article_id, platform, status FROM social_publications");
+      for (const row of rows) {
+        if (!index.has(row.article_id)) index.set(row.article_id, new Map());
+        index.get(row.article_id)!.set(row.platform, row.status);
+      }
       return index;
     }
-    throw new Error(`Failed to load social_publications: ${error.message}`);
-  }
 
-  for (const row of data ?? []) {
-    const articleId = row.article_id as string;
-    const platform = row.platform as SocialPlatform;
-    const status = row.status as SocialPublicationStatus;
-    if (!index.has(articleId)) index.set(articleId, new Map());
-    index.get(articleId)!.set(platform, status);
+    const client = createSupabaseAdminClient();
+    const { data, error } = await client
+      .from("social_publications")
+      .select("article_id, platform, status");
+
+    if (error) {
+      if (isUndefinedTableError(error)) return index;
+      throw new Error(`Failed to load social_publications: ${error.message}`);
+    }
+
+    for (const row of data ?? []) {
+      const articleId = row.article_id as string;
+      const platform = row.platform as SocialPlatform;
+      const status = row.status as SocialPublicationStatus;
+      if (!index.has(articleId)) index.set(articleId, new Map());
+      index.get(articleId)!.set(platform, status);
+    }
+    return index;
+  } catch (error) {
+    if (isUndefinedTableError(error)) return index;
+    throw error;
   }
-  return index;
 }
 
 export function articleNeedsPlatformWork(
@@ -80,8 +108,42 @@ export async function upsertSocialPublication(input: {
   errorMessage?: string;
   markPosted?: boolean;
 }): Promise<void> {
-  if (!isSupabasePersistenceConfigured()) {
-    throw new Error("Supabase not configured");
+  if (!isPersistenceReady()) {
+    throw new Error("Content persistence is not configured");
+  }
+
+  const postedAt = input.markPosted ? new Date().toISOString() : null;
+
+  if (isPostgresPersistenceConfigured()) {
+    await createPostgresPool().query(
+      `
+      INSERT INTO social_publications (
+        article_id, platform, locale, status, export_path, caption,
+        external_post_id, error_message, posted_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ON CONFLICT (article_id, platform) DO UPDATE SET
+        locale = EXCLUDED.locale,
+        status = EXCLUDED.status,
+        export_path = EXCLUDED.export_path,
+        caption = EXCLUDED.caption,
+        external_post_id = EXCLUDED.external_post_id,
+        error_message = EXCLUDED.error_message,
+        posted_at = COALESCE(EXCLUDED.posted_at, social_publications.posted_at)
+      `,
+      [
+        input.articleId,
+        input.platform,
+        input.locale,
+        input.status,
+        input.exportPath ?? null,
+        input.caption ?? null,
+        input.externalPostId ?? null,
+        input.errorMessage ?? null,
+        postedAt,
+      ],
+    );
+    return;
   }
 
   const client = createSupabaseAdminClient();
@@ -106,19 +168,32 @@ export async function upsertSocialPublication(input: {
   }
 }
 
-export async function countPostedToday(
+async function countByStatusToday(
   platform: SocialPlatform,
   timeZone: string,
+  status: "posted" | "delivered",
 ): Promise<number> {
-  if (!isSupabasePersistenceConfigured()) return 0;
+  if (!isPersistenceReady()) return 0;
+  const since = startOfTodayUtcIso(timeZone);
+
+  if (isPostgresPersistenceConfigured()) {
+    const { rows } = await createPostgresPool().query<{ count: string }>(
+      `
+      SELECT COUNT(*)::text AS count
+      FROM social_publications
+      WHERE platform = $1 AND status = $2 AND posted_at >= $3::timestamptz
+      `,
+      [platform, status, since],
+    );
+    return Number(rows[0]?.count ?? 0);
+  }
 
   const client = createSupabaseAdminClient();
-  const since = startOfTodayUtcIso(timeZone);
   const { count, error } = await client
     .from("social_publications")
     .select("*", { count: "exact", head: true })
     .eq("platform", platform)
-    .eq("status", "posted")
+    .eq("status", status)
     .gte("posted_at", since);
 
   if (error) {
@@ -127,23 +202,16 @@ export async function countPostedToday(
   return count ?? 0;
 }
 
+export async function countPostedToday(
+  platform: SocialPlatform,
+  timeZone: string,
+): Promise<number> {
+  return countByStatusToday(platform, timeZone, "posted");
+}
+
 export async function countDeliveredToday(
   platform: SocialPlatform,
   timeZone: string,
 ): Promise<number> {
-  if (!isSupabasePersistenceConfigured()) return 0;
-
-  const client = createSupabaseAdminClient();
-  const since = startOfTodayUtcIso(timeZone);
-  const { count, error } = await client
-    .from("social_publications")
-    .select("*", { count: "exact", head: true })
-    .eq("platform", platform)
-    .eq("status", "delivered")
-    .gte("posted_at", since);
-
-  if (error) {
-    throw new Error(`Failed to count delivered social_publications: ${error.message}`);
-  }
-  return count ?? 0;
+  return countByStatusToday(platform, timeZone, "delivered");
 }

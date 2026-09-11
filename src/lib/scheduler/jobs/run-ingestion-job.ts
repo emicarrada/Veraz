@@ -1,4 +1,5 @@
 import { getNewsConfig } from "@/config/accessors";
+import { notifyArticleIndexNow } from "@/features/seo/indexnow";
 import {
   createRssIngestionPersistenceRunner,
   type RssIngestionPersistenceRunner,
@@ -80,6 +81,14 @@ export class RunIngestionJob implements ScheduledJob {
       metrics.duplicates += result.data.persistence.skippedDuplicates;
       metrics.failed += result.data.persistence.failed;
       metrics.discovered += result.data.normalized;
+
+      const createdSlugs = result.data.persistence.results
+        .filter((entry) => entry.created)
+        .map((entry) => entry.article.slug);
+
+      if (createdSlugs.length > 0) {
+        await Promise.all(createdSlugs.map((slug) => notifyArticleIndexNow(slug, ["es"])));
+      }
     }
 
     return finalizeJobRun(context, startedAtMs, {

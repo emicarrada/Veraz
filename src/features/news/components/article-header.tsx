@@ -8,7 +8,7 @@ export type ArticleHeaderProps = {
 export function ArticleHeader({ article }: ArticleHeaderProps) {
   return (
     <header className="space-y-4 border-b border-border pb-6">
-      <Text variant="h1" as="h1" className="text-balance">
+      <Text variant="h1" as="h1" id="article-headline" className="text-balance">
         {article.title}
       </Text>
     </header>

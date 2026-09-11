@@ -9,7 +9,6 @@ import type { IngestionResult } from "@/lib/news-ingestion/types/results";
 import { ingestionFail, ingestionOk } from "@/lib/news-ingestion/utils/ingestion-result";
 import type { ArticleRepository } from "@/lib/repositories/contracts/article-repository";
 import type { SourceRepository } from "@/lib/repositories/contracts/source-repository";
-import type { SupabaseArticleRepository } from "@/lib/repositories/supabase/supabase-article-repository";
 
 export type ArticlePersistenceResult = {
   article: Article;
@@ -136,9 +135,7 @@ export class NormalizedArticlePersistenceService {
 }
 
 export function createLanguageResolverFromArticleRepository(
-  articleRepository: SupabaseArticleRepository,
+  articleRepository: LanguageResolver,
 ): LanguageResolver {
-  return {
-    resolveLanguageId: (languageCode) => articleRepository.resolveLanguageId(languageCode),
-  };
+  return articleRepository;
 }

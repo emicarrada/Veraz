@@ -14,9 +14,9 @@ function candidate(
     excerpt: "",
     categorySlug: "general",
     languageCode: "es",
-    sourceSlug: "infobae",
-    sourceName: "Infobae",
-    sourceAttribution: "Infobae",
+    sourceSlug: "la-nacion",
+    sourceName: "La Nación",
+    sourceAttribution: "La Nación",
     categoryFallbackImageUrl: "https://www.veraz.app/x.webp",
     locale: "es",
     verazArticleUrl: "https://www.veraz.app/es/noticias/test-slug",
@@ -35,7 +35,7 @@ describe("socialReachScore", () => {
     const weak = candidate({
       title: "El intendente de Santa Cruz presentó obras en un barrio",
       categorySlug: "general",
-      sourceSlug: "infobae",
+      sourceSlug: "la-nacion",
     });
     expect(socialReachScore(strong)).toBeGreaterThanOrEqual(3);
     expect(socialReachScore(weak)).toBeLessThan(3);

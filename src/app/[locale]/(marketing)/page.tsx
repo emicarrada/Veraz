@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { LandingPage } from "@/components/marketing/landing";
 import { getAppConfig } from "@/config";
-import { homePath } from "@/i18n/paths";
+import { feedPath, homePath } from "@/i18n/paths";
 import { locales, type Locale } from "@/i18n/routing";
 
 const { name: SITE_NAME, tagline: SITE_TAGLINE, siteUrl } = getAppConfig();
@@ -89,7 +89,15 @@ async function JsonLd({ locale }: { locale: Locale }) {
       "@type": "Organization",
       name: SITE_NAME,
     },
-    inLanguage: locale,
+    inLanguage: locale === "en" ? "en" : "es-MX",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${siteUrl}${feedPath(locale)}?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
   };
 
   return (

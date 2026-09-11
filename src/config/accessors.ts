@@ -79,6 +79,10 @@ export function getSupabaseConfig() {
   return getConfig().supabase;
 }
 
+export function getPostgresConfig() {
+  return getConfig().postgres;
+}
+
 export function isFeatureEnabled(
   flag: keyof import("@/config/domains/feature-flags").FeatureFlags,
 ): boolean {

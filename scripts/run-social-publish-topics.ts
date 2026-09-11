@@ -20,7 +20,7 @@ import {
 } from "@/lib/social-publishing/social-publication-store";
 import { writePlatformCaptionFiles } from "@/lib/social-publishing/write-caption-files";
 import { createContentRepositories } from "@/lib/repositories/factory";
-import { isSupabasePersistenceConfigured } from "@/lib/supabase";
+import { isContentPersistenceEnabled } from "@/lib/repositories/factory";
 
 const VALID_GROUPS: NewsTopicGroup[] = [
   "politica",
@@ -48,8 +48,8 @@ async function main(): Promise<void> {
     console.error("SOCIAL_PUBLISHING_ENABLED is not true.");
     process.exit(1);
   }
-  if (!isSupabasePersistenceConfigured()) {
-    console.error("Supabase not configured.");
+  if (!isContentPersistenceEnabled()) {
+    console.error("Content persistence is not configured.");
     process.exit(1);
   }
 

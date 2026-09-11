@@ -10,7 +10,9 @@
 
 ## Motor previsto
 
-PostgreSQL vía **Supabase**, con Row Level Security (RLS) para datos de usuario.
+PostgreSQL directo (`DATABASE_URL`), alojado en el EC2 de social. Supabase queda como fallback legado si `DATABASE_URL` no está definido.
+
+Migraciones: `supabase/migrations/` aplicadas con `npm run db:migrate`. Provisionar el servidor: `./scripts/vps-postgres-setup.sh`.
 
 ## Principio de mapeo
 
@@ -109,4 +111,4 @@ erDiagram
 
 ## Migraciones
 
-Viven en `supabase/migrations/`. Aplicar con la CLI de Supabase antes de persistir en entorno local/staging.
+Viven en `supabase/migrations/`. Aplicar con `npm run db:migrate` contra `DATABASE_URL`.

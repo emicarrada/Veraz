@@ -23,7 +23,7 @@ El MVP debe funcionar **con IA desactivada** (modo `disabled`).
 - Feed público (ISR)
 - Página de noticia (contenido de fuente; enrichment opcional si Engine activo)
 - Categorías básicas
-- SEO (metadata, sitemap, OG)
+- SEO (metadata, sitemap, OG) — ver [`docs/seo-geo-strategy.md`](seo-geo-strategy.md)
 - Auth opcional (login)
 - AI Engine: facade runtime + al menos un provider **opcional** (pluggable; no bloquea el MVP)
 

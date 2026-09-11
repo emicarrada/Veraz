@@ -11,13 +11,13 @@ import { selectSocialCandidates } from "@/features/social-publishing/select-cand
 import { downloadSocialImage } from "@/lib/social-publishing/download-social-image";
 import { renderSocialCard } from "@/lib/social-publishing/render-social-card";
 import { createContentRepositories } from "@/lib/repositories/factory";
-import { isSupabasePersistenceConfigured } from "@/lib/supabase";
+import { isContentPersistenceEnabled } from "@/lib/repositories/factory";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 
 async function main(): Promise<void> {
-  if (!isSupabasePersistenceConfigured()) {
-    console.error("Supabase not configured — need .env.local with service role.");
+  if (!isContentPersistenceEnabled()) {
+    console.error("Content persistence is not configured — need DATABASE_URL in .env.local.");
     process.exit(1);
   }
 

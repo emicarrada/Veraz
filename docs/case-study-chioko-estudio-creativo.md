@@ -112,7 +112,7 @@ Ruta `/` — composición modular en secciones:
 
 - **Feed** con tabs por vertical (economía, tecnología, política, deportes, …).
 - **Filtros** por tags específicos (Messi, Trump, OpenAI, cripto, …).
-- **Banner de confianza** en verticales “prestigiosas”: muestra medios permitidos (CNBC, Expansión, TechCrunch, Infobae, etc. según locale).
+- **Banner de confianza** en verticales “prestigiosas”: muestra medios permitidos (CNBC, Expansión, TechCrunch, etc. según locale).
 - **Tarjetas de artículo** con imagen segura, categoría, fuente y excerpt.
 - **Detalle** con hero image, metadatos, cuerpo, **referencias** y **JSON-LD** para SEO.
 - **Paginación** “load more” sin recargar la app entera.
@@ -144,7 +144,7 @@ Pipeline diseñado por etapas (aunque no todas están en producción al 100%):
 - Proveedor **RSS** funcional (fetch XML, parse, normalizar a modelo interno).
 - Persistencia idempotente en **Supabase** (`articles`, `sources`, …).
 - **Scheduler** vía GitHub Actions / cron API (`CRON_SECRET`) para discover, run, health.
-- Catálogo amplio: Infobae, La Nación, El País, BBC Mundo, TechCrunch, CNBC, etc.
+- Catálogo amplio: La Nación, El País, BBC Mundo, TechCrunch, CNBC, etc.
 
 **Diseño destacable:** un proveedor caído no tumba el resto; la lectura pública no espera a la ingesta.
 

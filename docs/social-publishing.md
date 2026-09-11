@@ -54,7 +54,7 @@ X, Instagram y entrega Telegram usan la **misma puntuación** (`social-reach-sco
 SOCIAL_HIGH_REACH_ONLY=true
 SOCIAL_MIN_REACH_SCORE=3
 SOCIAL_REACH_REQUIRE_HERO_FOR_VIDEO=true
-SOCIAL_REACH_TIER1_SOURCES=infobae,la-nacion,el-pais,bbc-mundo,expansion,bloomberg-linea
+SOCIAL_REACH_TIER1_SOURCES=la-nacion,el-pais,bbc-mundo,expansion,bloomberg-linea
 ```
 
 Legacy: `SOCIAL_INSTAGRAM_HIGH_IMPACT_ONLY` sigue mapeando a `SOCIAL_HIGH_REACH_ONLY` si no defines el nuevo flag.

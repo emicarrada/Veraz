@@ -141,7 +141,7 @@ export function getPrestigiousFeedTrustIntro(
   );
 }
 
-/** English catalog sources — whitelist for /en feed (blocks Clarín, Infobae, etc.). */
+/** English catalog sources — whitelist for /en feed (blocks Clarín and other non-EN outlets). */
 export const EN_FEED_SOURCE_SLUGS: readonly string[] = RSS_FEED_CATALOG.filter(
   (entry) => entry.defaultLanguageCode === "en",
 ).map((entry) => entry.sourceSlug);

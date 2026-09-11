@@ -15,6 +15,15 @@ Entrar al VPS (solo desde la PC):
 ssh -i ~/Descargas/veraz-social.pem ubuntu@3.87.109.197
 ```
 
+Postgres de contenido (reemplazo de Supabase) se instala en este mismo EC2:
+
+```bash
+./scripts/vps-postgres-setup.sh
+npm run db:migrate
+```
+
+La web en Vercel y GitHub Actions usan `DATABASE_URL`. En el Security Group hay que abrir TCP 5432.
+
 ## Desplegar código (Git)
 
 **PC:**

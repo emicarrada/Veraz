@@ -44,6 +44,7 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  serverExternalPackages: ["pg"],
   async headers() {
     return [
       {
@@ -57,47 +58,99 @@ const nextConfig: NextConfig = {
       {
         source: "/",
         destination: "/es",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/noticias/finanzas",
-        destination: "/es/noticias?categoria=economia",
+        destination: "/es/noticias/economia",
         permanent: true,
       },
       {
         source: "/noticias/tecnologia",
-        destination: "/es/noticias?categoria=tecnologia",
+        destination: "/es/noticias/tecnologia",
+        permanent: true,
+      },
+      {
+        source: "/noticias/:slug",
+        destination: "/es/noticias/:slug",
         permanent: true,
       },
       {
         source: "/noticias",
         destination: "/es/noticias",
-        permanent: false,
+        permanent: true,
+      },
+      {
+        source: "/:locale(es|en)/noticias",
+        has: [{ type: "query", key: "categoria", value: "economia" }],
+        destination: "/:locale/noticias/economia",
+        permanent: true,
+      },
+      {
+        source: "/:locale(es|en)/noticias",
+        has: [{ type: "query", key: "categoria", value: "tecnologia" }],
+        destination: "/:locale/noticias/tecnologia",
+        permanent: true,
+      },
+      {
+        source: "/:locale(es|en)/noticias",
+        has: [{ type: "query", key: "categoria", value: "politica" }],
+        destination: "/:locale/noticias/politica",
+        permanent: true,
+      },
+      {
+        source: "/:locale(es|en)/noticias",
+        has: [{ type: "query", key: "categoria", value: "internacional" }],
+        destination: "/:locale/noticias/internacional",
+        permanent: true,
+      },
+      {
+        source: "/:locale(es|en)/noticias",
+        has: [{ type: "query", key: "categoria", value: "deportes" }],
+        destination: "/:locale/noticias/deportes",
+        permanent: true,
+      },
+      {
+        source: "/:locale(es|en)/noticias",
+        has: [{ type: "query", key: "categoria", value: "sociedad" }],
+        destination: "/:locale/noticias/sociedad",
+        permanent: true,
+      },
+      {
+        source: "/:locale(es|en)/noticias",
+        has: [{ type: "query", key: "categoria", value: "cultura" }],
+        destination: "/:locale/noticias/cultura",
+        permanent: true,
       },
       {
         source: "/metodologia",
         destination: "/es/metodologia",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/acerca-de",
         destination: "/es/acerca-de",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/contacto",
         destination: "/es/contacto",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/privacidad",
         destination: "/es/privacidad",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/terminos",
         destination: "/es/terminos",
-        permanent: false,
+        permanent: true,
+      },
+      {
+        source: "/fuentes",
+        destination: "/es/fuentes",
+        permanent: true,
       },
     ];
   },

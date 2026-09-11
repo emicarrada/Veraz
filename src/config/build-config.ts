@@ -8,6 +8,7 @@ import {
   DEFAULT_PROVIDER_CONFIG,
   DEFAULT_SEARCH_CONFIG,
   DEFAULT_SECURITY_CONFIG,
+  DEFAULT_POSTGRES_CONFIG,
   DEFAULT_SUPABASE_CONFIG,
   DEFAULT_SCHEDULER_CONFIG,
   DEFAULT_APP_NAME,
@@ -20,12 +21,14 @@ import type { AppConfig } from "@/config/domains/app";
 import type { CacheConfig } from "@/config/domains/cache";
 import type { FeatureFlags } from "@/config/domains/feature-flags";
 import type { NewsConfig, RssFeedConfig } from "@/config/domains/news";
+import { isBlockedRssFeed } from "@/config/domains/rss-feed-catalog";
 import { isNewsTopicGroup } from "@/features/news/classification/categories";
 import type { PremiumConfig } from "@/config/domains/premium";
 import type { ProviderConfig } from "@/config/domains/providers";
 import type { SearchConfig } from "@/config/domains/search";
 import type { SecurityConfig } from "@/config/domains/security";
 import type { SchedulerConfig } from "@/config/domains/scheduler";
+import type { PostgresConfig } from "@/config/domains/postgres";
 import type { SupabaseConfig } from "@/config/domains/supabase";
 import { ENV_KEYS, getEnv, getEnvBoolean, getEnvInt, hasEnv } from "@/config/env";
 import {
@@ -99,10 +102,16 @@ function parseRssFeeds(raw: string | undefined): ReadonlyArray<RssFeedConfig> {
       }
 
       const feed = entry as RssFeedConfig;
+      const sourceSlug = feed.sourceSlug.trim();
+      const feedUrl = feed.feedUrl.trim();
+      if (isBlockedRssFeed({ sourceSlug, feedUrl })) {
+        return [];
+      }
+
       return [
         {
-          sourceSlug: feed.sourceSlug.trim(),
-          feedUrl: feed.feedUrl.trim(),
+          sourceSlug,
+          feedUrl,
           ...(feed.defaultLanguageCode
             ? { defaultLanguageCode: feed.defaultLanguageCode.trim() }
             : {}),
@@ -206,6 +215,15 @@ function buildSchedulerConfig(): SchedulerConfig {
   };
 }
 
+function buildPostgresConfig(): PostgresConfig {
+  const connectionString = getEnv(ENV_KEYS.DATABASE_URL) ?? "";
+  return {
+    ...DEFAULT_POSTGRES_CONFIG,
+    connectionString,
+    persistenceEnabled: Boolean(connectionString.trim()),
+  };
+}
+
 function buildSupabaseConfig(): SupabaseConfig {
   const url = getEnv(ENV_KEYS.NEXT_PUBLIC_SUPABASE_URL) ?? "";
   const anonKey = getEnv(ENV_KEYS.NEXT_PUBLIC_SUPABASE_ANON_KEY) ?? "";
@@ -284,6 +302,7 @@ export function buildConfig(): VerazConfig {
     premium: buildPremiumConfig(featureFlags),
     security: buildSecurityConfig(environment),
     supabase: buildSupabaseConfig(),
+    postgres: buildPostgresConfig(),
     scheduler: buildSchedulerConfig(),
     analytics: buildAnalyticsConfig(environment),
     featureFlags,

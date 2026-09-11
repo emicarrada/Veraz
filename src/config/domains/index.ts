@@ -44,6 +44,9 @@ export { DEFAULT_ANALYTICS_CONFIG } from "@/config/domains/analytics";
 export type { FeatureFlags } from "@/config/domains/feature-flags";
 export { DEFAULT_FEATURE_FLAGS } from "@/config/domains/feature-flags";
 
+export type { PostgresConfig } from "@/config/domains/postgres";
+export { DEFAULT_POSTGRES_CONFIG } from "@/config/domains/postgres";
+
 export type { SupabaseConfig } from "@/config/domains/supabase";
 export { DEFAULT_SUPABASE_CONFIG } from "@/config/domains/supabase";
 

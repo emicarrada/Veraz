@@ -9,6 +9,7 @@ import { articleDetailPath } from "@/i18n/paths";
 import type { Locale } from "@/i18n/routing";
 import type { ArticleRepository } from "@/lib/repositories/contracts/article-repository";
 import { createContentRepositories } from "@/lib/repositories/factory";
+import { buildArticleAlternateLanguages, publisherLogoUrl } from "@/features/seo/build-page-metadata";
 
 export type GetArticleBySlugParams = {
   slug: string;
@@ -101,16 +102,20 @@ export function buildArticleDetailMetadata(
   const url = buildArticleDetailUrl(article.slug, siteUrl, locale);
   const description = article.excerpt.slice(0, 160);
   const path = buildArticleDetailPath(article.slug, locale);
+  const alternateLanguages = buildArticleAlternateLanguages(
+    article.slug,
+    article.source.slug,
+    article.languageCode,
+  );
 
   return {
-    title: `${article.title} | Veraz`,
+    title: article.title,
     description,
     alternates: {
       canonical: path,
-      languages: {
-        es: buildArticleDetailPath(article.slug, "es"),
-        en: buildArticleDetailPath(article.slug, "en"),
-      },
+      ...(Object.keys(alternateLanguages).length > 0
+        ? { languages: alternateLanguages }
+        : {}),
     },
     openGraph: {
       title: article.title,
@@ -136,6 +141,7 @@ export function buildArticleNewsArticleJsonLd(
   locale: Locale,
 ): Record<string, unknown> {
   const url = buildArticleDetailUrl(article.slug, siteUrl, locale);
+  const logoUrl = publisherLogoUrl(siteUrl);
 
   return {
     "@context": "https://schema.org",
@@ -144,7 +150,12 @@ export function buildArticleNewsArticleJsonLd(
     description: article.excerpt,
     datePublished: article.publishedAt,
     dateModified: article.publishedAt,
-    inLanguage: locale,
+    inLanguage: locale === "en" ? "en" : "es-MX",
+    articleSection: article.categoryLabel,
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: ["#article-headline", "#article-factual-summary"],
+    },
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": url,
@@ -158,6 +169,10 @@ export function buildArticleNewsArticleJsonLd(
       "@type": "Organization",
       name: "Veraz",
       url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: logoUrl,
+      },
     },
     ...(article.heroImage
       ? {

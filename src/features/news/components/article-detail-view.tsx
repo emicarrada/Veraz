@@ -1,4 +1,4 @@
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -13,13 +13,17 @@ import { ArticleMeta } from "@/features/news/components/article-meta";
 import { ArticleReferences } from "@/features/news/components/article-references";
 import { NewsAppShell } from "@/features/news/components/news-app-shell";
 import type { ArticleDetailItem } from "@/features/news/types/article-detail";
+import { ArticleFactualSummary } from "@/features/seo/components/article-factual-summary";
+import { RelatedArticles } from "@/features/seo/components/related-articles";
 import { feedReturnPathname } from "@/i18n/paths";
+import type { Locale } from "@/i18n/routing";
 
 export type ArticleDetailViewProps = {
   article: ArticleDetailItem;
+  locale: Locale;
 };
 
-export async function ArticleDetailView({ article }: ArticleDetailViewProps) {
+export async function ArticleDetailView({ article, locale }: ArticleDetailViewProps) {
   const t = await getTranslations("article");
   const tLanguages = await getTranslations("languages");
   const feedHref = feedReturnPathname(article.categorySlug);
@@ -57,6 +61,7 @@ export async function ArticleDetailView({ article }: ArticleDetailViewProps) {
             />
           )}
 
+          <ArticleFactualSummary article={article} />
           <ArticleContent article={article} />
 
           <div className="rounded-xl border border-border bg-surface-muted px-4 py-4 sm:px-5">
@@ -76,6 +81,12 @@ export async function ArticleDetailView({ article }: ArticleDetailViewProps) {
           </div>
 
           <ArticleReferences references={article.references} />
+
+          <RelatedArticles
+            locale={locale}
+            categorySlug={article.categorySlug}
+            excludeSlug={article.slug}
+          />
         </article>
       </Section>
     </NewsAppShell>

@@ -4,7 +4,7 @@
 
 Modular monolith sobre **Next.js App Router**, con lógica de negocio en `src/features/*`, infraestructura en `src/lib/*`, y UI compartida en `src/components/*`.
 
-Deploy: **Vercel**. Datos y auth: **Supabase (PostgreSQL + Auth)**.
+Deploy: **Vercel**. Datos: **PostgreSQL** en el EC2 de social (`DATABASE_URL`). Auth de usuario sigue pendiente (Fase B).
 
 **Núcleo del producto:** plataforma de noticias (ingesta, publicación, lectura).  
 **IA:** capa opcional (`AI Engine`) que *enriquece* contenido. Veraz debe funcionar al 100% **sin ningún proveedor de IA ni API keys**.
@@ -18,7 +18,7 @@ App Router (src/app) — routing, layouts, Route Handlers
         │
 Features (src/features) — news, search, auth, … (+ ai insights UI)
         │
-        ├── lib/supabase, cache, …     (infra del núcleo)
+        ├── lib/postgres, lib/supabase, cache, …     (infra del núcleo)
         │
         ├── lib/news-ingestion  ← ÚNICA puerta a fuentes externas de noticias
         │        │
@@ -30,7 +30,7 @@ Features (src/features) — news, search, auth, … (+ ai insights UI)
                  ├── providers/openai|gemini|anthropic|…  (futuro)
                  └── mode: disabled | summaries | context | full
         │
-PostgreSQL (Supabase) + Auth + jobs de ingesta
+PostgreSQL (EC2) + jobs de ingesta
         │
    [opcional] jobs de enriquecimiento vía AI Engine
 ```

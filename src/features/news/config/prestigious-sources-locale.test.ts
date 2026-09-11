@@ -50,7 +50,7 @@ describe("prestigious sources by locale", () => {
     expect(resolveFeedLanguageCodes("es", "tecnologia")).toBeUndefined();
   });
 
-  it("whitelists EN catalog sources for /en feed (excludes Clarín, Infobae, etc.)", () => {
+  it("whitelists EN catalog sources for /en feed (excludes Clarín and other non-EN outlets)", () => {
     const allowed = resolveFeedSourceSlugs("en") ?? [];
     expect(allowed).toEqual(EN_FEED_SOURCE_SLUGS);
     expect(allowed).toContain("cnbc-top");
@@ -62,11 +62,12 @@ describe("prestigious sources by locale", () => {
     expect(allowed).not.toContain("clarin");
   });
 
-  it("whitelists ES catalog sources for /es feed", () => {
+  it("whitelists ES catalog sources for /es feed and excludes Infobae", () => {
     const allowed = resolveFeedSourceSlugs("es") ?? [];
     expect(allowed).toEqual(ES_FEED_SOURCE_SLUGS);
-    expect(allowed).toContain("infobae");
+    expect(allowed).toContain("la-nacion");
     expect(allowed).toContain("expansion");
+    expect(allowed).not.toContain("infobae");
     expect(allowed).not.toContain("cnbc-top");
     expect(allowed).not.toContain("bbc-sport");
   });
@@ -78,8 +79,17 @@ describe("prestigious sources by locale", () => {
 
   it("allows ES articles from ES sources on /es", () => {
     expect(
-      isArticleAccessibleForLocale({ sourceSlug: "infobae", languageCode: "es" }, "es"),
+      isArticleAccessibleForLocale({ sourceSlug: "la-nacion", languageCode: "es" }, "es"),
     ).toBe(true);
+  });
+
+  it("never allows Infobae articles on any locale", () => {
+    expect(
+      isArticleAccessibleForLocale({ sourceSlug: "infobae", languageCode: "es" }, "es"),
+    ).toBe(false);
+    expect(
+      isArticleAccessibleForLocale({ sourceSlug: "infobae", languageCode: "es" }, "en"),
+    ).toBe(false);
   });
 
   it("allows prestigious EN sources on /es for finance/tech articles", () => {
@@ -96,7 +106,7 @@ describe("prestigious sources by locale", () => {
 
   it("blocks ES articles on /en", () => {
     expect(
-      isArticleAccessibleForLocale({ sourceSlug: "infobae", languageCode: "es" }, "en"),
+      isArticleAccessibleForLocale({ sourceSlug: "la-nacion", languageCode: "es" }, "en"),
     ).toBe(false);
   });
 

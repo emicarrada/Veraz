@@ -4,6 +4,7 @@ export const SITE_FOOTER_NAV = [
   { href: "/", label: "Inicio" },
   { href: "/noticias", label: "Noticias" },
   { href: "/metodologia", label: "Metodología" },
+  { href: "/fuentes", label: "Fuentes" },
   { href: "/acerca-de", label: "Acerca de" },
   { href: "/contacto", label: "Contacto" },
 ] as const;

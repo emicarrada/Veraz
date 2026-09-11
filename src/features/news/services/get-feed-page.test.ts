@@ -49,6 +49,7 @@ function createRepository(result: ListFeedArticlesResult): ArticleRepository {
     findBySlug: vi.fn(),
     save: vi.fn(),
     listForFeed: vi.fn(async () => result),
+    listPublishedForSitemap: vi.fn(),
   };
 }
 
@@ -121,7 +122,7 @@ describe("getFeedPage", () => {
     expect(repository.listForFeed).toHaveBeenCalledWith(
       expect.objectContaining({
         languageCodes: ["es"],
-        sourceSlugs: expect.arrayContaining(["infobae", "la-nacion"]),
+        sourceSlugs: expect.arrayContaining(["bbc-mundo", "la-nacion"]),
       }),
     );
     expect(repository.listForFeed).toHaveBeenCalledWith(

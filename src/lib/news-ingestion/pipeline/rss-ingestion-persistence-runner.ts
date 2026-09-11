@@ -1,7 +1,5 @@
 import { getRssFeedBySourceSlug } from "@/config/accessors";
-import { SupabaseNotConfiguredError } from "@/lib/supabase/errors";
 import {
-  createLanguageResolverFromArticleRepository,
   NormalizedArticlePersistenceService,
 } from "@/lib/news-ingestion/persistence/normalized-article-persistence-service";
 import {
@@ -25,7 +23,7 @@ export type RssIngestionPersistenceRunnerOptions = {
 };
 
 /**
- * RSS discover → fetch → normalize → persist (Supabase via repositories).
+ * RSS discover → fetch → normalize → persist (Postgres/Supabase via repositories).
  */
 export class RssIngestionPersistenceRunner {
   private readonly ingestionRunner: RssIngestionRunner;
@@ -48,9 +46,7 @@ export class RssIngestionPersistenceRunner {
     this.persistenceService = new NormalizedArticlePersistenceService({
       sourceRepository: repos.sourceRepository,
       articleRepository: repos.articleRepository,
-      languageResolver: createLanguageResolverFromArticleRepository(
-        repos.supabaseArticleRepository,
-      ),
+      languageResolver: repos.languageResolver,
       feedLookup: getRssFeedBySourceSlug,
     });
   }
@@ -61,8 +57,8 @@ export class RssIngestionPersistenceRunner {
     if (!this.persistenceService) {
       return ingestionFail(
         new PersistenceFailedError(
-          "Supabase persistence is not configured.",
-          { retryable: false, cause: new SupabaseNotConfiguredError() },
+          "Content persistence is not configured.",
+          { retryable: false },
         ),
       );
     }

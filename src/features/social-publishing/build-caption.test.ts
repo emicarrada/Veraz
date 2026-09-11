@@ -11,9 +11,9 @@ const base: SocialArticleCandidate = {
   excerpt: "Lead",
   categorySlug: "general",
   languageCode: "es",
-  sourceSlug: "infobae",
-  sourceName: "Infobae",
-  sourceAttribution: "Infobae",
+  sourceSlug: "la-nacion",
+  sourceName: "La Nación",
+  sourceAttribution: "La Nación",
   categoryFallbackImageUrl: "https://www.veraz.app/ImagenesNoticias/general.webp",
   locale: "es",
   verazArticleUrl: "https://www.veraz.app/es/noticias/demo-slug",
@@ -24,7 +24,7 @@ describe("buildSocialCaption", () => {
     const caption = buildSocialCaption(base);
     expect(caption).toContain("Titular de prueba");
     expect(caption).toContain("https://www.veraz.app/es/noticias/demo-slug");
-    expect(caption).toContain("Fuente: Infobae");
+    expect(caption).toContain("Fuente: La Nación");
   });
 
   it("builds platform-specific captions", () => {

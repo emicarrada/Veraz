@@ -56,6 +56,27 @@ export type ListFeedArticlesResult = {
   hasMore: boolean;
 };
 
+/** Lightweight row for sitemap and IndexNow discovery. */
+export type SitemapArticleRecord = {
+  slug: Slug;
+  title: string;
+  publishedAt: string;
+  languageCode: string;
+  sourceSlug: string;
+  categorySlug: NewsCategorySlug;
+};
+
+export type ListPublishedForSitemapParams = {
+  limit: number;
+  cursor?: FeedCursor;
+};
+
+export type ListPublishedForSitemapResult = {
+  items: ReadonlyArray<SitemapArticleRecord>;
+  nextCursor?: FeedCursor;
+  hasMore: boolean;
+};
+
 /** Full article read model for the detail page. */
 export type ArticleDetailRecord = {
   article: Article;
@@ -71,4 +92,7 @@ export type ArticleRepository = {
   findBySlug(slug: Slug): Promise<ArticleDetailRecord | null>;
   save(input: ArticlePersistInput): Promise<ArticlePersistResult>;
   listForFeed(params: ListFeedArticlesParams): Promise<ListFeedArticlesResult>;
+  listPublishedForSitemap(
+    params: ListPublishedForSitemapParams,
+  ): Promise<ListPublishedForSitemapResult>;
 };

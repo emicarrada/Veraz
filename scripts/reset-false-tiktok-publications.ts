@@ -3,11 +3,26 @@
  * Reset tiktok rows marked posted so publish can retry (e.g. false positive).
  * Usage: npm run social:reset-tiktok-false-posts
  */
+import { createPostgresPool, isPostgresPersistenceConfigured } from "@/lib/postgres";
 import { createSupabaseAdminClient, isSupabasePersistenceConfigured } from "@/lib/supabase";
 
 async function main(): Promise<void> {
+  if (isPostgresPersistenceConfigured()) {
+    const result = await createPostgresPool().query<{ article_id: string }>(
+      `
+      UPDATE social_publications
+      SET status = 'failed',
+          error_message = 'Reset for retry (manual false-post cleanup)'
+      WHERE platform = 'tiktok' AND status = 'posted'
+      RETURNING article_id
+      `,
+    );
+    console.log(`Reset ${result.rowCount ?? 0} tiktok publication(s) to failed for retry.`);
+    return;
+  }
+
   if (!isSupabasePersistenceConfigured()) {
-    console.error("Supabase not configured.");
+    console.error("Content persistence is not configured.");
     process.exit(1);
   }
 

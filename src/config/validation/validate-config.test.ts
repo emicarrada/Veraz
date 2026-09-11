@@ -20,6 +20,7 @@ describe("runBuiltInValidators security rules", () => {
   it("errors when production lacks CRON_SECRET", () => {
     process.env[ENV_KEYS.VERAZ_ENV] = "production";
     delete process.env[ENV_KEYS.CRON_SECRET];
+    delete process.env[ENV_KEYS.DATABASE_URL];
     delete process.env[ENV_KEYS.SUPABASE_SERVICE_ROLE_KEY];
     resetEnvSnapshot();
 

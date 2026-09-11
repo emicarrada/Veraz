@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { StaticPageShell } from "@/components/marketing/static-page-shell";
 import { SUPPORT_EMAIL } from "@/config/site-navigation";
+import { buildStaticPageMetadata } from "@/features/seo/build-page-metadata";
 import type { Locale } from "@/i18n/routing";
 
 type PageProps = {
@@ -13,13 +14,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "static.terms" });
 
-  return {
+  return buildStaticPageMetadata({
+    locale: locale as Locale,
+    segment: "terminos",
     title: t("title"),
     description: t("metaDescription"),
-    alternates: {
-      languages: { es: "/es/terminos", en: "/en/terminos" },
-    },
-  };
+  });
 }
 
 export default async function TerminosPage({ params }: PageProps) {

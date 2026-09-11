@@ -31,8 +31,7 @@ import { renderSocialReelForCandidate } from "@/lib/social-publishing/render-soc
 import { publishToSocialNetwork, profileDirForPlatform } from "@/lib/social-publishing/publish";
 import { assertSocialPublishReady } from "@/lib/social-publishing/publish/assert-ready";
 import { writePlatformCaptionFiles } from "@/lib/social-publishing/write-caption-files";
-import { createContentRepositories } from "@/lib/repositories/factory";
-import { isSupabasePersistenceConfigured } from "@/lib/supabase";
+import { createContentRepositories, isContentPersistenceEnabled } from "@/lib/repositories/factory";
 
 function maxPostsPerDayForPlatform(
   platform: SocialPlatform,
@@ -94,8 +93,8 @@ export async function runSocialPublish(): Promise<void> {
     process.exit(0);
   }
 
-  if (!isSupabasePersistenceConfigured()) {
-    console.error("Supabase not configured (NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY).");
+  if (!isContentPersistenceEnabled()) {
+    console.error("Content persistence is not configured (DATABASE_URL or Supabase).");
     process.exit(1);
   }
 

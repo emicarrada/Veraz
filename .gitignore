@@ -45,3 +45,4 @@ coverage
 
 # Social automation (Playwright sessions, downloads)
 .social/
+.env*

@@ -23,13 +23,13 @@ import {
 } from "@/lib/social-publishing/render-social-reel-video";
 import { renderVideoReelOverlay } from "@/lib/social-publishing/render-video-reel-overlay";
 import { createContentRepositories } from "@/lib/repositories/factory";
-import { isSupabasePersistenceConfigured } from "@/lib/supabase";
+import { isContentPersistenceEnabled } from "@/lib/repositories/factory";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 
 async function main(): Promise<void> {
-  if (!isSupabasePersistenceConfigured()) {
-    console.error("Supabase not configured — need .env.local");
+  if (!isContentPersistenceEnabled()) {
+    console.error("Content persistence is not configured — need .env.local");
     process.exit(1);
   }
 

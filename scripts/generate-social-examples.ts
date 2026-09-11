@@ -15,10 +15,10 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 
 const SAMPLES = [
   {
-    id: "infobae-messi",
+    id: "la-nacion-messi",
     title:
       "El emotivo mensaje de Leandro Paredes tras perder la final: fue un orgullo ser parte de esta Selección",
-    source: "Infobae",
+    source: "La Nación",
     photo: "public/fotosGlobo/expansion.jpg",
   },
   {

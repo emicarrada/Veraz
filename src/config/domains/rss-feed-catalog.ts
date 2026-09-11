@@ -192,13 +192,6 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     label: "El País",
   },
   {
-    sourceSlug: "infobae",
-    feedUrl: "https://www.infobae.com/arc/outboundfeeds/rss/?outputType=xml",
-    defaultLanguageCode: "es",
-    primaryVertical: "general",
-    label: "Infobae",
-  },
-  {
     sourceSlug: "la-nacion",
     feedUrl: "https://www.lanacion.com.ar/arc/outboundfeeds/rss/?outputType=xml",
     defaultLanguageCode: "es",
@@ -206,6 +199,28 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     label: "La Nación",
   },
 ] as const;
+
+const BLOCKED_NEWS_SOURCE_SLUGS = new Set(["infobae"]);
+const BLOCKED_NEWS_HOSTS = ["infobae.com"] as const;
+
+export function isBlockedNewsSourceSlug(slug: string): boolean {
+  return BLOCKED_NEWS_SOURCE_SLUGS.has(slug.trim().toLowerCase());
+}
+
+export function isBlockedNewsHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^www\./, "");
+  return BLOCKED_NEWS_HOSTS.some((blocked) => host === blocked || host.endsWith(`.${blocked}`));
+}
+
+/** Hard-block leftover env entries (slug or infobae.com host). */
+export function isBlockedRssFeed(feed: { sourceSlug: string; feedUrl: string }): boolean {
+  if (isBlockedNewsSourceSlug(feed.sourceSlug)) return true;
+  try {
+    return isBlockedNewsHost(new URL(feed.feedUrl).hostname);
+  } catch {
+    return false;
+  }
+}
 
 /** Strip catalog-only fields for NEWS_RSS_FEEDS JSON. */
 export function toRssFeedConfig(entry: RssFeedCatalogEntry): RssFeedConfig {

@@ -3,8 +3,9 @@
 Infrastructure and low-level helpers.
 
 - `ai-engine/` — optional, provider-agnostic AI layer (contracts only today)
-- `supabase/` — Supabase admin client + DB types (service role, server-only)
-- `repositories/` — contratos + implementaciones Supabase (`Article`, `Source`)
+- `postgres/` — pool `pg` + migraciones (`DATABASE_URL`)
+- `supabase/` — cliente legado (solo si no hay `DATABASE_URL`)
+- `repositories/` — contratos + implementaciones Postgres (y Supabase de fallback)
 - `scheduler/` — jobs periódicos de ingesta (desacoplado del pipeline)
 - `cache/` — caching helpers (future)
 

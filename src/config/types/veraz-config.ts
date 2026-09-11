@@ -9,6 +9,7 @@ import type { ProviderConfig } from "@/config/domains/providers";
 import type { SearchConfig } from "@/config/domains/search";
 import type { SecurityConfig } from "@/config/domains/security";
 import type { SchedulerConfig } from "@/config/domains/scheduler";
+import type { PostgresConfig } from "@/config/domains/postgres";
 import type { SupabaseConfig } from "@/config/domains/supabase";
 import type { AppEnvironment } from "@/config/types/environment";
 
@@ -26,6 +27,7 @@ export type VerazConfig = {
   premium: PremiumConfig;
   security: SecurityConfig;
   supabase: SupabaseConfig;
+  postgres: PostgresConfig;
   scheduler: SchedulerConfig;
   analytics: AnalyticsConfig;
   featureFlags: FeatureFlags;
