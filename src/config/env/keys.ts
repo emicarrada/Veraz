@@ -20,6 +20,10 @@ export const ENV_KEYS = {
   /** Same public key, read only on the server. Not inlined into the browser bundle. */
   SUPABASE_ANON_KEY: "SUPABASE_ANON_KEY",
   SUPABASE_SERVICE_ROLE_KEY: "SUPABASE_SERVICE_ROLE_KEY",
+  /** Server-only. Same key the Resend CLI uses. Never NEXT_PUBLIC. */
+  RESEND_API_KEY: "RESEND_API_KEY",
+  /** Optional. Defaults to Veraz <noreply@veraz.app>. */
+  RESEND_FROM: "RESEND_FROM",
 
   /** AI Engine */
   AI_MODE: "AI_MODE",

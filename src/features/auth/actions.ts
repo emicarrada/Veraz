@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { registerWithEmail } from "@/features/auth/services/register-with-email";
 import { getReaderPreferences, saveReaderPreferences } from "@/features/auth/services/reader-preferences";
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import type { Database } from "@/lib/supabase/database.types";
@@ -81,32 +82,10 @@ export async function signUpWithPasswordAction(formData: FormData): Promise<void
   if (!isEmail(email)) redirect(`/${locale}/entrar?error=email`);
   if (password.length < 8) redirect(`/${locale}/entrar?error=password`);
 
-  const supabase = await createAuthServerClient();
-  if (!supabase) redirect(`/${locale}/entrar?error=unavailable`);
-
   const origin = await siteOrigin();
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { emailRedirectTo: `${origin}/auth/callback?locale=${locale}` },
-  });
-
-  if (error) {
-    const message = error.message.toLowerCase();
-    if (message.includes("already")) redirect(`/${locale}/entrar?error=exists`);
-    if (message.includes("password")) redirect(`/${locale}/entrar?error=password`);
-    redirect(`/${locale}/entrar?error=credentials`);
-  }
-
-  if (data.user && data.user.identities?.length === 0) {
-    redirect(`/${locale}/entrar?error=exists`);
-  }
-
-  if (!data.session || !data.user) {
-    redirect(`/${locale}/entrar?status=confirm`);
-  }
-
-  await redirectAfterSession(data.user.id, locale, supabase);
+  const result = await registerWithEmail({ email, password, origin, locale });
+  if (!result.ok) redirect(`/${locale}/entrar?error=${result.error}`);
+  redirect(`/${locale}/entrar?status=confirm`);
 }
 
 /**

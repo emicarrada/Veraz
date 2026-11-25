@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { authCallbackDestination, getReaderPreferences } from "@/features/auth";
@@ -8,14 +9,29 @@ import type { Database } from "@/lib/supabase/database.types";
 
 type PendingCookie = { name: string; value: string; options: CookieOptions };
 
+const EMAIL_OTP_TYPES = new Set<EmailOtpType>([
+  "signup",
+  "invite",
+  "magiclink",
+  "recovery",
+  "email_change",
+  "email",
+]);
+
+function isEmailOtpType(value: string | null): value is EmailOtpType {
+  return value != null && EMAIL_OTP_TYPES.has(value as EmailOtpType);
+}
+
 /** Google and the confirmation link return here. The route stays outside the locale prefix. */
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
   const locale = isLocale(url.searchParams.get("locale") ?? "") ? url.searchParams.get("locale")! : "es";
   const code = url.searchParams.get("code");
+  const tokenHash = url.searchParams.get("token_hash");
+  const otpType = url.searchParams.get("type");
   const home = new URL(`/${locale}/noticias`, url.origin);
 
-  if (!code) {
+  if (!code && !(tokenHash && isEmailOtpType(otpType))) {
     return NextResponse.redirect(home);
   }
 
@@ -36,7 +52,12 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = code
+    ? await supabase.auth.exchangeCodeForSession(code)
+    : await supabase.auth.verifyOtp({
+        token_hash: tokenHash ?? "",
+        type: otpType as EmailOtpType,
+      });
   if (error) {
     return NextResponse.redirect(home);
   }

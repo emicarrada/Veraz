@@ -45,6 +45,9 @@ const SECURITY_HEADERS = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["pg"],
+  outputFileTracingIncludes: {
+    "/**": ["./emails/confirm-signup.html"],
+  },
   async headers() {
     return [
       {

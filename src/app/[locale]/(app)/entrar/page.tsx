@@ -38,6 +38,7 @@ export default async function EntrarPage({ params, searchParams }: EntrarPagePro
     credentials: t("credentialsError"),
     exists: t("existsError"),
     unavailable: t("unavailable"),
+    mail: t("mailError"),
   };
 
   return (

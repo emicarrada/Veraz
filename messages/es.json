@@ -29,6 +29,7 @@
     "credentialsError": "Correo o contraseña incorrectos.",
     "existsError": "Ese correo ya tiene cuenta. Entra con la contraseña.",
     "unavailable": "Falta la clave pública de Supabase en el servidor.",
+    "mailError": "No se pudo enviar el correo de confirmación. Inténtalo de nuevo.",
     "google": "Continuar con Google",
     "googleAria": "Continuar con Google",
     "opening": "Abriendo Google…",

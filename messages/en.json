@@ -29,6 +29,7 @@
     "credentialsError": "Email or password is incorrect.",
     "existsError": "That email already has an account. Sign in with the password.",
     "unavailable": "The public Supabase key is missing on the server.",
+    "mailError": "The confirmation email could not be sent. Try again.",
     "google": "Continue with Google",
     "googleAria": "Continue with Google",
     "opening": "Opening Google…",
