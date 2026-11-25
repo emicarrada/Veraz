@@ -109,10 +109,17 @@ export async function signUpWithPasswordAction(formData: FormData): Promise<void
   await redirectAfterSession(data.user.id, locale, supabase);
 }
 
-export async function signInWithGoogleAction(formData: FormData): Promise<void> {
-  const locale = localeFrom(formData);
+/**
+ * Builds the Google URL and stores the PKCE verifier in the response cookies.
+ * The browser must navigate only after this returns, so the verifier is saved
+ * before Google sends the reader back.
+ */
+export async function beginGoogleSignIn(
+  localeValue: string,
+): Promise<{ ok: true; url: string } | { ok: false }> {
+  const locale = isLocale(localeValue) ? localeValue : "es";
   const supabase = await createAuthServerClient();
-  if (!supabase) redirect(`/${locale}/entrar?error=unavailable`);
+  if (!supabase) return { ok: false };
 
   const origin = await siteOrigin();
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -124,8 +131,8 @@ export async function signInWithGoogleAction(formData: FormData): Promise<void> 
     },
   });
 
-  if (error || !data.url) redirect(`/${locale}/entrar?error=unavailable`);
-  redirect(data.url);
+  if (error || !data.url) return { ok: false };
+  return { ok: true, url: data.url };
 }
 
 export async function signOutAction(formData: FormData): Promise<void> {

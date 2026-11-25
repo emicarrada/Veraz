@@ -37,3 +37,4 @@ La migración `20251125000000_user_preferences.sql` crea la tabla solo si existe
 - La primera entrada, por correo o por Google, abre `/preferencias`. Cuando la ficha ya está guardada, la siguiente entrada vuelve al inicio.
 - Si Google no está activo en el panel, el botón de Google no completa el retorno. El correo sigue disponible.
 - Si Supabase pide confirmar el correo, la persona vuelve por `/auth/callback` y entonces ve la ficha.
+- El correo de confirmación lo envía Supabase por SMTP (Resend). La plantilla está en `emails/confirm-signup.html`. Invitaciones, magic link, cambio de correo y reautenticación no forman parte del producto. Google no manda ese correo.

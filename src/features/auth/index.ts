@@ -10,6 +10,7 @@ export {
   getActiveReaderPreferences,
   getReaderPreferences,
 } from "@/features/auth/services/reader-preferences";
+export { authCallbackDestination } from "@/features/auth/services/auth-callback-destination";
 export { AuthPill } from "@/features/auth/components/auth-pill";
 export { GoogleAuthButton } from "@/features/auth/components/google-auth-button";
 export { PreferenceForm } from "@/features/auth/components/preference-form";
