@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { LandingPage } from "@/components/marketing/landing";
-import { getAppConfig, getCacheConfig } from "@/config";
+import { getAppConfig } from "@/config";
 import { getLandingPhotoRing } from "@/features/news";
 import { feedPath, homePath } from "@/i18n/paths";
 import { locales, type Locale } from "@/i18n/routing";
 
 const { name: SITE_NAME, tagline: SITE_TAGLINE, siteUrl } = getAppConfig();
 
-export const revalidate = getCacheConfig().feedRevalidateSeconds;
+/** Keep in sync with DEFAULT_CACHE_CONFIG.feedRevalidateSeconds. */
+export const revalidate = 120;
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;
