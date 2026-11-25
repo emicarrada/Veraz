@@ -53,6 +53,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/favicon.ico",
+        destination: "/verazicon.png",
+      },
+    ];
+  },
   async redirects() {
     return [
       {
