@@ -157,6 +157,11 @@ describe("article detail SEO helpers", () => {
 
     expect(metadata.title).toBe("Demo Post");
     expect(metadata.alternates?.canonical).toBe("/es/noticias/demo-post-abc12345");
+    expect(metadata.alternates?.languages).toMatchObject({
+      es: "/es/noticias/demo-post-abc12345",
+      "es-MX": "/es/noticias/demo-post-abc12345",
+      "x-default": "/es/noticias/demo-post-abc12345",
+    });
     expect(metadata.openGraph?.type).toBe("article");
     expect(metadata.twitter?.card).toBe("summary");
   });

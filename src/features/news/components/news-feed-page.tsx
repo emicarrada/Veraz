@@ -13,6 +13,9 @@ import { FeedSkeleton } from "@/features/news/components/feed-skeleton";
 import { NewsAppShell } from "@/features/news/components/news-app-shell";
 import { parseCategorySlug } from "@/features/news/classification/categories";
 import { getFeedPage } from "@/features/news/services/get-feed-page";
+import { buildItemListJsonLd, JsonLdScript } from "@/features/seo/build-json-ld";
+import { getAppConfig } from "@/config";
+import { articleDetailPath, feedPath } from "@/i18n/paths";
 import { countryLabel } from "@/features/news/utils/country-label";
 import { homeFeedSlugs } from "@/features/news/utils/home-feed";
 import { resolveVisitorCountry } from "@/features/news/utils/visitor-country";
@@ -67,13 +70,28 @@ async function FeedContent({
     return <FeedEmptyState />;
   }
 
+  const list = search?.trim()
+    ? null
+    : buildItemListJsonLd({
+        siteUrl: getAppConfig().siteUrl,
+        path: feedPath(locale),
+        name: "Veraz",
+        items: result.data.items.map((item) => ({
+          name: item.title,
+          path: articleDetailPath(locale, item.slug),
+        })),
+      });
+
   return (
-    <FeedPagination
+    <>
+      {list ? <JsonLdScript schema={list} /> : null}
+      <FeedPagination
       key={`${visitorCountry}|${categorySlug ?? ""}|${search ?? ""}|${readerPreferences?.countryCodes.join(",") ?? ""}|${readerPreferences?.topicSlugs.join(",") ?? ""}|${result.data.items[0]?.id ?? "empty"}`}
       initialPage={result.data}
       search={search?.trim()}
       categorySlug={parseCategorySlug(categorySlug)}
     />
+    </>
   );
 }
 

@@ -5,7 +5,7 @@ import { Alert } from "@/components/ui/alert";
 import { Section } from "@/components/ui/section";
 import {
   getTopic,
-  type NewsTopicGroup,
+  type NewsTopicSlug,
 } from "@/features/news/classification/categories";
 import { FeedEmptyState } from "@/features/news/components/feed-empty-state";
 import { FeedFilters } from "@/features/news/components/feed-filters";
@@ -17,15 +17,16 @@ import { getFeedPage } from "@/features/news/services/get-feed-page";
 import {
   buildCollectionPageJsonLd,
   buildBreadcrumbJsonLd,
+  buildItemListJsonLd,
   JsonLdScript,
 } from "@/features/seo/build-json-ld";
 import { getAppConfig } from "@/config";
-import { feedCategoryPath, feedPath, homePath } from "@/i18n/paths";
+import { articleDetailPath, feedCategoryPath, feedPath, homePath } from "@/i18n/paths";
 import type { Locale } from "@/i18n/routing";
 
 export type CategoryFeedPageProps = {
   locale: Locale;
-  categorySlug: NewsTopicGroup;
+  categorySlug: NewsTopicSlug;
 };
 
 async function CategoryFeedContent({ locale, categorySlug }: CategoryFeedPageProps) {
@@ -44,7 +45,24 @@ async function CategoryFeedContent({ locale, categorySlug }: CategoryFeedPagePro
     return <FeedEmptyState />;
   }
 
-  return <FeedPagination initialPage={result.data} categorySlug={categorySlug} />;
+  const { siteUrl } = getAppConfig();
+  const tFeed = await getTranslations({ locale, namespace: "feed.categories" });
+  const list = buildItemListJsonLd({
+    siteUrl,
+    path: feedCategoryPath(locale, categorySlug),
+    name: tFeed(categorySlug),
+    items: result.data.items.map((item) => ({
+      name: item.title,
+      path: articleDetailPath(locale, item.slug),
+    })),
+  });
+
+  return (
+    <>
+      <JsonLdScript schema={list} />
+      <FeedPagination initialPage={result.data} categorySlug={categorySlug} />
+    </>
+  );
 }
 
 export async function CategoryFeedPage({ locale, categorySlug }: CategoryFeedPageProps) {

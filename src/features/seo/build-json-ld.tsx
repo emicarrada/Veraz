@@ -48,6 +48,67 @@ export type CollectionPageJsonLdInput = {
   description: string;
 };
 
+export type ItemListEntry = {
+  name: string;
+  path: string;
+};
+
+export function buildItemListJsonLd(input: {
+  siteUrl: string;
+  path: string;
+  name: string;
+  items: ReadonlyArray<ItemListEntry>;
+}): Record<string, unknown> {
+  const base = input.siteUrl.replace(/\/$/, "");
+  const url = `${base}${input.path}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: input.name,
+    url,
+    numberOfItems: input.items.length,
+    itemListElement: input.items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      url: `${base}${item.path}`,
+    })),
+  };
+}
+
+export function buildWebSiteJsonLd(input: {
+  siteUrl: string;
+  name: string;
+  description: string;
+  locale: string;
+  searchPath: string;
+}): Record<string, unknown> {
+  const base = input.siteUrl.replace(/\/$/, "");
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: input.name,
+    url: base,
+    description: input.description,
+    inLanguage: input.locale === "en" ? "en" : "es-MX",
+    publisher: {
+      "@type": "Organization",
+      name: input.name,
+      url: base,
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${base}${input.searchPath}?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
 export function buildCollectionPageJsonLd(
   input: CollectionPageJsonLdInput,
 ): Record<string, unknown> {

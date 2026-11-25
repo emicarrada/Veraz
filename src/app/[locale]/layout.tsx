@@ -10,7 +10,8 @@ import { SitePillNav } from "@/components/layout/site-pill-nav";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { getAnalyticsConfig, getAppConfig } from "@/config/accessors";
 import { getAuthSession } from "@/features/auth";
-import { buildSiteVerificationMetadata } from "@/features/seo/build-page-metadata";
+import { indexableRobots, buildSiteVerificationMetadata } from "@/features/seo/build-page-metadata";
+import { SiteGraphJsonLd } from "@/features/seo/components/site-graph";
 import { routing, type Locale } from "@/i18n/routing";
 
 type LocaleLayoutProps = {
@@ -38,12 +39,17 @@ export async function generateMetadata({
     },
     applicationName: name,
     verification: buildSiteVerificationMetadata(),
+    robots: indexableRobots(true),
     other:
       locale === "es"
         ? {
             "content-language": "es-MX",
+            "geo.region": "MX",
+            "geo.placename": "México",
           }
-        : undefined,
+        : {
+            "content-language": "en",
+          },
   };
 }
 
@@ -76,6 +82,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   return (
     <NextIntlClientProvider messages={messages}>
       <HtmlLang />
+      <SiteGraphJsonLd locale={locale as Locale} />
       <ThemeProvider defaultTheme="dark">
         {posthogEnabled && posthogKey && posthogHost ? (
           <PostHogAnalytics apiKey={posthogKey} apiHost={posthogHost}>

@@ -31,22 +31,37 @@ export async function notifyIndexNow(input: IndexNowNotifyInput): Promise<boolea
 
   if (input.urls.length === 0) return false;
 
-  try {
-    const response = await fetch(INDEXNOW_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({
-        host,
-        key,
-        keyLocation,
-        urlList: [...input.urls],
-      }),
-    });
+  const unique = [...new Set(input.urls)];
+  let ok = true;
 
-    return response.ok;
+  try {
+    for (let offset = 0; offset < unique.length; offset += 1000) {
+      const response = await fetch(INDEXNOW_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({
+          host,
+          key,
+          keyLocation,
+          urlList: unique.slice(offset, offset + 1000),
+        }),
+      });
+      ok = ok && response.ok;
+    }
+    return ok;
   } catch {
     return false;
   }
+}
+
+export function buildDiscoveryIndexNowUrls(siteUrl: string): string[] {
+  const base = siteUrl.replace(/\/$/, "");
+  return [
+    `${base}/es/noticias`,
+    `${base}/es`,
+    `${base}/llms.txt`,
+    `${base}/sitemap-news.xml`,
+  ];
 }
 
 export async function notifyArticleIndexNow(

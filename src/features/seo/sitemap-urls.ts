@@ -1,8 +1,10 @@
 import { getAppConfig } from "@/config";
 import { isArticleAccessibleForLocale } from "@/features/news/config/prestigious-sources";
 import {
+  isIndexableFeedTopic,
   NEWS_FEED_TAB_ORDER,
-  type NewsTopicGroup,
+  NEWS_SPECIFIC_FILTER_TOPICS,
+  type NewsTopicSlug,
 } from "@/features/news/classification/categories";
 import { articleDetailPath, feedPath, homePath, staticPath, feedCategoryPath } from "@/i18n/paths";
 import type { Locale } from "@/i18n/routing";
@@ -11,8 +13,8 @@ import { fetchAllSitemapArticles } from "@/features/seo/services/fetch-sitemap-a
 import { localePriority, STATIC_PAGE_SEGMENTS } from "@/features/seo/build-page-metadata";
 import type { MetadataRoute } from "next";
 
-export function isCategoryLandingSlug(slug: string): slug is NewsTopicGroup {
-  return (NEWS_FEED_TAB_ORDER as readonly string[]).includes(slug);
+export function isCategoryLandingSlug(slug: string): slug is NewsTopicSlug {
+  return isIndexableFeedTopic(slug);
 }
 
 export async function buildMainSitemapEntries(): Promise<MetadataRoute.Sitemap> {
@@ -65,6 +67,20 @@ export async function buildMainSitemapEntries(): Promise<MetadataRoute.Sitemap> 
   }
 
   const articles = await fetchAllSitemapArticles();
+  const presentTopics = new Set(articles.map((article) => article.categorySlug));
+
+  for (const locale of locales) {
+    const priority = localePriority(locale);
+    for (const topic of NEWS_SPECIFIC_FILTER_TOPICS) {
+      if (!presentTopics.has(topic.slug)) continue;
+      entries.push({
+        url: `${base}${feedCategoryPath(locale, topic.slug)}`,
+        lastModified: now,
+        changeFrequency: "hourly",
+        priority: priority * 0.75,
+      });
+    }
+  }
 
   for (const article of articles) {
     for (const locale of locales) {
@@ -95,6 +111,7 @@ export function buildNewsSitemapXml(
     title: string;
     publishedAt: string;
     languageCode: string;
+    categorySlug?: string;
   }>,
   siteUrl: string,
 ): string {
@@ -118,6 +135,7 @@ export function buildNewsSitemapXml(
       </news:publication>
       <news:publication_date>${pubDate}</news:publication_date>
       <news:title>${escapeXml(article.title)}</news:title>
+      <news:keywords>${escapeXml([article.categorySlug, "México"].filter(Boolean).join(", "))}</news:keywords>
     </news:news>
   </url>`;
     })

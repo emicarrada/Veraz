@@ -42,6 +42,20 @@ Convertir Veraz de un producto dependiente de social orgánico a uno **descubrib
 4. Validar Open Graph con Facebook Sharing Debugger y Twitter Card Validator
 5. Monitorear cobertura e impresiones por país (MX vs US)
 
+## Postura ejecutada
+
+Búsqueda y motores de respuesta pueden citar. El entrenamiento de modelos queda fuera: las fichas son extractos de otros medios.
+
+- `robots.txt` permite GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended, Applebot-Extended y Bingbot. `Content-Signal: search=yes, ai-input=yes, ai-train=no`. `/entrar` y `/preferencias` no se indexan.
+- `llms.txt` y `llms-full.txt` salen del catálogo vivo: titular, medio, fecha y URL. Se regeneran cada 10 minutos.
+- Cada página indexable pide `max-image-preview:large` y snippet completo (Discover y AI Overviews).
+- `hreflang` emite `es`, `es-MX`, `en` y `x-default` hacia el español.
+- El layout lleva `Organization` (México) y `WebSite` con `SearchAction` en todas las rutas.
+- El feed y cada sección publican `ItemList` con las fichas de esa página.
+- Los temas específicos con notas (Sheinbaum, fútbol, IA, etc.) tienen URL propia `/es/noticias/{tema}`. Si el tema queda vacío, la página responde `noindex`.
+- Google News sitemap añade `news:keywords`.
+- IndexNow manda en un solo lote las fichas nuevas, el feed, `llms.txt` y el sitemap de noticias.
+
 ## Señales GEO
 
 - JSON-LD `NewsArticle` con `isBasedOn`, `speakable`, `publisher.logo`

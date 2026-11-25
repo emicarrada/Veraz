@@ -8,7 +8,7 @@
  */
 import type { Locale } from "@/i18n/routing";
 import { locales } from "@/i18n/routing";
-import { isNewsTopicGroup } from "@/features/news/classification/categories";
+import { isIndexableFeedTopic } from "@/features/news/classification/categories";
 
 const FEED_SEGMENT = "/noticias";
 
@@ -55,7 +55,7 @@ export function feedReturnPathname(categorySlug?: string): string {
     return FEED_SEGMENT;
   }
 
-  if (isNewsTopicGroup(categorySlug)) {
+  if (isIndexableFeedTopic(categorySlug)) {
     return `${FEED_SEGMENT}/${categorySlug}`;
   }
 
@@ -83,7 +83,7 @@ export function feedReturnPath(locale: Locale, categorySlug?: string): string {
     return feedPath(locale);
   }
 
-  if (isNewsTopicGroup(categorySlug)) {
+  if (isIndexableFeedTopic(categorySlug)) {
     return feedCategoryPath(locale, categorySlug);
   }
 

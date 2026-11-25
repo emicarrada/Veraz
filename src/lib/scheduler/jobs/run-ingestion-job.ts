@@ -1,5 +1,10 @@
 import { getNewsConfig } from "@/config/accessors";
-import { notifyArticleIndexNow } from "@/features/seo/indexnow";
+import { getAppConfig } from "@/config";
+import {
+  buildArticleIndexNowUrls,
+  buildDiscoveryIndexNowUrls,
+  notifyIndexNow,
+} from "@/features/seo/indexnow";
 import {
   createRssIngestionPersistenceRunner,
   type RssIngestionPersistenceRunner,
@@ -36,6 +41,7 @@ export class RunIngestionJob implements ScheduledJob {
     const metrics = emptyJobMetrics();
     metrics.feedsConfigured = feeds.length;
     const errors: JobRunError[] = [];
+    const createdSlugs: string[] = [];
 
     if (!newsConfig.ingestionEnabled) {
       return finalizeJobRun(context, startedAtMs, {
@@ -82,13 +88,21 @@ export class RunIngestionJob implements ScheduledJob {
       metrics.failed += result.data.persistence.failed;
       metrics.discovered += result.data.normalized;
 
-      const createdSlugs = result.data.persistence.results
-        .filter((entry) => entry.created)
-        .map((entry) => entry.article.slug);
+      createdSlugs.push(
+        ...result.data.persistence.results
+          .filter((entry) => entry.created)
+          .map((entry) => entry.article.slug),
+      );
+    }
 
-      if (createdSlugs.length > 0) {
-        await Promise.all(createdSlugs.map((slug) => notifyArticleIndexNow(slug, ["es"])));
-      }
+    if (createdSlugs.length > 0) {
+      const { siteUrl } = getAppConfig();
+      await notifyIndexNow({
+        urls: [
+          ...createdSlugs.flatMap((slug) => buildArticleIndexNowUrls(siteUrl, slug, ["es"])),
+          ...buildDiscoveryIndexNowUrls(siteUrl),
+        ],
+      });
     }
 
     return finalizeJobRun(context, startedAtMs, {

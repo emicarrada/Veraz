@@ -9,7 +9,11 @@ import { articleDetailPath } from "@/i18n/paths";
 import type { Locale } from "@/i18n/routing";
 import type { ArticleRepository } from "@/lib/repositories/contracts/article-repository";
 import { createContentRepositories } from "@/lib/repositories/factory";
-import { buildArticleAlternateLanguages, publisherLogoUrl } from "@/features/seo/build-page-metadata";
+import {
+  buildArticleAlternateLanguages,
+  publisherLogoUrl,
+  withRegionalAlternates,
+} from "@/features/seo/build-page-metadata";
 
 export type GetArticleBySlugParams = {
   slug: string;
@@ -113,9 +117,7 @@ export function buildArticleDetailMetadata(
     description,
     alternates: {
       canonical: path,
-      ...(Object.keys(alternateLanguages).length > 0
-        ? { languages: alternateLanguages }
-        : {}),
+      languages: withRegionalAlternates(alternateLanguages),
     },
     openGraph: {
       title: article.title,

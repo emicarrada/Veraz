@@ -6,6 +6,35 @@ import type { Locale } from "@/i18n/routing";
 import { locales } from "@/i18n/routing";
 import { feedPath, homePath, staticPath } from "@/i18n/paths";
 
+export function indexableRobots(index = true): Metadata["robots"] {
+  return {
+    index,
+    follow: true,
+    googleBot: {
+      index,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  };
+}
+
+/** es-MX is the primary market. x-default follows Spanish. */
+export function withRegionalAlternates(
+  languages: Partial<Record<Locale, string>>,
+): Record<string, string> {
+  const alternates: Record<string, string> = {};
+  if (languages.es) {
+    alternates.es = languages.es;
+    alternates["es-MX"] = languages.es;
+    alternates["x-default"] = languages.es;
+  }
+  if (languages.en) alternates.en = languages.en;
+  if (!alternates["x-default"] && languages.en) alternates["x-default"] = languages.en;
+  return alternates;
+}
+
 export const SEO_OG_IMAGE = "/veraznegrologo.png" as const;
 export const SEO_OG_IMAGE_WIDTH = 1200;
 export const SEO_OG_IMAGE_HEIGHT = 630;
@@ -48,8 +77,10 @@ export function buildStaticPageMetadata(input: BuildStaticPageMetadataInput): Me
     ...(input.keywords ? { keywords: input.keywords } : {}),
     alternates: {
       canonical,
-      languages: Object.fromEntries(
-        locales.map((code) => [code, staticPath(code, `/${input.segment}`)]),
+      languages: withRegionalAlternates(
+        Object.fromEntries(locales.map((code) => [code, staticPath(code, `/${input.segment}`)])) as Partial<
+          Record<Locale, string>
+        >,
       ),
     },
     openGraph: {
@@ -74,7 +105,7 @@ export function buildStaticPageMetadata(input: BuildStaticPageMetadataInput): Me
       description: input.description,
       images: [SEO_OG_IMAGE],
     },
-    ...(input.robots ? { robots: input.robots } : { robots: { index: true, follow: true } }),
+    robots: input.robots ?? indexableRobots(true),
     other:
       input.locale === "es"
         ? {
@@ -101,7 +132,9 @@ export function buildFeedPageMetadata(input: BuildFeedPageMetadataInput): Metada
     description: input.description,
     alternates: {
       canonical,
-      languages: Object.fromEntries(locales.map((code) => [code, feedPath(code)])),
+      languages: withRegionalAlternates(
+        Object.fromEntries(locales.map((code) => [code, feedPath(code)])) as Partial<Record<Locale, string>>,
+      ),
     },
     openGraph: {
       type: "website",
@@ -125,10 +158,7 @@ export function buildFeedPageMetadata(input: BuildFeedPageMetadataInput): Metada
       description: input.description,
       images: [SEO_OG_IMAGE],
     },
-    robots:
-      input.indexable === false
-        ? { index: false, follow: true }
-        : { index: true, follow: true },
+    robots: indexableRobots(input.indexable !== false),
     other:
       input.locale === "es"
         ? {

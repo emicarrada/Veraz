@@ -108,6 +108,16 @@ export const NEWS_SPECIFIC_FILTER_TOPICS = NEWS_TOPICS.filter(
   (topic) => topic.showInSpecificFilters,
 );
 
+const INDEXABLE_FEED_TOPICS = new Set<string>([
+  ...NEWS_FEED_TAB_ORDER,
+  ...NEWS_SPECIFIC_FILTER_TOPICS.map((topic) => topic.slug),
+]);
+
+/** Topics with their own indexable URL under /noticias. */
+export function isIndexableFeedTopic(value: string): value is NewsTopicSlug {
+  return INDEXABLE_FEED_TOPICS.has(value);
+}
+
 /** @deprecated Use NEWS_TOPICS */
 export const NEWS_CATEGORIES = NEWS_FILTER_GROUPS;
 

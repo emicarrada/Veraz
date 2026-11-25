@@ -10,6 +10,7 @@ import {
   buildArticleDetailMetadata,
   getArticleBySlug,
 } from "@/features/news/services/get-article-by-slug";
+import { getFeedPage } from "@/features/news/services/get-feed-page";
 import { CategoryFeedPage } from "@/features/seo/components/category-feed-page";
 import {
   buildBreadcrumbJsonLd,
@@ -37,11 +38,18 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
     const categoryLabel = tFeed(slug);
     const canonical = feedCategoryPath(resolvedLocale, slug);
 
+    const preview = await getFeedPage({
+      locale: resolvedLocale,
+      categorySlug: slug,
+      limit: 1,
+    });
+
     return buildFeedPageMetadata({
       locale: resolvedLocale,
       title: t("pageTitle", { category: categoryLabel }),
       description: t("metaDescription", { category: categoryLabel }),
       canonicalPath: canonical,
+      indexable: preview.ok && preview.data.items.length > 0,
     });
   }
 

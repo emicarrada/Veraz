@@ -27,6 +27,7 @@ describe("i18n paths", () => {
       "/noticias?categoria=economia&q=fed",
     );
     expect(feedReturnPathname("tecnologia")).toBe("/noticias/tecnologia");
+    expect(feedReturnPathname("sheinbaum")).toBe("/noticias/sheinbaum");
   });
 
   it("strips locale prefix for nav matching", () => {
