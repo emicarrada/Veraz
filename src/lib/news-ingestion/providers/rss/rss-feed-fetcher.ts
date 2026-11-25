@@ -42,6 +42,11 @@ function isAllowedContentType(contentType: string | null): boolean {
   );
 }
 
+/** ESPN sometimes labels a real RSS document as text/html. */
+function looksLikeFeedXml(body: string): boolean {
+  return /^\s*(<\?xml\b|<rss\b|<feed\b)/i.test(body);
+}
+
 async function readResponseWithLimit(
   response: Response,
   maxBytes: number,
@@ -123,7 +128,8 @@ export class RssFeedFetcher {
         method: "GET",
         headers: {
           Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml, */*",
-          "User-Agent": "Veraz-RSS-Ingestion/1.0",
+          "User-Agent":
+            "Mozilla/5.0 (compatible; Veraz-RSS-Ingestion/1.0; +https://www.veraz.app)",
         },
         signal: controller.signal,
       });
@@ -143,18 +149,18 @@ export class RssFeedFetcher {
       }
 
       const contentType = response.headers.get("content-type");
-      if (!isAllowedContentType(contentType)) {
-        throw new ProviderParseFailureError(
-          RSS_PROVIDER_ID,
-          `Unsupported feed content type: ${contentType ?? "unknown"}.`,
-        );
-      }
-
       const xml = await readResponseWithLimit(response, this.maxBytes);
       if (!xml.trim()) {
         throw new ProviderParseFailureError(
           RSS_PROVIDER_ID,
           "Feed response body is empty.",
+        );
+      }
+
+      if (!isAllowedContentType(contentType) && !looksLikeFeedXml(xml)) {
+        throw new ProviderParseFailureError(
+          RSS_PROVIDER_ID,
+          `Unsupported feed content type: ${contentType ?? "unknown"}.`,
         );
       }
 
