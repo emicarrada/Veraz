@@ -28,7 +28,7 @@
     "passwordError": "The password needs at least 8 characters.",
     "credentialsError": "Email or password is incorrect.",
     "existsError": "That email already has an account. Sign in with the password.",
-    "unavailable": "Sign-in is unavailable right now. Try again.",
+    "unavailable": "The public Supabase key is missing on the server.",
     "google": "Continue with Google",
     "googleAria": "Continue with Google",
     "opening": "Opening Google…",

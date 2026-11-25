@@ -33,12 +33,38 @@ function readPublicEnv(key: string): string | undefined {
   }
 }
 
-/** Read a single env var. Public keys prefer the static binding above. */
+/**
+ * Request-time read. Next replaces a static `process.env.NEXT_PUBLIC_*` access
+ * with the value from the build, so a key saved later stays empty until the
+ * next compile. Bracket access still sees the live environment.
+ */
+function readRuntimeEnv(name: string): string | undefined {
+  const runtimeEnv = process.env;
+  const raw = runtimeEnv[name];
+  if (typeof raw !== "string") return undefined;
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function readAnonKey(): string | undefined {
+  return (
+    readRuntimeEnv(ENV_KEYS.NEXT_PUBLIC_SUPABASE_ANON_KEY) ??
+    readRuntimeEnv(ENV_KEYS.SUPABASE_ANON_KEY) ??
+    nonempty(readPublicEnv(ENV_KEYS.NEXT_PUBLIC_SUPABASE_ANON_KEY))
+  );
+}
+
+function nonempty(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+/** Read a single env var. The anon key is read from the live environment. */
 export function getEnv(key: EnvKey | string): string | undefined {
-  const direct = readPublicEnv(key)?.trim();
+  if (key === ENV_KEYS.NEXT_PUBLIC_SUPABASE_ANON_KEY) return readAnonKey();
+  const direct = nonempty(readPublicEnv(key));
   if (direct) return direct;
-  const value = loadEnvSnapshot()[key]?.trim();
-  return value ? value : undefined;
+  return readRuntimeEnv(key) ?? nonempty(loadEnvSnapshot()[key]);
 }
 
 /** Read env var with string fallback. */

@@ -17,6 +17,8 @@ export const ENV_KEYS = {
   /** Supabase (legacy persistence) */
   NEXT_PUBLIC_SUPABASE_URL: "NEXT_PUBLIC_SUPABASE_URL",
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  /** Same public key, read only on the server. Not inlined into the browser bundle. */
+  SUPABASE_ANON_KEY: "SUPABASE_ANON_KEY",
   SUPABASE_SERVICE_ROLE_KEY: "SUPABASE_SERVICE_ROLE_KEY",
 
   /** AI Engine */

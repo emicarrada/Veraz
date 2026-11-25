@@ -28,7 +28,7 @@
     "passwordError": "La contraseña necesita al menos 8 caracteres.",
     "credentialsError": "Correo o contraseña incorrectos.",
     "existsError": "Ese correo ya tiene cuenta. Entra con la contraseña.",
-    "unavailable": "Ahora no se puede entrar. Inténtalo de nuevo.",
+    "unavailable": "Falta la clave pública de Supabase en el servidor.",
     "google": "Continuar con Google",
     "googleAria": "Continuar con Google",
     "opening": "Abriendo Google…",
