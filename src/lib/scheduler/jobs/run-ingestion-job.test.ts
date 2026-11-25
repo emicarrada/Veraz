@@ -50,20 +50,19 @@ describe("RunIngestionJob", () => {
   });
 
   it("aggregates persistence metrics from the runner", async () => {
-    const runner = {
-      run: vi.fn(async () => ({
-        ok: true as const,
-        data: {
-          normalized: 3,
-          persistence: {
-            results: [],
-            persisted: 3,
-            skippedDuplicates: 1,
-            failed: 0,
-          },
+    const run = vi.fn(async () => ({
+      ok: true as const,
+      data: {
+        normalized: 3,
+        persistence: {
+          results: [],
+          persisted: 3,
+          skippedDuplicates: 1,
+          failed: 0,
         },
-      })),
-    } as unknown as RssIngestionPersistenceRunner;
+      },
+    }));
+    const runner = { run } as unknown as RssIngestionPersistenceRunner;
 
     const job = new RunIngestionJob({ runner });
     const summary = await job.execute({
@@ -71,9 +70,20 @@ describe("RunIngestionJob", () => {
       startedAt: new Date().toISOString(),
     });
 
+    const calls = run.mock.calls.length;
+    expect(calls).toBeGreaterThan(1);
+    expect(run).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceSlug: "demo",
+        feedUrl: "https://example.com/feed.xml",
+      }),
+    );
+    expect(run).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceSlug: "marca" }),
+    );
     expect(summary.status).toBe("success");
-    expect(summary.metrics.normalized).toBe(3);
-    expect(summary.metrics.persisted).toBe(3);
-    expect(summary.metrics.duplicates).toBe(1);
+    expect(summary.metrics.normalized).toBe(3 * calls);
+    expect(summary.metrics.persisted).toBe(3 * calls);
+    expect(summary.metrics.duplicates).toBe(calls);
   });
 });

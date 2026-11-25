@@ -18,7 +18,7 @@ export type RssFeedCatalogEntry = RssFeedConfig & {
 /**
  * Curated RSS catalog — global mix (ES + EN), section feeds preferred over homepages.
  * Used by smoke tests and documented in docs/news-sources.md.
- * Runtime ingestion still reads NEWS_RSS_FEEDS from env (copy entries from here).
+ * Ingestion unions this catalog with NEWS_RSS_FEEDS: env wins per slug, catalog fills the rest.
  */
 export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
   // ——— Finanzas ———
@@ -256,6 +256,34 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     label: "La Jornada Deportes",
   },
   {
+    sourceSlug: "espn-mx",
+    feedUrl: "https://www.espn.com.mx/espn/rss/news",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "deportes",
+    primaryVertical: "sports",
+    countryCode: "MX",
+    label: "ESPN México",
+    notes: "Portada deportiva en español. ESPN en inglés sigue en espn-top.",
+  },
+  {
+    sourceSlug: "record-mx",
+    feedUrl: "https://www.record.com.mx/rss",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "deportes",
+    primaryVertical: "sports",
+    countryCode: "MX",
+    label: "Récord",
+  },
+  {
+    sourceSlug: "marca",
+    feedUrl: "https://www.marca.com/rss/portada.xml",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "deportes",
+    primaryVertical: "sports",
+    countryCode: "ES",
+    label: "Marca",
+  },
+  {
     sourceSlug: "reforma",
     feedUrl: "https://www.reforma.com/rss/portada.xml",
     defaultLanguageCode: "es",
@@ -370,6 +398,33 @@ export function sourceSlugsForCountry(countryCode: string): readonly string[] {
   return RSS_FEED_CATALOG.filter((entry) => entry.countryCode === code).map(
     (entry) => entry.sourceSlug,
   );
+}
+
+/** Sports desks for a locale. The deportes tab reads only these slugs. */
+export function sportsSourceSlugs(languageCode: "es" | "en"): readonly string[] {
+  return RSS_FEED_CATALOG.filter(
+    (entry) =>
+      entry.primaryVertical === "sports" && entry.defaultLanguageCode === languageCode,
+  ).map((entry) => entry.sourceSlug);
+}
+
+/**
+ * Env feeds stay as configured. Catalog slugs missing from env are appended
+ * so a stale NEWS_RSS_FEEDS secret still ingests new sports desks.
+ */
+export function mergeRssFeedsWithCatalog(
+  fromEnv: readonly RssFeedConfig[],
+): RssFeedConfig[] {
+  const bySlug = new Map<string, RssFeedConfig>();
+  for (const feed of fromEnv) {
+    if (!isBlockedRssFeed(feed)) bySlug.set(feed.sourceSlug, feed);
+  }
+  for (const entry of RSS_FEED_CATALOG) {
+    const feed = toRssFeedConfig(entry);
+    if (isBlockedRssFeed(feed) || bySlug.has(feed.sourceSlug)) continue;
+    bySlug.set(feed.sourceSlug, feed);
+  }
+  return [...bySlug.values()];
 }
 
 export function cultureSourceSlugsForCountry(countryCode: string): readonly string[] {

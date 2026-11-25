@@ -21,7 +21,7 @@ import type { AppConfig } from "@/config/domains/app";
 import type { CacheConfig } from "@/config/domains/cache";
 import type { FeatureFlags } from "@/config/domains/feature-flags";
 import type { NewsConfig, RssFeedConfig } from "@/config/domains/news";
-import { isBlockedRssFeed } from "@/config/domains/rss-feed-catalog";
+import { isBlockedRssFeed, mergeRssFeedsWithCatalog } from "@/config/domains/rss-feed-catalog";
 import { isNewsTopicGroup } from "@/features/news/classification/categories";
 import type { PremiumConfig } from "@/config/domains/premium";
 import type { ProviderConfig } from "@/config/domains/providers";
@@ -141,7 +141,7 @@ function buildNewsConfig(): NewsConfig {
       DEFAULT_NEWS_CONFIG.ingestionEnabled,
     ),
     rss: {
-      feeds: parseRssFeeds(getEnv(ENV_KEYS.NEWS_RSS_FEEDS)),
+      feeds: mergeRssFeedsWithCatalog(parseRssFeeds(getEnv(ENV_KEYS.NEWS_RSS_FEEDS))),
     },
   };
 }

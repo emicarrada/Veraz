@@ -95,6 +95,13 @@ Xataka y Xataka México están en el catálogo para **Todas**. No alimentan la p
 | `guardian-sport` | The Guardian Sport | EN |
 | `espn-top` | ESPN Top Headlines | EN |
 | `la-jornada-deportes` | La Jornada Deportes | ES (México) |
+| `espn-mx` | ESPN México | ES (México) |
+| `record-mx` | Récord | ES (México) |
+| `marca` | Marca | ES (España) |
+
+La pestaña Deportes (y sus subtemas) solo lee estas redacciones. Xataka y el resto de portadas generales no entran, aunque un artículo se clasifique como deporte. Fox Sports México no publica un RSS utilizable, así que no está en el catálogo.
+
+La ingesta une el catálogo con `NEWS_RSS_FEEDS`: si el secreto no trae un slug nuevo, el catálogo lo agrega. Una entrada del secreto con el mismo slug conserva su URL.
 
 ## Cultura / entretenimiento (`primaryVertical: culture`)
 
@@ -141,7 +148,9 @@ Todo vive en **`/noticias`** con pestañas de clasificación (`?categoria=`). Co
 | `/es/noticias` (Todas) | Solo fuentes ES del catálogo y artículos en español |
 | `/en/noticias` (Todas) | Solo fuentes EN del catálogo y artículos en inglés |
 | `/es/noticias?categoria=economia\|tecnologia` | Fuentes prestigiosas ES+EN (mixto); aviso de idioma en UI |
-| `/es/noticias?categoria=deportes\|cultura\|…` | Solo fuentes ES y artículos en español |
+| `/es/noticias?categoria=deportes` | Solo redacciones deportivas en español |
+| `/en/noticias?categoria=deportes` | Solo redacciones deportivas en inglés (incluye ESPN) |
+| `/es/noticias?categoria=cultura\|…` | Solo fuentes ES y artículos en español |
 | `/en/noticias?categoria=economia\|tecnologia` | Solo fuentes prestigiosas EN |
 | `/en/noticias/[slug]` (detalle) | 404 si el artículo no cumple la política EN |
 | `/es/noticias/[slug]` (detalle) | 404 salvo fuente ES en español o fuente EN de referencia en finanzas/tech |

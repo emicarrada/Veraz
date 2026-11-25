@@ -5,6 +5,8 @@ import {
   getCatalogFeedsByVertical,
   isBlockedRssFeed,
   isNewsTopicGroup,
+  mergeRssFeedsWithCatalog,
+  sportsSourceSlugs,
   toRssFeedConfig,
 } from "@/config/domains/rss-feed-catalog";
 import { isNewsTopicGroup as isNewsTopicGroupFromCategories } from "@/features/news/classification/categories";
@@ -13,7 +15,7 @@ describe("RSS_FEED_CATALOG", () => {
   it("includes finance, tech, sports, and culture verticals", () => {
     expect(getCatalogFeedsByVertical("finance").length).toBe(6);
     expect(getCatalogFeedsByVertical("tech").length).toBe(9);
-    expect(getCatalogFeedsByVertical("sports").length).toBe(4);
+    expect(getCatalogFeedsByVertical("sports").length).toBe(7);
     expect(getCatalogFeedsByVertical("culture").length).toBe(8);
   });
 
@@ -67,6 +69,30 @@ describe("RSS_FEED_CATALOG", () => {
         feedUrl: "https://www.lanacion.com.ar/arc/outboundfeeds/rss/?outputType=xml",
       }),
     ).toBe(false);
+  });
+
+  it("keeps the Spanish sports tab on sports desks", () => {
+    expect(sportsSourceSlugs("es")).toEqual(
+      expect.arrayContaining(["espn-mx", "record-mx", "marca", "la-jornada-deportes"]),
+    );
+    expect(sportsSourceSlugs("es")).not.toEqual(expect.arrayContaining(["xataka", "xataka-mx"]));
+    expect(sportsSourceSlugs("en")).toEqual(
+      expect.arrayContaining(["espn-top", "bbc-sport", "guardian-sport"]),
+    );
+  });
+
+  it("appends catalog feeds that the env list does not already name", () => {
+    const merged = mergeRssFeedsWithCatalog([
+      { sourceSlug: "demo", feedUrl: "https://example.com/feed.xml" },
+      { sourceSlug: "marca", feedUrl: "https://example.com/marca.xml" },
+    ]);
+    const slugs = merged.map((feed) => feed.sourceSlug);
+    expect(slugs).toContain("demo");
+    expect(slugs).toContain("espn-mx");
+    expect(slugs).toContain("record-mx");
+    expect(merged.find((feed) => feed.sourceSlug === "marca")?.feedUrl).toBe(
+      "https://example.com/marca.xml",
+    );
   });
 
   it("validates topic groups", () => {

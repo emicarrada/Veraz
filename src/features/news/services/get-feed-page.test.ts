@@ -113,7 +113,7 @@ describe("getFeedPage", () => {
     );
   });
 
-  it("filters /es deportes to Spanish sources and language only", async () => {
+  it("filters /es deportes to Spanish sports desks", async () => {
     const repository = createRepository({ items: [], hasMore: false });
     await getFeedPage({
       locale: "es",
@@ -124,12 +124,45 @@ describe("getFeedPage", () => {
     expect(repository.listForFeed).toHaveBeenCalledWith(
       expect.objectContaining({
         languageCodes: ["es"],
-        sourceSlugs: expect.arrayContaining(["bbc-mundo", "la-nacion"]),
+        categorySlug: "deportes",
+        sourceSlugs: expect.arrayContaining([
+          "espn-mx",
+          "record-mx",
+          "marca",
+          "la-jornada-deportes",
+        ]),
       }),
     );
     expect(repository.listForFeed).toHaveBeenCalledWith(
       expect.objectContaining({
-        sourceSlugs: expect.not.arrayContaining(["bbc-sport", "espn-top"]),
+        sourceSlugs: expect.not.arrayContaining([
+          "xataka",
+          "xataka-mx",
+          "bbc-mundo",
+          "espn-top",
+        ]),
+      }),
+    );
+  });
+
+  it("filters /en deportes to English sports desks", async () => {
+    const repository = createRepository({ items: [], hasMore: false });
+    await getFeedPage({
+      locale: "en",
+      articleRepository: repository,
+      categorySlug: "futbol",
+    });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        languageCodes: ["en"],
+        categorySlug: "futbol",
+        sourceSlugs: expect.arrayContaining(["espn-top", "bbc-sport"]),
+      }),
+    );
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceSlugs: expect.not.arrayContaining(["marca", "xataka"]),
       }),
     );
   });

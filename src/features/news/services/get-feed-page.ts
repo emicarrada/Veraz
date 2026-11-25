@@ -20,7 +20,7 @@ import {
   resolveFeedSourceSlugs,
   resolvePrestigiousFeedQuery,
 } from "@/features/news/config/prestigious-sources";
-import { sourceSlugsForCountry } from "@/config/domains/rss-feed-catalog";
+import { sourceSlugsForCountry, sportsSourceSlugs } from "@/config/domains/rss-feed-catalog";
 
 export type GetFeedPageParams = {
   locale: Locale;
@@ -65,7 +65,15 @@ export async function getFeedPage(params: GetFeedPageParams): Promise<FeedLoadRe
 
     const prestigiousQuery = resolvePrestigiousFeedQuery(params.categorySlug, params.locale);
     const languageCodes = resolveFeedLanguageCodes(params.locale, params.categorySlug);
-    const localeSourceSlugs = resolveFeedSourceSlugs(params.locale, prestigiousQuery.sourceSlugs);
+    const topicGroup = params.categorySlug ? getTopicGroup(params.categorySlug) : undefined;
+    const sportsSlugs =
+      topicGroup === "deportes"
+        ? sportsSourceSlugs(params.locale === "en" ? "en" : "es")
+        : undefined;
+    const localeSourceSlugs = resolveFeedSourceSlugs(
+      params.locale,
+      prestigiousQuery.sourceSlugs ?? sportsSlugs,
+    );
     const reader =
       !params.categorySlug && params.readerPreferences
         ? params.readerPreferences
