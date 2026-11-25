@@ -4,7 +4,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { getSupabaseConfig } from "@/config/accessors";
-import { authCodeRecoveryPath } from "@/features/auth";
+// The auth barrel also exports client components. The edge bundle needs the pure function only.
+import { authCodeRecoveryPath } from "@/features/auth/services/auth-callback-destination";
 import { dedupeLocalePrefix } from "@/i18n/dedupe-locale-prefix";
 import { routing } from "@/i18n/routing";
 
