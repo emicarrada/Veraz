@@ -1,66 +1,26 @@
-"use client";
+import { getLocale, getTranslations } from "next-intl/server";
 
-import { useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
-
-import { createAuthBrowserClient } from "@/lib/supabase/auth-browser";
-import type { Locale } from "@/i18n/routing";
+import { signInWithGoogleAction } from "@/features/auth/actions";
 
 /**
- * Next erases this key when a Server Component passes it as a prop, so the
- * button rendered nothing under the "o". These two reads are inlined into the
- * client bundle. The anon key is public. The service role never belongs here.
+ * Server form. The anon key stays on the server: Next drops it if a client
+ * component receives it, and that left only the word "o" on the sign-in page.
  */
-const PUBLIC_SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
-const PUBLIC_SUPABASE_ANON_KEY = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "").trim();
-
-export type GoogleAuthButtonProps = {
-  supabaseUrl?: string;
-  supabaseAnonKey?: string;
-};
-
-export function GoogleAuthButton({
-  supabaseUrl = "",
-  supabaseAnonKey = "",
-}: GoogleAuthButtonProps) {
-  const t = useTranslations("auth");
-  const locale = useLocale() as Locale;
-  const [pending, setPending] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const url = supabaseUrl.trim() || PUBLIC_SUPABASE_URL;
-  const anonKey = supabaseAnonKey.trim() || PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !anonKey) return null;
-
-  async function signIn() {
-    setFailed(false);
-    setPending(true);
-    const supabase = createAuthBrowserClient(url, anonKey);
-    const redirectTo = `${window.location.origin}/auth/callback?locale=${locale}`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo,
-        queryParams: { prompt: "select_account" },
-      },
-    });
-    if (error) {
-      setPending(false);
-      setFailed(true);
-    }
-  }
+export async function GoogleAuthButton() {
+  const t = await getTranslations("auth");
+  const locale = await getLocale();
 
   return (
-    <button
-      type="button"
-      className="veraz-focus-ring inline-flex h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-surface px-4 text-small text-ink hover:bg-surface-muted disabled:opacity-60"
-      onClick={() => void signIn()}
-      disabled={pending}
-      aria-busy={pending}
-    >
-      <GoogleMark />
-      <span>{failed ? t("googleFailed") : pending ? t("opening") : t("google")}</span>
-    </button>
+    <form action={signInWithGoogleAction}>
+      <input type="hidden" name="locale" value={locale} />
+      <button
+        type="submit"
+        className="veraz-focus-ring inline-flex h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-surface px-4 text-small text-ink hover:bg-surface-muted"
+      >
+        <GoogleMark />
+        <span>{t("google")}</span>
+      </button>
+    </form>
   );
 }
 

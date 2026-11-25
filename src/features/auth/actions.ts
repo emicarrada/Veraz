@@ -109,6 +109,25 @@ export async function signUpWithPasswordAction(formData: FormData): Promise<void
   await redirectAfterSession(data.user.id, locale, supabase);
 }
 
+export async function signInWithGoogleAction(formData: FormData): Promise<void> {
+  const locale = localeFrom(formData);
+  const supabase = await createAuthServerClient();
+  if (!supabase) redirect(`/${locale}/entrar?error=unavailable`);
+
+  const origin = await siteOrigin();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback?locale=${locale}`,
+      skipBrowserRedirect: true,
+      queryParams: { prompt: "select_account" },
+    },
+  });
+
+  if (error || !data.url) redirect(`/${locale}/entrar?error=unavailable`);
+  redirect(data.url);
+}
+
 export async function signOutAction(formData: FormData): Promise<void> {
   const locale = localeFrom(formData);
   const supabase = await createAuthServerClient();
