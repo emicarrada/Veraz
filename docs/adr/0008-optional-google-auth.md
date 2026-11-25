@@ -20,6 +20,8 @@ Supabase ya está en el proyecto. Las noticias viven en el Postgres de `DATABASE
 
 ## Cómo activar Google
 
+En Vercel, `NEXT_PUBLIC_SUPABASE_ANON_KEY` es la publishable key de Supabase (Settings → API Keys). Empieza por `sb_publishable_`. La anon key antigua, en View legacy API keys, empieza por `eyJ` y también sirve. La secret key no va en esa variable. Hay que redesplegar después de guardarla: Next la incorpora al construir.
+
 En Google Cloud, el redirect autorizado es `{NEXT_PUBLIC_SUPABASE_URL}/auth/v1/callback`.
 
 En Supabase, Authentication → Providers → Google, y en la lista de retornos del sitio:
