@@ -65,7 +65,7 @@ export async function registerWithEmail(input: {
   origin: string;
   locale: string;
 }): Promise<RegisterWithEmailResult> {
-  const redirectTo = `${input.origin}/auth/callback?locale=${input.locale}`;
+  const redirectTo = `${input.origin}/auth/callback`;
   const created = await createSignupLink(input.email, input.password, redirectTo);
   if (!created.ok) return created;
 

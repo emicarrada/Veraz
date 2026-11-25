@@ -24,10 +24,12 @@ En Vercel, `NEXT_PUBLIC_SUPABASE_ANON_KEY` es la publishable key de Supabase (Se
 
 En Google Cloud, el redirect autorizado es `{NEXT_PUBLIC_SUPABASE_URL}/auth/v1/callback`.
 
-En Supabase, Authentication → Providers → Google, y en la lista de retornos del sitio:
+En Supabase, Authentication → URL Configuration, el Site URL es `https://www.veraz.app`. Si queda en `http://localhost:3000`, un retorno que no coincide manda el navegador a esa máquina. La lista de retornos es exacta, sin parámetros:
 
 - `http://localhost:3000/auth/callback`
 - `https://www.veraz.app/auth/callback`
+
+El idioma viaja en la cookie `NEXT_LOCALE` o en el enlace del correo. Google no lleva `?locale=` en la dirección de retorno.
 
 La migración `20251125000000_user_preferences.sql` crea la tabla solo si existe `auth.users`. En el Postgres de contenido, sin ese esquema, no crea nada.
 

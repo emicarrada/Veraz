@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { getSupabaseConfig } from "@/config/accessors";
+import { authCodeRecoveryPath } from "@/features/auth";
 import { dedupeLocalePrefix } from "@/i18n/dedupe-locale-prefix";
 import { routing } from "@/i18n/routing";
 
@@ -25,6 +26,13 @@ export default async function middleware(request: NextRequest) {
     }
 
     return NextResponse.next();
+  }
+
+  const recoveryPath = authCodeRecoveryPath(pathname, request.nextUrl.searchParams.get("code"));
+  if (recoveryPath) {
+    const url = request.nextUrl.clone();
+    url.pathname = recoveryPath;
+    return NextResponse.redirect(url);
   }
 
   if (pathname.startsWith("/auth/") || pathname.startsWith("/api/hero-image")) {

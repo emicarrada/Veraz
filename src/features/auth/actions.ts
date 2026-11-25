@@ -104,7 +104,7 @@ export async function beginGoogleSignIn(
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback?locale=${locale}`,
+      redirectTo: `${origin}/auth/callback`,
       skipBrowserRedirect: true,
       queryParams: { prompt: "select_account" },
     },

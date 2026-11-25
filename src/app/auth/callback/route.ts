@@ -25,7 +25,9 @@ function isEmailOtpType(value: string | null): value is EmailOtpType {
 /** Google and the confirmation link return here. The route stays outside the locale prefix. */
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
-  const locale = isLocale(url.searchParams.get("locale") ?? "") ? url.searchParams.get("locale")! : "es";
+  const queryLocale = url.searchParams.get("locale") ?? "";
+  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value ?? "";
+  const locale = isLocale(queryLocale) ? queryLocale : isLocale(cookieLocale) ? cookieLocale : "es";
   const code = url.searchParams.get("code");
   const tokenHash = url.searchParams.get("token_hash");
   const otpType = url.searchParams.get("type");
