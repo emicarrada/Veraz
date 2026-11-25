@@ -16,7 +16,7 @@ Supabase ya está en el proyecto. Las noticias viven en el Postgres de `DATABASE
 2. **Sesión:** Supabase Auth. El retorno de Google y el del correo confirmado es `/auth/callback`, fuera del prefijo de locale. Esa ruta cambia el código por la cookie. El middleware refresca la sesión sin bloquear las páginas públicas.
 3. **Ficha:** después del primer acceso, `/preferencias` pide nombre, apellido, sexo, edad (desde los 16), intereses, país, el correo opcional de avisos y la aceptación de los términos. Sexo y edad no filtran el feed. Temas y países sí: slugs e ISO. Tabla `user_preferences` en Supabase, `user_id` = `auth.users.id`, RLS con `auth.uid()`.
 4. **Inicio:** solo el feed sin categoría, y solo si el onboarding está completo, usa esos temas y esos países, en el día de Ciudad de México y en orden de publicación. Las pestañas no usan la preferencia. Sin sesión, el feed sigue por el país detectado. En México ese frente es Chilango, Sopitas y Xataka México, y después el resto del país. El mismo flujo está en inglés en `/en`.
-5. **Secreto:** el client id y el secret de Google viven en el panel de Supabase. La service role no sale al navegador. La contraseña tampoco se guarda en el repositorio.
+5. **Secreto:** el client id y el secret de Google viven en el panel de Supabase. La service role no sale al navegador. La contraseña tampoco se guarda en el repositorio. La anon key es pública y el botón de Google la lee en su propio módulo: si el servidor se la pasa como prop, Next la borra en el camino al navegador y el botón no se pinta.
 
 ## Cómo activar Google
 

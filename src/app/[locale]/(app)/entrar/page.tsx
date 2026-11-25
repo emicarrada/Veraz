@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 import { Section } from "@/components/ui/section";
-import { getSupabaseConfig } from "@/config/accessors";
 import { signInWithPasswordAction, signUpWithPasswordAction } from "@/features/auth/actions";
 import { GoogleAuthButton, getAuthSession, getReaderPreferences } from "@/features/auth";
 import { NewsAppShell } from "@/features/news";
@@ -33,7 +32,6 @@ export default async function EntrarPage({ params, searchParams }: EntrarPagePro
     redirect(preferences?.onboardingCompletedAt ? `/${resolvedLocale}/noticias` : `/${resolvedLocale}/preferencias`);
   }
 
-  const { url, anonKey } = getSupabaseConfig();
   const errorCopy: Record<string, string> = {
     email: t("emailError"),
     password: t("passwordError"),
@@ -83,7 +81,7 @@ export default async function EntrarPage({ params, searchParams }: EntrarPagePro
           </form>
 
           <p className="text-center text-caption text-ink-muted">{t("or")}</p>
-          <GoogleAuthButton supabaseUrl={url} supabaseAnonKey={anonKey} />
+          <GoogleAuthButton />
         </div>
       </Section>
     </NewsAppShell>

@@ -6,23 +6,36 @@ import { useLocale, useTranslations } from "next-intl";
 import { createAuthBrowserClient } from "@/lib/supabase/auth-browser";
 import type { Locale } from "@/i18n/routing";
 
+/**
+ * Next erases this key when a Server Component passes it as a prop, so the
+ * button rendered nothing under the "o". These two reads are inlined into the
+ * client bundle. The anon key is public. The service role never belongs here.
+ */
+const PUBLIC_SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
+const PUBLIC_SUPABASE_ANON_KEY = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "").trim();
+
 export type GoogleAuthButtonProps = {
-  supabaseUrl: string;
-  supabaseAnonKey: string;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
 };
 
-export function GoogleAuthButton({ supabaseUrl, supabaseAnonKey }: GoogleAuthButtonProps) {
+export function GoogleAuthButton({
+  supabaseUrl = "",
+  supabaseAnonKey = "",
+}: GoogleAuthButtonProps) {
   const t = useTranslations("auth");
   const locale = useLocale() as Locale;
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
+  const url = supabaseUrl.trim() || PUBLIC_SUPABASE_URL;
+  const anonKey = supabaseAnonKey.trim() || PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseAnonKey) return null;
+  if (!url || !anonKey) return null;
 
   async function signIn() {
     setFailed(false);
     setPending(true);
-    const supabase = createAuthBrowserClient(supabaseUrl, supabaseAnonKey);
+    const supabase = createAuthBrowserClient(url, anonKey);
     const redirectTo = `${window.location.origin}/auth/callback?locale=${locale}`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
