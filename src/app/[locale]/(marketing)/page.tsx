@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { LandingPage } from "@/components/marketing/landing";
-import { getAppConfig } from "@/config";
+import { getAppConfig, getCacheConfig } from "@/config";
+import { getLandingPhotoRing } from "@/features/news";
 import { feedPath, homePath } from "@/i18n/paths";
 import { locales, type Locale } from "@/i18n/routing";
 
 const { name: SITE_NAME, tagline: SITE_TAGLINE, siteUrl } = getAppConfig();
+
+export const revalidate = getCacheConfig().feedRevalidateSeconds;
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;
@@ -116,11 +119,12 @@ async function JsonLd({ locale }: { locale: Locale }) {
 
 export default async function MarketingHomePage({ params }: HomePageProps) {
   const { locale } = await params;
+  const ringItems = await getLandingPhotoRing(locale as Locale).catch(() => []);
 
   return (
     <>
       <JsonLd locale={locale as Locale} />
-      <LandingPage />
+      <LandingPage ringItems={ringItems} />
     </>
   );
 }

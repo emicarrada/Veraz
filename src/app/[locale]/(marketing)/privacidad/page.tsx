@@ -31,6 +31,9 @@ export default async function PrivacidadPage({ params }: PageProps) {
       <h2>{t("sections.intro.title")}</h2>
       <p>{t("sections.intro.body")}</p>
 
+      <h2>{t("sections.account.title")}</h2>
+      <p>{t("sections.account.body")}</p>
+
       <h2>{t("sections.analytics.title")}</h2>
       <p>{t("sections.analytics.body")}</p>
 

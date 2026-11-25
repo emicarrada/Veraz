@@ -38,6 +38,13 @@ export async function buildMainSitemapEntries(): Promise<MetadataRoute.Sitemap> 
       priority: priority * 0.9,
     });
 
+    entries.push({
+      url: `${base}${staticPath(locale, "/ayer")}`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: priority * 0.8,
+    });
+
     for (const segment of STATIC_PAGE_SEGMENTS) {
       entries.push({
         url: `${base}${staticPath(locale, `/${segment}`)}`,

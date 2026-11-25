@@ -9,6 +9,7 @@ import { HtmlLang } from "@/components/layout/html-lang";
 import { SitePillNav } from "@/components/layout/site-pill-nav";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { getAnalyticsConfig, getAppConfig } from "@/config/accessors";
+import { getAuthSession } from "@/features/auth";
 import { buildSiteVerificationMetadata } from "@/features/seo/build-page-metadata";
 import { routing, type Locale } from "@/i18n/routing";
 
@@ -56,6 +57,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   setRequestLocale(locale);
 
   const messages = await getMessages();
+  const session = await getAuthSession();
   const analytics = getAnalyticsConfig();
   const posthogKey = analytics.publicId;
   const posthogHost = analytics.posthogHost;
@@ -66,7 +68,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
 
   const app = (
     <>
-      <SitePillNav />
+      <SitePillNav accountLabel={session?.displayName ?? session?.email ?? null} />
       {children}
     </>
   );

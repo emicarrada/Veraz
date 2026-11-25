@@ -1,3 +1,4 @@
+import { catalogLabelForSlug } from "@/config/domains/rss-feed-catalog";
 import type { ArticleDetailRecord } from "@/lib/repositories/contracts/article-repository";
 import type { ArticleDetailItem } from "@/features/news/types/article-detail";
 import { classifyArticle } from "@/features/news/classification/article-category-classifier";
@@ -24,6 +25,7 @@ function resolveDetailCategory(record: ArticleDetailRecord): NewsTopicSlug {
 export function mapArticleDetailRecord(record: ArticleDetailRecord): ArticleDetailItem {
   const { article, source, heroMedia, references } = record;
   const categorySlug = resolveDetailCategory(record);
+  const sourceLabel = catalogLabelForSlug(source.slug);
 
   return {
     id: article.id,
@@ -39,9 +41,9 @@ export function mapArticleDetailRecord(record: ArticleDetailRecord): ArticleDeta
     isTranslated: false,
     showOriginalLanguageNote: false,
     source: {
-      name: source.name,
+      name: sourceLabel ?? source.name,
       slug: source.slug,
-      attributionName: source.attributionName,
+      attributionName: sourceLabel ?? source.attributionName,
       homepageUrl: source.homepageUrl,
     },
     references: references.map((reference) => ({

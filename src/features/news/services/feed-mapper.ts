@@ -1,3 +1,4 @@
+import { catalogLabelForSlug } from "@/config/domains/rss-feed-catalog";
 import type { ArticleFeedRecord } from "@/lib/repositories/contracts/article-repository";
 import type { ArticleFeedItem } from "@/features/news/types/feed";
 import { classifyArticle } from "@/features/news/classification/article-category-classifier";
@@ -25,6 +26,7 @@ export function mapFeedRecordToItem(record: ArticleFeedRecord): ArticleFeedItem 
   const { article } = record;
   const categorySlug = resolveCategorySlug(record);
   const summary = formatFeedSummary(article.excerpt);
+  const sourceLabel = catalogLabelForSlug(record.sourceSlug);
 
   return {
     id: article.id,
@@ -40,9 +42,9 @@ export function mapFeedRecordToItem(record: ArticleFeedRecord): ArticleFeedItem 
     languageCode: record.languageCode,
     isTranslated: false,
     showOriginalLanguageNote: false,
-    sourceName: record.sourceName,
+    sourceName: sourceLabel ?? record.sourceName,
     sourceSlug: record.sourceSlug,
-    sourceAttributionName: record.sourceAttributionName,
+    sourceAttributionName: sourceLabel ?? record.sourceAttributionName,
     ...(article.byline ? { byline: formatDisplayText(article.byline) } : {}),
     ...(record.heroImageUrl ? { heroImageUrl: record.heroImageUrl } : {}),
   };

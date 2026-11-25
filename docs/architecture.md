@@ -4,7 +4,7 @@
 
 Modular monolith sobre **Next.js App Router**, con lógica de negocio en `src/features/*`, infraestructura en `src/lib/*`, y UI compartida en `src/components/*`.
 
-Deploy: **Vercel**. Datos: **PostgreSQL** en el EC2 de social (`DATABASE_URL`). Auth de usuario sigue pendiente (Fase B).
+Deploy: **Vercel**. Datos de noticias: **PostgreSQL** en el EC2 de social (`DATABASE_URL`). Identidad: **Supabase Auth** con correo o Google. La ficha y las preferencias del inicio viven en Supabase (`user_preferences`), no en el Postgres de las noticias.
 
 **Núcleo del producto:** plataforma de noticias (ingesta, publicación, lectura).  
 **IA:** capa opcional (`AI Engine`) que *enriquece* contenido. Veraz debe funcionar al 100% **sin ningún proveedor de IA ni API keys**.
@@ -300,21 +300,24 @@ Ruta: `/` vía `src/app/(marketing)/page.tsx`.
 ### Secciones (orden)
 
 1. Hero (brand-first, full-bleed)
-2. ¿Qué es Veraz?
-3. Cómo funciona
-4. Características principales
-5. Categorías de noticias
-6. Beneficios
-7. CTA final
-8. Footer
+2. Anillo de fotos: notas con foto de hoy, o de ayer si hoy todavía no llena el anillo. En `/es` son fuentes en español; en `/en`, en inglés. Lo arma `getLandingPhotoRing`.
+3. ¿Qué es Veraz?
+4. Cómo funciona
+5. Características principales
+6. Categorías de noticias
+7. Beneficios
+8. CTA final
+9. Footer
 
 ### Reglas de la landing
 
 - Solo Design System (`components/ui`, `components/layout`) + secciones marketing.
 - Copy con placeholders `[PLACEHOLDER: …]` hasta definición editorial.
-- Sin formularios conectados, APIs, auth, feed ni IA.
+- El anillo lee el feed del día (y el anterior si hace falta). El resto de la landing no publica ni reescribe notas.
 - SEO: Metadata API, Open Graph, Twitter Cards, JSON-LD (`Organization` + `WebSite`).
 - Animaciones CSS mínimas con `prefers-reduced-motion`.
+
+El feed principal, debajo de «Noticias», tiene un botón a `/ayer`. Esa ruta muestra las notas con foto del día anterior en Ciudad de México (en inglés, las de fuentes en inglés) y se renueva al cambiar el día.
 
 ## Features planificadas
 
@@ -323,7 +326,7 @@ Ruta: `/` vía `src/app/(marketing)/page.tsx`.
 | `news` | Artículos, feed, detalle, categorías (**núcleo**) |
 | `ai` | UI/use-cases de insights; consume solo AI Engine |
 | `search` | Búsqueda y filtros |
-| `auth` | Sesión y guards |
+| `auth` | Sesión de Supabase Auth (correo o Google), ficha y preferencias del inicio |
 | `profile` | Perfil y preferencias |
 | `premium` | Planes y paywall |
 | `settings` | Ajustes (incl. preferencias de enriquecimiento) |

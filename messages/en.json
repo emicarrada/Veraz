@@ -6,13 +6,71 @@
     "about": "About",
     "contact": "Contact",
     "privacy": "Privacy",
-    "terms": "Terms of use",
+    "terms": "Terms and conditions",
     "logoAlt": "Veraz",
     "mainAria": "Main",
     "homeAria": "Home",
     "localeEs": "Español",
     "localeEn": "English",
     "localeSwitchAria": "Language: {locale}. Click to switch."
+  },
+  "auth": {
+    "accountEntryAria": "Account",
+    "signInTitle": "Account",
+    "signInLead": "Sign in with your email or with Google. If you do not have an account yet, that same email creates one.",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "or": "or",
+    "confirmEmail": "Check your email to confirm the account. The link brings you back here.",
+    "emailError": "Enter a valid email.",
+    "passwordError": "The password needs at least 8 characters.",
+    "credentialsError": "Email or password is incorrect.",
+    "existsError": "That email already has an account. Sign in with the password.",
+    "unavailable": "Sign-in is unavailable right now. Try again.",
+    "google": "Continue with Google",
+    "googleAria": "Continue with Google",
+    "opening": "Opening Google…",
+    "googleFailed": "Google did not respond. Try again.",
+    "preferences": "Preferences",
+    "signOut": "Sign out",
+    "accountAria": "Account for {name}",
+    "preferencesTitle": "Your account",
+    "preferencesLead": "Your name, your interests, and the country of the news on your home. You can change this whenever you want.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "sex": "Sex",
+    "sexPlaceholder": "Choose",
+    "age": "Age",
+    "ageHint": "From 16 years old.",
+    "sexOptions": {
+      "female": "Female",
+      "male": "Male",
+      "other": "Other",
+      "undisclosed": "Prefer not to say"
+    },
+    "emailUpdates": "I want news and service updates by email.",
+    "termsAccept": "I accept the",
+    "termsLink": "Terms and conditions",
+    "topicsLabel": "Interests",
+    "countriesLabel": "Country",
+    "save": "Save",
+    "needName": "Enter your first and last name.",
+    "needSex": "Choose an option.",
+    "needAge": "The account is for people 16 and older.",
+    "needTopic": "Choose at least one interest.",
+    "needCountry": "Choose at least one country.",
+    "needTerms": "Accept the terms to save the account.",
+    "saveFailed": "Could not save. Try again.",
+    "signInFirst": "Sign in to save your home.",
+    "countries": {
+      "MX": "Mexico",
+      "ES": "Spain",
+      "AR": "Argentina",
+      "US": "United States",
+      "GB": "United Kingdom"
+    }
   },
   "footer": {
     "copyright": "© {year} Veraz"
@@ -51,6 +109,11 @@
       "subcopy": "We aggregate news from reference sources, with traceability to the original publication. No invented facts, no pushed agenda.",
       "ctaNews": "View news",
       "ctaAbout": "About Veraz"
+    },
+    "ring": {
+      "eyebrow": "Today",
+      "title": "The day, in one turn",
+      "description": "Photos from today's stories, and from yesterday when the day is still short. The headline and the outlet stay up front. Open the one you want."
     },
     "whatIs": {
       "eyebrow": "News platform",
@@ -153,14 +216,26 @@
     "allTab": "All",
     "specificTopics": "Specific topics",
     "specificTopicsAria": "Filter by specific topic",
-    "emptyTitle": "No news yet",
-    "emptyDescription": "When articles are ingested from RSS, they will appear here sorted by publication date.",
-    "emptyIngestHint": "If you expected news here, check Supabase and run: npm run ingest:run",
+    "emptyTitle": "No news",
+    "emptyDescription": "New stories will appear here as they arrive.",
+    "todayEdition": "Today",
+    "dayToday": "Today",
+    "dayYesterday": "Yesterday",
+    "yesterdayLink": "HangOver",
+    "homeCountryFirst": "{country} first",
     "languageDisclosureFinance": "Several reference finance sources publish primarily in English. We show headlines as published by the outlet; each story shows its source and original link.",
     "languageDisclosureTech": "Several reference technology sources publish primarily in English. We show headlines as published by the outlet; each story shows its source and original link.",
     "loadMore": "Load more",
+    "loadMoreFailed": "Couldn't load more news",
     "loading": "Loading…",
     "endOfFeed": "You've reached the end of the feed.",
+    "sinceLastVisit": "{count, plural, one {# story since your last visit} other {# stories since your last visit}}",
+    "sinceLastVisitMore": "{count, plural, one {# story since your last visit, with more below} other {# stories since your last visit, with more below}}",
+    "continueMarker": "Still in {section}",
+    "similarHeadlines": "{count, plural, one {# outlet, similar headline} other {# outlets, similar headlines}}",
+    "showVersions": "See each source",
+    "hideVersions": "Hide sources",
+    "unreadLabel": "Unread",
     "categories": {
       "politica": "Politics",
       "economia": "Finance",
@@ -185,6 +260,16 @@
       "criptomonedas": "Cryptocurrency"
     }
   },
+  "yesterday": {
+    "title": "HangOver",
+    "description": "Yesterday's stories that have a photo. The headline and the outlet stay up front.",
+    "mobileHelp": [
+      "Swipe sideways to move through the stories.",
+      "Tap a photo to bring it forward.",
+      "Tap the centered one again to open it. The headline and the outlet sit below."
+    ],
+    "empty": "Yesterday left no stories with a photo."
+  },
   "article": {
     "referencesTitle": "References",
     "readOriginal": "Read original article",
@@ -196,7 +281,8 @@
     "factualSourceLabel": "Primary source",
     "factualPublishedLabel": "Published",
     "factualTopicLabel": "Topic",
-    "relatedInCategory": "More in {category}"
+    "relatedInCategory": "More in {category}",
+    "nextArticle": "Next"
   },
   "seo": {
     "category": {
@@ -305,6 +391,10 @@
           "title": "Summary",
           "body": "Veraz collects the minimum information needed to operate the site, measure aggregate usage, and respond to inquiries. We do not sell personal data."
         },
+        "account": {
+          "title": "Account",
+          "body": "If you create an account, we store the email, first name, last name, sex, age, interests, the countries on your home, the date you accepted the terms, and whether you asked for email. Sex and age do not rank or hide news. Sign-in is operated by Supabase Auth. To delete the account, write to the contact email."
+        },
         "analytics": {
           "title": "Analytics",
           "body": "We may use tools like PostHog to understand aggregate usage (pages visited, language). You can use tracking blockers if you prefer."
@@ -317,26 +407,63 @@
       }
     },
     "terms": {
-      "title": "Terms of use",
-      "metaDescription": "Veraz terms of use.",
-      "pageTitle": "Terms of use",
-      "pageDescription": "Basic conditions for using the Veraz platform.",
+      "title": "Terms and conditions",
+      "metaDescription": "Veraz terms and conditions.",
+      "pageTitle": "Terms and conditions",
+      "pageDescription": "Conditions for reading Veraz and, if you want, creating an account.",
+      "updated": "In effect since November 24, 2026.",
       "sections": {
-        "service": {
-          "title": "The service",
-          "body": "Veraz aggregates third-party links and summaries. We are not authors of linked content; editorial responsibility remains with each source."
+        "who": {
+          "title": "Who offers Veraz",
+          "body": "Veraz is a news-reading service at veraz.app. It gathers headlines from outlets and links to the original source. The contact email is at the end of these terms."
+        },
+        "noAccount": {
+          "title": "You can read without an account",
+          "body": "The public feed does not ask you to register. An account is optional and only stores a home of your own."
+        },
+        "account": {
+          "title": "How an account is created",
+          "body": "You can sign in with email and password, or with Google. The first use of an email creates the account and the next one signs in. Veraz does not store the password in plain text; the sign-in service keeps it. If you use Google, Google confirms who you are. You must be at least 16 to create an account."
+        },
+        "data": {
+          "title": "What we ask when you create the account",
+          "body": "First name, last name, sex, age, the topics you want to see, the country of the sources on your home, acceptance of these terms, and whether you want email from Veraz. Sex and age do not rank or hide news. Topics and country only filter your home. You can change them whenever you want from the account."
+        },
+        "mail": {
+          "title": "Email",
+          "body": "If you check the box, we may send news and service notices to that email. You can uncheck it later in your account. Messages that confirm the email are sent even if you leave the box empty, because without them an email account does not become active."
+        },
+        "google": {
+          "title": "Google",
+          "body": "The Google button opens Google's screen. Veraz does not receive your Google password. It receives the basic identity Google shares, usually your name and email."
+        },
+        "acceptance": {
+          "title": "Acceptance",
+          "body": "The checkbox for these terms is required to save the account. If you do not accept them, you can keep reading without registering. Saving the account means you accept the version published on this page at that moment."
+        },
+        "content": {
+          "title": "The news",
+          "body": "Headlines belong to each outlet. Veraz orders and links them; it does not present them as its own reporting. On some Spanish sections an English headline may be shown in translation, marked as translated, and the link remains the source's. Check the original outlet before you rely on something that matters to you."
         },
         "use": {
           "title": "Permitted use",
-          "body": "You may browse the feed for personal use. Aggressive scraping or attempts to compromise infrastructure are not allowed."
+          "body": "Use is personal. Automated mass access that degrades the service is not allowed, nor is trying to enter someone else's account, nor using the account to impersonate another person."
+        },
+        "closing": {
+          "title": "Signing out and deletion",
+          "body": "You can sign out whenever you want and change your details. To delete the account and what we store about you, write to the contact email. When you sign out, the personal home stops applying."
         },
         "liability": {
-          "title": "Limitation",
-          "body": "The service is provided as is. Verify important information at original sources before making decisions."
+          "title": "Limit",
+          "body": "The service is offered as it is. Whether a story appears depends on the outlet publishing it and on the feed receiving it. Veraz is not responsible for the content of linked sites."
+        },
+        "law": {
+          "title": "Governing law",
+          "body": "These terms are read under the laws of Mexico. If you live in another country, including the United States, you keep the rights your law does not allow you to waive."
         },
         "contact": {
           "title": "Contact",
-          "bodyPrefix": "Legal or usage questions:",
+          "bodyPrefix": "Questions about these terms:",
           "bodySuffix": "."
         }
       }

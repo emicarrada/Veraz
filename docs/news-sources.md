@@ -35,7 +35,7 @@ En **Settings → Secrets and variables → Actions** del repo, o con el script:
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role (ingesta) |
-| `NEWS_RSS_FEEDS` | JSON del catálogo (21 feeds) |
+| `NEWS_RSS_FEEDS` | JSON del catálogo (32 feeds) |
 
 ### Workflows (`.github/workflows/`)
 
@@ -83,21 +83,29 @@ Solo estas fuentes alimentan la pestaña Finanzas (y sub-temas Mercados / Cripto
 | `engadget` | Engadget | EN |
 | `el-pais-tecnologia` | El País Tecnología | ES |
 
-## Deportes — fuentes EN (`primaryVertical: sports`, solo `/en`)
+Xataka y Xataka México están en el catálogo para **Todas**. No alimentan la pestaña Tecnología.
+
+## Deportes (`primaryVertical: sports`)
 
 | sourceSlug | Fuente | Idioma |
 |------------|--------|--------|
 | `bbc-sport` | BBC Sport | EN |
 | `guardian-sport` | The Guardian Sport | EN |
 | `espn-top` | ESPN Top Headlines | EN |
+| `la-jornada-deportes` | La Jornada Deportes | ES (México) |
 
-## Cultura / entretenimiento — fuentes EN (`primaryVertical: culture`, solo `/en`)
+## Cultura / entretenimiento (`primaryVertical: culture`)
 
 | sourceSlug | Fuente | Idioma |
 |------------|--------|--------|
 | `bbc-entertainment` | BBC Entertainment & Arts | EN |
 | `guardian-culture` | The Guardian Culture | EN |
 | `variety` | Variety | EN |
+| `la-jornada-cultura` | La Jornada Cultura | ES (México) |
+| `la-jornada-espectaculos` | La Jornada Espectáculos | ES (México) |
+| `reforma-cultura` | Reforma Cultura | ES (México) |
+| `chilango` | Chilango | ES (México) |
+| `sopitas` | Sopitas | ES (México) |
 
 ## General (`primaryVertical: general`)
 
@@ -108,6 +116,11 @@ Portadas generales — visibles en **Todas**, no en Finanzas/Tecnología:
 | `bbc-mundo` | BBC Mundo | ES |
 | `el-pais` | El País | ES |
 | `la-nacion` | La Nación | ES |
+| `la-jornada` | La Jornada | ES (México) |
+| `reforma` | Reforma | ES (México) |
+| `el-economista` | El Economista | ES (México; economía, visible en Todas) |
+
+En **Todas**, si el visitante es de un país con fuentes en el catálogo, esas fuentes van primero: cultura de ese país, luego el resto del país, luego el mundo. México usa La Jornada, Reforma y El Economista. Infobae no está en el catálogo.
 
 ## Rutas de producto por rubro
 
@@ -151,8 +164,7 @@ Causa habitual post-i18n: artículos con `language_id` huérfano (excluidos por 
 |--------|--------|
 | Infobae | Excluido del catálogo, la web y las publicaciones sociales |
 | Reuters Business RSS | Feed legacy caído / bloqueado |
-| El Economista (MX) | HTTP 403 en RSS público |
-| Xataka, Genbeta, Hipertextual | Blogs — no entran en pestaña Tecnología (referencia global) |
+| Genbeta, Hipertextual | Blogs — no entran en la pestaña Tecnología |
 | Ámbito Financiero | Medio regional — excluido de Finanzas de referencia |
 
 ## Monitoreo

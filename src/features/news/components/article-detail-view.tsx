@@ -11,6 +11,7 @@ import { ArticleHeader } from "@/features/news/components/article-header";
 import { ArticleHeroImage } from "@/features/news/components/article-hero-image";
 import { ArticleMeta } from "@/features/news/components/article-meta";
 import { ArticleReferences } from "@/features/news/components/article-references";
+import { RememberArticleRead } from "@/features/news/components/remember-article-read";
 import { NewsAppShell } from "@/features/news/components/news-app-shell";
 import type { ArticleDetailItem } from "@/features/news/types/article-detail";
 import { ArticleFactualSummary } from "@/features/seo/components/article-factual-summary";
@@ -35,6 +36,7 @@ export async function ArticleDetailView({ article, locale }: ArticleDetailViewPr
     <NewsAppShell>
       <Section padding="md" containerSize="md">
         <article className="mx-auto max-w-3xl space-y-8">
+          <RememberArticleRead slug={article.slug} />
           <ArticleBackLink feedHref={feedHref} />
           <ArticleMeta article={article} />
           {article.isTranslated ? (

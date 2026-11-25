@@ -67,6 +67,8 @@ describe("getFeedPage", () => {
     expect(result.data.items).toHaveLength(1);
     expect(result.data.items[0]?.title).toBe("Demo Post");
     expect(result.data.items[0]?.sourceName).toBe("Demo Source");
+    const query = vi.mocked(repository.listForFeed).mock.calls[0]?.[0];
+    expect(query?.publishedSince).toBeUndefined();
   });
 
   it("returns not_configured when repository is unavailable", async () => {
@@ -161,6 +163,68 @@ describe("getFeedPage", () => {
     );
   });
 
+  it("leads the main feed with the visitor country and keeps that order", async () => {
+    const homeRecord: ArticleFeedRecord = {
+      ...sampleRecord,
+      sourceSlug: "la-jornada-cultura",
+      article: {
+        ...sampleRecord.article,
+        id: "article-home" as ArticleId,
+        publishedAt: "2026-07-15T12:00:00.000Z",
+      },
+    };
+    const foreignRecord: ArticleFeedRecord = {
+      ...sampleRecord,
+      sourceSlug: "el-pais",
+      article: {
+        ...sampleRecord.article,
+        id: "article-foreign" as ArticleId,
+        publishedAt: "2026-07-16T18:00:00.000Z",
+      },
+    };
+    const repository = createRepository({
+      items: [homeRecord, foreignRecord],
+      hasMore: false,
+    });
+
+    const result = await getFeedPage({
+      locale: "es",
+      visitorCountry: "MX",
+      articleRepository: repository,
+    });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prioritizeSourceSlugs: expect.arrayContaining(["la-jornada", "reforma-cultura"]),
+        leadSourceSlugs: expect.arrayContaining(["la-jornada-cultura", "reforma-cultura"]),
+      }),
+    );
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prioritizeSourceSlugs: expect.not.arrayContaining(["el-pais", "la-nacion"]),
+      }),
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.items.map((item) => item.id)).toEqual(["article-home", "article-foreign"]);
+  });
+
+  it("leaves category tabs in publication order", async () => {
+    const repository = createRepository({ items: [], hasMore: false });
+    await getFeedPage({
+      locale: "es",
+      visitorCountry: "MX",
+      categorySlug: "cultura",
+      articleRepository: repository,
+    });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        prioritizeSourceSlugs: expect.anything(),
+      }),
+    );
+  });
+
   it("uses EN-only finance sources on /en economia tab", async () => {
     const repository = createRepository({ items: [], hasMore: false });
     await getFeedPage({
@@ -179,6 +243,49 @@ describe("getFeedPage", () => {
       expect.objectContaining({
         sourceSlugs: expect.not.arrayContaining(["expansion", "bloomberg-linea"]),
       }),
+    );
+  });
+
+  it("limits the main feed to the reader's countries and topics", async () => {
+    const repository = createRepository({ items: [], hasMore: false });
+    await getFeedPage({
+      locale: "es",
+      articleRepository: repository,
+      visitorCountry: "ES",
+      readerPreferences: { countryCodes: ["MX"], topicSlugs: ["cultura"] },
+    });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceSlugs: expect.arrayContaining(["chilango", "la-jornada"]),
+        categorySlugs: expect.arrayContaining(["cultura"]),
+        chronological: true,
+      }),
+    );
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        prioritizeSourceSlugs: expect.anything(),
+      }),
+    );
+  });
+
+  it("keeps category tabs independent of reader preferences", async () => {
+    const repository = createRepository({ items: [], hasMore: false });
+    await getFeedPage({
+      locale: "es",
+      articleRepository: repository,
+      categorySlug: "deportes",
+      readerPreferences: { countryCodes: ["MX"], topicSlugs: ["cultura"] },
+    });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        languageCodes: ["es"],
+        categorySlug: "deportes",
+      }),
+    );
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.not.objectContaining({ chronological: true }),
     );
   });
 });

@@ -25,18 +25,27 @@ export async function RelatedArticles({
   if (!result.ok) return null;
 
   const related = result.data.items.filter((item) => item.slug !== excludeSlug).slice(0, limit);
-  if (related.length === 0) return null;
+  const [next, ...rest] = related;
+  if (!next) return null;
 
   return (
-    <section aria-labelledby="related-articles-heading" className="space-y-4 border-t border-border pt-8">
-      <Text as="h2" id="related-articles-heading" variant="label" className="text-ink">
-        {t("relatedInCategory", { category: related[0]?.categoryLabel ?? categorySlug })}
+    <section aria-labelledby="next-article-heading" className="space-y-4 border-t border-border pt-8">
+      <Text as="h2" id="next-article-heading" variant="label" className="text-ink">
+        {t("nextArticle")}
       </Text>
-      <div className="grid gap-4">
-        {related.map((item) => (
-          <ArticleCard key={item.id} item={item} />
-        ))}
-      </div>
+      <ArticleCard item={next} variant="media" />
+      {rest.length > 0 ? (
+        <div className="space-y-3 pt-2">
+          <Text as="h3" variant="label" className="text-ink">
+            {t("relatedInCategory", { category: next.categoryLabel })}
+          </Text>
+          <div className="grid gap-3">
+            {rest.map((item) => (
+              <ArticleCard key={item.id} item={item} variant="compact" />
+            ))}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

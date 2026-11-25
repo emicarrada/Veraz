@@ -1,6 +1,5 @@
 import type { ArticleId } from "@/domain/shared/ids";
-import { isAIEnabled } from "@/lib/ai-engine/config";
-import { translateArticleContent } from "@/lib/ai-engine/translate";
+import { mapWithLimit, translateArticleContent } from "@/lib/ai-engine/translate";
 import type { ArticleTranslationRepository, ArticleTranslation } from "@/lib/repositories/contracts/article-translation-repository";
 import { createContentRepositories } from "@/lib/repositories/factory";
 import type { Locale } from "@/i18n/routing";
@@ -78,17 +77,15 @@ export async function resolveArticleDisplay(
     };
   }
 
-  if (!isAIEnabled()) {
-    return {
-      title: article.title,
-      excerpt: article.excerpt,
-      ...(article.bodyExcerpt ? { bodyExcerpt: article.bodyExcerpt } : {}),
-      isTranslated: false,
-      showOriginalLanguageNote: true,
-      sourceLanguageCode,
-    };
-  }
+  return translateMissing(locale, article, sourceLanguageCode, repository);
+}
 
+async function translateMissing(
+  locale: Locale,
+  article: ArticleSourceContent,
+  sourceLanguageCode: string,
+  repository: ArticleTranslationRepository | null,
+): Promise<ResolvedArticleDisplay> {
   const translated = await translateArticleContent({
     locale,
     sourceLocale: sourceLanguageCode,
@@ -120,7 +117,7 @@ export async function resolveArticleDisplay(
         provider: "ai",
       });
     } catch {
-      // fail-open: show translation without persisting cache
+      // fail-open: show the translation without persisting the cache
     }
   }
 
@@ -138,6 +135,7 @@ export async function resolveArticlesDisplay(
   locale: Locale,
   articles: ReadonlyArray<ArticleSourceContent>,
   repository: ArticleTranslationRepository | null = createTranslationRepository(),
+  options?: { translate?: boolean },
 ): Promise<Map<ArticleId, ResolvedArticleDisplay>> {
   const result = new Map<ArticleId, ResolvedArticleDisplay>();
   if (articles.length === 0) return result;
@@ -180,13 +178,30 @@ export async function resolveArticlesDisplay(
       continue;
     }
 
-    result.set(article.id, {
-      title: article.title,
-      excerpt: article.excerpt,
-      ...(article.bodyExcerpt ? { bodyExcerpt: article.bodyExcerpt } : {}),
-      isTranslated: false,
-      showOriginalLanguageNote: true,
-      sourceLanguageCode,
+    if (!options?.translate) {
+      result.set(article.id, {
+        title: article.title,
+        excerpt: article.excerpt,
+        ...(article.bodyExcerpt ? { bodyExcerpt: article.bodyExcerpt } : {}),
+        isTranslated: false,
+        showOriginalLanguageNote: true,
+        sourceLanguageCode,
+      });
+    }
+  }
+
+  if (options?.translate) {
+    const pending = articles.filter((article) => !result.has(article.id));
+    await mapWithLimit(pending, 3, async (article) => {
+      result.set(
+        article.id,
+        await translateMissing(
+          locale,
+          article,
+          normalizeLanguageCode(article.languageCode),
+          repository,
+        ),
+      );
     });
   }
 

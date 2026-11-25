@@ -28,14 +28,28 @@ export default async function TerminosPage({ params }: PageProps) {
 
   return (
     <StaticPageShell title={t("pageTitle")} description={t("pageDescription")}>
-      <h2>{t("sections.service.title")}</h2>
-      <p>{t("sections.service.body")}</p>
-
-      <h2>{t("sections.use.title")}</h2>
-      <p>{t("sections.use.body")}</p>
-
-      <h2>{t("sections.liability.title")}</h2>
-      <p>{t("sections.liability.body")}</p>
+      <p>{t("updated")}</p>
+      {(
+        [
+          "who",
+          "noAccount",
+          "account",
+          "data",
+          "mail",
+          "google",
+          "acceptance",
+          "content",
+          "use",
+          "closing",
+          "liability",
+          "law",
+        ] as const
+      ).map((key) => (
+        <section key={key}>
+          <h2>{t(`sections.${key}.title`)}</h2>
+          <p>{t(`sections.${key}.body`)}</p>
+        </section>
+      ))}
 
       <h2>{t("sections.contact.title")}</h2>
       <p>

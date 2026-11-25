@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server";
 
 import { Alert } from "@/components/ui/alert";
 import { Section } from "@/components/ui/section";
-import { Text } from "@/components/ui/text";
 import {
   getTopic,
   type NewsTopicGroup,
@@ -56,7 +55,6 @@ export async function CategoryFeedPage({ locale, categorySlug }: CategoryFeedPag
   const topic = getTopic(categorySlug);
   const path = feedCategoryPath(locale, categorySlug);
   const categoryLabel = tFeed(categorySlug);
-  const intro = t(`intro.${categorySlug}` as "intro.economia");
 
   const breadcrumb = buildBreadcrumbJsonLd(siteUrl, [
     { name: tNav("home"), path: homePath(locale) },
@@ -77,9 +75,6 @@ export async function CategoryFeedPage({ locale, categorySlug }: CategoryFeedPag
       <JsonLdScript schema={collection} />
       <Section padding="md" containerSize="md">
         <FeedHeader categorySlug={categorySlug} />
-        <Text as="p" variant="body" className="mb-6 max-w-3xl text-ink-secondary">
-          {intro}
-        </Text>
         <Suspense fallback={null}>
           <FeedFilters />
         </Suspense>

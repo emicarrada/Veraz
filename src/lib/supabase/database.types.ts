@@ -253,6 +253,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_preferences: {
+        Row: {
+          user_id: string;
+          country_codes: string[];
+          topic_slugs: string[];
+          first_name: string;
+          last_name: string;
+          sex: string | null;
+          age: number | null;
+          email_updates: boolean;
+          terms_accepted_at: string | null;
+          onboarding_completed_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          country_codes?: string[];
+          topic_slugs?: string[];
+          first_name?: string;
+          last_name?: string;
+          sex?: string | null;
+          age?: number | null;
+          email_updates?: boolean;
+          terms_accepted_at?: string | null;
+          onboarding_completed_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          country_codes?: string[];
+          topic_slugs?: string[];
+          first_name?: string;
+          last_name?: string;
+          sex?: string | null;
+          age?: number | null;
+          email_updates?: boolean;
+          terms_accepted_at?: string | null;
+          onboarding_completed_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       social_publications: {
         Row: {
           id: string;

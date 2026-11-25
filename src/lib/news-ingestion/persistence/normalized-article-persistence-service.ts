@@ -1,6 +1,9 @@
 import type { Article } from "@/domain/content/article";
 import type { RssFeedConfig } from "@/config/domains/news";
 import { getRssFeedBySourceSlug } from "@/config/accessors";
+import { catalogLabelForSlug } from "@/config/domains/rss-feed-catalog";
+import { isSharpEnough, type ImageSize } from "@/lib/news-ingestion/images/feed-image";
+import { probeImageSize } from "@/lib/news-ingestion/images/probe-image";
 import { classifyArticle } from "@/features/news/classification/article-category-classifier";
 import { PersistenceFailedError } from "@/lib/news-ingestion/errors";
 import { NormalizedArticleMapper } from "@/lib/news-ingestion/mappers/normalized-article-mapper";
@@ -32,6 +35,7 @@ export type NormalizedArticlePersistenceServiceOptions = {
   articleRepository: ArticleRepository;
   languageResolver: LanguageResolver;
   feedLookup?: (sourceSlug: string) => RssFeedConfig | undefined;
+  imageProbe?: (url: string) => Promise<ImageSize | null>;
 };
 
 /**
@@ -44,6 +48,7 @@ export class NormalizedArticlePersistenceService {
   private readonly articleRepository: ArticleRepository;
   private readonly languageResolver: LanguageResolver;
   private readonly feedLookup: (sourceSlug: string) => RssFeedConfig | undefined;
+  private readonly imageProbe: (url: string) => Promise<ImageSize | null>;
 
   constructor(options: NormalizedArticlePersistenceServiceOptions) {
     this.mapper = options.mapper ?? new NormalizedArticleMapper();
@@ -51,12 +56,26 @@ export class NormalizedArticlePersistenceService {
     this.articleRepository = options.articleRepository;
     this.languageResolver = options.languageResolver;
     this.feedLookup = options.feedLookup ?? getRssFeedBySourceSlug;
+    this.imageProbe = options.imageProbe ?? probeImageSize;
   }
 
   async persistOne(normalized: NormalizedArticle): Promise<ArticlePersistenceResult> {
     try {
       const bundle = this.mapper.map(normalized);
+      if (bundle.heroMedia) {
+        const size = await this.imageProbe(bundle.heroMedia.url);
+        if (!size || !isSharpEnough(size)) {
+          delete bundle.heroMedia;
+        } else {
+          bundle.heroMedia = { ...bundle.heroMedia, width: size.width, height: size.height };
+        }
+      }
       const feed = this.feedLookup(bundle.sourceSlug);
+
+      const feedTitle = normalized.rawMetadata?.feedTitle;
+      const sourceName =
+        catalogLabelForSlug(bundle.sourceSlug) ??
+        (typeof feedTitle === "string" ? feedTitle : undefined);
 
       const source = await this.sourceRepository.ensureRssSource({
         slug: bundle.sourceSlug,
@@ -64,10 +83,7 @@ export class NormalizedArticlePersistenceService {
         ...(feed?.defaultLanguageCode
           ? { defaultLanguageCode: feed.defaultLanguageCode }
           : {}),
-        ...(normalized.rawMetadata?.feedTitle &&
-        typeof normalized.rawMetadata.feedTitle === "string"
-          ? { name: normalized.rawMetadata.feedTitle }
-          : {}),
+        ...(sourceName ? { name: sourceName } : {}),
       });
 
       const languageId = await this.languageResolver.resolveLanguageId(bundle.languageCode);

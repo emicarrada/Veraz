@@ -36,7 +36,7 @@ Migraciones: `supabase/migrations/` aplicadas con `npm run db:migrate`. Provisio
 | RelatedArticle | `related_articles` | aristas tipadas |
 | AIAnalysis | `ai_analyses` | **opcional**; 0..N por article |
 | UserProfile | `profiles` | alineado a auth.uid |
-| UserPreference | `user_preferences` | 1:1 |
+| UserPreference | `user_preferences` en Supabase | 1:1 con `auth.users`; nombre, sexo, edad, términos, aviso por correo, slugs e ISO |
 | Bookmark | `bookmarks` | unique (user, article) |
 | Notification | `notifications` | |
 | PremiumPlan | `premium_plans` | |
@@ -79,7 +79,7 @@ erDiagram
 2. `articles` son válidos **sin** filas en `ai_analyses`.
 3. Todo analysis factual debe poder citar fuentes (`source_refs`).
 4. Contenido público: RLS read-only (`articles.status = 'published'`, `sources.status = 'active'`) — ver [`docs/security.md`](./security.md).
-5. Datos de usuario: RLS estricta (`auth.uid()`).
+5. Datos de usuario: en Supabase, RLS con `auth.uid()` sobre `user_preferences`. El Postgres de noticias no guarda cuentas.
 6. `service_role` solo en server/jobs.
 7. Fallos de IA no revierten un article ya insertado.
 8. Dedupe: unique en `articles.url_fingerprint` (implementado).

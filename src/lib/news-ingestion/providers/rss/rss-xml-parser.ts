@@ -100,11 +100,11 @@ function extractHeroImageUrl(
   contentHtml?: string,
 ): string | undefined {
   return (
-    extractEnclosureUrl(block) ??
-    extractMediaTagUrl(block, "media:thumbnail") ??
     extractMediaTagUrl(block, "media:content") ??
+    extractEnclosureUrl(block) ??
     extractFirstImageUrl(contentHtml) ??
-    extractFirstImageUrl(descriptionHtml)
+    extractFirstImageUrl(descriptionHtml) ??
+    extractMediaTagUrl(block, "media:thumbnail")
   );
 }
 

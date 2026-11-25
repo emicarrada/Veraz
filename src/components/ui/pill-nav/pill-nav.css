@@ -87,6 +87,24 @@
   appearance: none;
 }
 
+.account-pill {
+  width: var(--nav-h, 2.375rem);
+  height: var(--nav-h, 2.375rem);
+  min-width: var(--nav-h, 2.375rem);
+  padding-inline: 0;
+  border: none;
+  appearance: none;
+}
+
+.account-pill svg {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  max-width: none;
+  flex: none;
+  display: block;
+}
+
 @media (min-width: 769px) {
   .locale-toggle-pill {
     min-width: 2.5rem;

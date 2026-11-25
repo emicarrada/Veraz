@@ -393,14 +393,18 @@ Regla: **Domain ← Infrastructure** (la flecha de dependencia apunta al dominio
 
 ### 5.15 UserPreference *(adicional)*
 
-**Propósito.** Preferencias de lectura y producto (idioma, países, topics seguidos, densidad del feed).
+**Propósito.** Ficha y preferencias de lectura. En el producto actual guardan nombre, apellido, sexo, edad, la aceptación de los términos, el aviso por correo, y los temas y países del inicio personal.
 
 | Atributo | Notas |
 |----------|-------|
-| `userId` | PK |
-| `uiLanguageId`, `contentLanguageIds[]` | |
-| `followedCountryIds[]`, `followedTopicIds[]`, `followedCategoryIds[]` | |
+| `userId` | PK, igual al id de Supabase Auth |
+| nombre, apellido, sexo, edad | la cuenta es desde los 16. Sexo y edad no filtran ni ordenan noticias |
+| aviso por correo | opt-in. Los mensajes para confirmar el correo no dependen de esa casilla |
+| `followedCountryIds[]`, `followedTopicIds[]` | en persistencia v1 son códigos ISO y slugs de sección, porque los catálogos UUID aún no existen |
+| `uiLanguageId`, `contentLanguageIds[]`, `followedCategoryIds[]` | previstos |
 | `reduceMotion?`, `showAiEnrichment` | default true si hay analysis |
+
+La persona puede cambiar la ficha cuando quiera. Sin cuenta, el feed no la usa. El mismo formulario existe en inglés.
 
 **Evolución.** Horarios de digest; exclusiones de Sources.
 

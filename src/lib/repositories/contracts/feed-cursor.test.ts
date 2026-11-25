@@ -21,4 +21,9 @@ describe("feed cursor", () => {
   it("returns null for invalid cursor", () => {
     expect(decodeFeedCursor("not-valid")).toBeNull();
   });
+
+  it("keeps the country lane when the main feed paginates", () => {
+    const encoded = encodeFeedCursor({ ...cursor, lane: 1 });
+    expect(decodeFeedCursor(encoded)).toEqual({ ...cursor, lane: 1 });
+  });
 });

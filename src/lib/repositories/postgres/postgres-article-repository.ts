@@ -7,6 +7,7 @@ import {
   parseCategorySlug,
 } from "@/features/news/classification/categories";
 import { createPostgresPool } from "@/lib/postgres";
+import { resolveFeedLane } from "@/lib/repositories/contracts/feed-lane";
 import type {
   ArticleDetailRecord,
   ArticleFeedRecord,
@@ -253,6 +254,9 @@ export class PostgresArticleRepository implements ArticleRepository {
         values.push([...slugs]);
         filters.push(`a.category_slug = ANY($${values.length}::text[])`);
       }
+    } else if (params.categorySlugs && params.categorySlugs.length > 0) {
+      values.push([...params.categorySlugs]);
+      filters.push(`a.category_slug = ANY($${values.length}::text[])`);
     }
 
     const search = params.search?.trim();
@@ -261,20 +265,80 @@ export class PostgresArticleRepository implements ArticleRepository {
       filters.push(`(a.title ILIKE $${values.length} OR a.excerpt ILIKE $${values.length})`);
     }
 
+    if (params.publishedSince) {
+      values.push(params.publishedSince);
+      filters.push(`a.published_at >= $${values.length}::timestamptz`);
+    }
+
+    if (params.publishedBefore) {
+      values.push(params.publishedBefore);
+      filters.push(`a.published_at < $${values.length}::timestamptz`);
+    }
+
+    const homeSlugs = [...(params.prioritizeSourceSlugs ?? [])];
+    const leadSlugs = [...(params.leadSourceSlugs ?? [])].filter((slug) => homeSlugs.includes(slug));
+    const prioritized = homeSlugs.length > 0;
+    let laneSql = "";
+    if (prioritized) {
+      values.push(homeSlugs);
+      const homeIndex = values.length;
+      values.push(leadSlugs.length > 0 ? leadSlugs : ["__none__"]);
+      const leadIndex = values.length;
+      laneSql = `CASE
+        WHEN s.slug = ANY($${homeIndex}::text[]) AND (
+          a.category_slug = 'cultura'
+          OR s.slug = ANY($${leadIndex}::text[])
+        ) AND a.hero_media_id IS NOT NULL THEN 0
+        WHEN s.slug = ANY($${homeIndex}::text[]) AND a.hero_media_id IS NOT NULL THEN 1
+        WHEN s.slug = ANY($${homeIndex}::text[]) AND (
+          a.category_slug = 'cultura'
+          OR s.slug = ANY($${leadIndex}::text[])
+        ) THEN 2
+        WHEN s.slug = ANY($${homeIndex}::text[]) THEN 3
+        WHEN a.hero_media_id IS NOT NULL THEN 4
+        ELSE 5
+      END`;
+    }
+
+    const imageSql = `CASE WHEN a.hero_media_id IS NOT NULL THEN 0 ELSE 1 END`;
+    const chronological = params.chronological === true && !prioritized;
+
     if (params.cursor) {
       values.push(params.cursor.publishedAt, params.cursor.ingestedAt, params.cursor.id);
       const published = values.length - 2;
       const ingested = values.length - 1;
       const id = values.length;
-      filters.push(`(
+      const datePredicate = `(
         a.published_at < $${published}::timestamptz
         OR (a.published_at = $${published}::timestamptz AND a.ingested_at < $${ingested}::timestamptz)
         OR (a.published_at = $${published}::timestamptz AND a.ingested_at = $${ingested}::timestamptz AND a.id < $${id}::uuid)
-      )`);
+      )`;
+      if (prioritized && params.cursor.lane !== undefined) {
+        values.push(params.cursor.lane);
+        const laneIndex = values.length;
+        filters.push(`(
+          ${laneSql} > $${laneIndex}
+          OR (${laneSql} = $${laneIndex} AND ${datePredicate})
+        )`);
+      } else if (!prioritized && !chronological && params.cursor.imageRank !== undefined) {
+        values.push(params.cursor.imageRank);
+        const imageIndex = values.length;
+        filters.push(`(
+          ${imageSql} > $${imageIndex}
+          OR (${imageSql} = $${imageIndex} AND ${datePredicate})
+        )`);
+      } else {
+        filters.push(datePredicate);
+      }
     }
 
     values.push(limit + 1);
     const limitIndex = values.length;
+    const orderBy = prioritized
+      ? `${laneSql} ASC, a.published_at DESC, a.ingested_at DESC, a.id DESC`
+      : chronological
+        ? `a.published_at DESC, a.ingested_at DESC, a.id DESC`
+        : `${imageSql} ASC, a.published_at DESC, a.ingested_at DESC, a.id DESC`;
 
     const { rows } = await createPostgresPool().query<FeedRow>(
       `
@@ -288,7 +352,7 @@ export class PostgresArticleRepository implements ArticleRepository {
       INNER JOIN sources s ON s.id = a.source_id
       LEFT JOIN languages l ON l.id = a.language_id
       WHERE ${filters.join(" AND ")}
-      ORDER BY a.published_at DESC, a.ingested_at DESC, a.id DESC
+      ORDER BY ${orderBy}
       LIMIT $${limitIndex}
       `,
       values,
@@ -309,6 +373,19 @@ export class PostgresArticleRepository implements ArticleRepository {
               publishedAt: last.published_at,
               ingestedAt: last.ingested_at,
               id: last.id as ArticleId,
+              ...(prioritized
+                ? {
+                    lane: resolveFeedLane(
+                      last.source_slug,
+                      last.category_slug ?? "general",
+                      homeSlugs,
+                      leadSlugs,
+                      Boolean(last.hero_media_id),
+                    ),
+                  }
+                : chronological
+                  ? {}
+                  : { imageRank: last.hero_media_id ? 0 : 1 }),
             },
           }
         : {}),

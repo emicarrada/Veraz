@@ -11,15 +11,32 @@ import { isNewsTopicGroup as isNewsTopicGroupFromCategories } from "@/features/n
 
 describe("RSS_FEED_CATALOG", () => {
   it("includes finance, tech, sports, and culture verticals", () => {
-    expect(getCatalogFeedsByVertical("finance").length).toBe(5);
-    expect(getCatalogFeedsByVertical("tech").length).toBe(7);
-    expect(getCatalogFeedsByVertical("sports").length).toBe(3);
-    expect(getCatalogFeedsByVertical("culture").length).toBe(3);
+    expect(getCatalogFeedsByVertical("finance").length).toBe(6);
+    expect(getCatalogFeedsByVertical("tech").length).toBe(9);
+    expect(getCatalogFeedsByVertical("sports").length).toBe(4);
+    expect(getCatalogFeedsByVertical("culture").length).toBe(8);
   });
 
   it("does not include Infobae", () => {
     expect(RSS_FEED_CATALOG.some((entry) => entry.sourceSlug === "infobae")).toBe(false);
     expect(RSS_FEED_CATALOG.some((entry) => entry.feedUrl.includes("infobae.com"))).toBe(false);
+  });
+
+  it("marks Mexican outlets, including culture sections", () => {
+    const mexico = RSS_FEED_CATALOG.filter((entry) => entry.countryCode === "MX").map(
+      (entry) => entry.sourceSlug,
+    );
+    expect(mexico).toEqual(
+      expect.arrayContaining([
+        "la-jornada",
+        "la-jornada-cultura",
+        "reforma",
+        "reforma-cultura",
+        "el-economista",
+      ]),
+    );
+    expect(RSS_FEED_CATALOG.find((entry) => entry.sourceSlug === "el-pais")?.countryCode).toBe("ES");
+    expect(RSS_FEED_CATALOG.find((entry) => entry.sourceSlug === "bbc-mundo")?.countryCode).toBeUndefined();
   });
 
   it("maps catalog entries to RssFeedConfig", () => {

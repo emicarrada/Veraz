@@ -11,5 +11,5 @@ export const SITE_FOOTER_NAV = [
 
 export const SITE_FOOTER_LEGAL = [
   { href: "/privacidad", label: "Privacidad" },
-  { href: "/terminos", label: "Términos de uso" },
+  { href: "/terminos", label: "Términos y condiciones" },
 ] as const;

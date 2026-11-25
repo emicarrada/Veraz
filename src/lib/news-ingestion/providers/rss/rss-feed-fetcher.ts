@@ -48,7 +48,7 @@ async function readResponseWithLimit(
 ): Promise<string> {
   const reader = response.body?.getReader();
   if (!reader) {
-    const text = await response.text();
+    const text = decodeFeedXml(new Uint8Array(await response.arrayBuffer()));
     if (text.length > maxBytes) {
       throw new ProviderParseFailureError(
         RSS_PROVIDER_ID,
@@ -85,7 +85,18 @@ async function readResponseWithLimit(
     offset += chunk.byteLength;
   }
 
-  return new TextDecoder("utf-8", { fatal: false }).decode(merged);
+  return decodeFeedXml(merged);
+}
+
+function decodeFeedXml(bytes: Uint8Array): string {
+  const head = new TextDecoder("ascii").decode(bytes.subarray(0, 180));
+  const declared = head.match(/encoding=["']([^"']+)["']/i)?.[1]?.toLowerCase();
+  const latin =
+    declared === "iso-8859-1" ||
+    declared === "latin1" ||
+    declared === "latin-1" ||
+    declared === "windows-1252";
+  return new TextDecoder(latin ? "iso-8859-1" : "utf-8", { fatal: false }).decode(bytes);
 }
 
 /**

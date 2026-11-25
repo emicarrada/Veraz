@@ -42,12 +42,26 @@ export type ListFeedArticlesParams = {
   cursor?: FeedCursor;
   search?: string;
   categorySlug?: NewsCategorySlug;
+  /** Union of topic slugs for a reader's home. Ignored when categorySlug is set. */
+  categorySlugs?: ReadonlyArray<NewsCategorySlug>;
+  /** Date order, without the photo lanes. Used by the personal home. */
+  chronological?: boolean;
   /** When set, only articles from these source slugs are returned. */
   sourceSlugs?: ReadonlyArray<string>;
   /** When set, only articles with matching language codes are returned. */
   languageCodes?: ReadonlyArray<string>;
   /** When set, articles from these source slugs are excluded. */
   excludeSourceSlugs?: ReadonlyArray<string>;
+  /** Inclusive lower bound on publication time. */
+  publishedSince?: string;
+  /** Exclusive upper bound on publication time. */
+  publishedBefore?: string;
+  /**
+   * Main feed only. These sources sort ahead of the rest.
+   * Culture from the same set, via leadSourceSlugs or category cultura, sorts first.
+   */
+  prioritizeSourceSlugs?: ReadonlyArray<string>;
+  leadSourceSlugs?: ReadonlyArray<string>;
 };
 
 export type ListFeedArticlesResult = {

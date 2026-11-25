@@ -7,6 +7,8 @@ export type RssFeedVertical = "finance" | "tech" | "sports" | "culture" | "gener
 export type RssFeedCatalogEntry = RssFeedConfig & {
   /** Editorial vertical for docs and UI grouping. */
   primaryVertical: RssFeedVertical;
+  /** ISO 3166-1 alpha-2 when the outlet belongs to one country. */
+  countryCode?: string;
   /** Human-readable source name for documentation. */
   label: string;
   /** Optional editorial notes (trust, coverage, caveats). */
@@ -27,6 +29,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "economia",
     primaryVertical: "finance",
+    countryCode: "US",
     label: "CNBC Top News",
     notes: "Mercados USA y macro global.",
   },
@@ -36,6 +39,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "economia",
     primaryVertical: "finance",
+    countryCode: "US",
     label: "MarketWatch",
   },
   {
@@ -53,6 +57,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "es",
     defaultTopicGroup: "economia",
     primaryVertical: "finance",
+    countryCode: "ES",
     label: "Expansión",
     notes: "Economía y empresas (España).",
   },
@@ -63,6 +68,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "es",
     defaultTopicGroup: "economia",
     primaryVertical: "finance",
+    countryCode: "ES",
     label: "El País Economía",
   },
   // ——— Tecnología (referencia global) ———
@@ -72,6 +78,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "tecnologia",
     primaryVertical: "tech",
+    countryCode: "US",
     label: "TechCrunch",
   },
   {
@@ -80,6 +87,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "tecnologia",
     primaryVertical: "tech",
+    countryCode: "US",
     label: "The Verge",
   },
   {
@@ -88,6 +96,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "tecnologia",
     primaryVertical: "tech",
+    countryCode: "US",
     label: "Ars Technica",
   },
   {
@@ -96,6 +105,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "tecnologia",
     primaryVertical: "tech",
+    countryCode: "US",
     label: "Wired",
   },
   {
@@ -104,6 +114,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "tecnologia",
     primaryVertical: "tech",
+    countryCode: "US",
     label: "MIT Technology Review",
   },
   {
@@ -112,6 +123,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "tecnologia",
     primaryVertical: "tech",
+    countryCode: "US",
     label: "Engadget",
   },
   {
@@ -121,6 +133,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "es",
     defaultTopicGroup: "tecnologia",
     primaryVertical: "tech",
+    countryCode: "ES",
     label: "El País Tecnología",
   },
   // ——— Sports (EN — /en deportes) ———
@@ -130,6 +143,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "deportes",
     primaryVertical: "sports",
+    countryCode: "GB",
     label: "BBC Sport",
     notes: "Global sports coverage, editorial tone.",
   },
@@ -139,6 +153,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "deportes",
     primaryVertical: "sports",
+    countryCode: "GB",
     label: "The Guardian Sport",
   },
   {
@@ -147,6 +162,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "deportes",
     primaryVertical: "sports",
+    countryCode: "US",
     label: "ESPN Top Headlines",
     notes: "USA-centric; low item count in RSS — monitor in feeds:validate.",
   },
@@ -157,6 +173,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "cultura",
     primaryVertical: "culture",
+    countryCode: "GB",
     label: "BBC Entertainment & Arts",
   },
   {
@@ -165,6 +182,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "cultura",
     primaryVertical: "culture",
+    countryCode: "GB",
     label: "The Guardian Culture",
   },
   {
@@ -173,6 +191,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     defaultLanguageCode: "en",
     defaultTopicGroup: "cultura",
     primaryVertical: "culture",
+    countryCode: "US",
     label: "Variety",
     notes: "Entertainment industry; film/TV business.",
   },
@@ -189,6 +208,7 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     feedUrl: "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
     defaultLanguageCode: "es",
     primaryVertical: "general",
+    countryCode: "ES",
     label: "El País",
   },
   {
@@ -196,7 +216,109 @@ export const RSS_FEED_CATALOG: readonly RssFeedCatalogEntry[] = [
     feedUrl: "https://www.lanacion.com.ar/arc/outboundfeeds/rss/?outputType=xml",
     defaultLanguageCode: "es",
     primaryVertical: "general",
+    countryCode: "AR",
     label: "La Nación",
+  },
+  // ——— México (feed principal: cultura de aquí, luego el resto del país) ———
+  {
+    sourceSlug: "la-jornada",
+    feedUrl: "https://www.jornada.com.mx/rss/edicion.xml",
+    defaultLanguageCode: "es",
+    primaryVertical: "general",
+    countryCode: "MX",
+    label: "La Jornada",
+  },
+  {
+    sourceSlug: "la-jornada-cultura",
+    feedUrl: "https://www.jornada.com.mx/rss/cultura.xml",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "cultura",
+    primaryVertical: "culture",
+    countryCode: "MX",
+    label: "La Jornada Cultura",
+  },
+  {
+    sourceSlug: "la-jornada-espectaculos",
+    feedUrl: "https://www.jornada.com.mx/rss/espectaculos.xml",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "cultura",
+    primaryVertical: "culture",
+    countryCode: "MX",
+    label: "La Jornada Espectáculos",
+  },
+  {
+    sourceSlug: "la-jornada-deportes",
+    feedUrl: "https://www.jornada.com.mx/rss/deportes.xml",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "deportes",
+    primaryVertical: "sports",
+    countryCode: "MX",
+    label: "La Jornada Deportes",
+  },
+  {
+    sourceSlug: "reforma",
+    feedUrl: "https://www.reforma.com/rss/portada.xml",
+    defaultLanguageCode: "es",
+    primaryVertical: "general",
+    countryCode: "MX",
+    label: "Reforma",
+  },
+  {
+    sourceSlug: "reforma-cultura",
+    feedUrl: "https://www.reforma.com/rss/cultura.xml",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "cultura",
+    primaryVertical: "culture",
+    countryCode: "MX",
+    label: "Reforma Cultura",
+  },
+  {
+    sourceSlug: "el-economista",
+    feedUrl: "https://www.eleconomista.com.mx/rss/ultimas-noticias",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "economia",
+    primaryVertical: "finance",
+    countryCode: "MX",
+    label: "El Economista",
+    notes: "Economía de México.",
+  },
+  {
+    sourceSlug: "xataka-mx",
+    feedUrl: "https://www.xataka.com.mx/index.xml",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "tecnologia",
+    primaryVertical: "tech",
+    countryCode: "MX",
+    label: "Xataka México",
+    notes: "Cultura digital en México. Entra en Todas, no en la pestaña Tecnología de referencia.",
+  },
+  {
+    sourceSlug: "xataka",
+    feedUrl: "https://www.xataka.com/index.xml",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "tecnologia",
+    primaryVertical: "tech",
+    countryCode: "ES",
+    label: "Xataka",
+    notes: "Cultura digital en español. Entra en Todas, no en la pestaña Tecnología de referencia.",
+  },
+  {
+    sourceSlug: "chilango",
+    feedUrl: "https://www.chilango.com/feed/",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "cultura",
+    primaryVertical: "culture",
+    countryCode: "MX",
+    label: "Chilango",
+  },
+  {
+    sourceSlug: "sopitas",
+    feedUrl: "https://www.sopitas.com/feed/",
+    defaultLanguageCode: "es",
+    defaultTopicGroup: "cultura",
+    primaryVertical: "culture",
+    countryCode: "MX",
+    label: "Sopitas",
   },
 ] as const;
 
@@ -237,6 +359,24 @@ export function getCatalogFeedsByVertical(
   vertical: RssFeedVertical,
 ): ReadonlyArray<RssFeedCatalogEntry> {
   return RSS_FEED_CATALOG.filter((entry) => entry.primaryVertical === vertical);
+}
+
+export function catalogLabelForSlug(sourceSlug: string): string | undefined {
+  return RSS_FEED_CATALOG.find((entry) => entry.sourceSlug === sourceSlug)?.label;
+}
+
+export function sourceSlugsForCountry(countryCode: string): readonly string[] {
+  const code = countryCode.trim().toUpperCase();
+  return RSS_FEED_CATALOG.filter((entry) => entry.countryCode === code).map(
+    (entry) => entry.sourceSlug,
+  );
+}
+
+export function cultureSourceSlugsForCountry(countryCode: string): readonly string[] {
+  const code = countryCode.trim().toUpperCase();
+  return RSS_FEED_CATALOG.filter(
+    (entry) => entry.countryCode === code && entry.primaryVertical === "culture",
+  ).map((entry) => entry.sourceSlug);
 }
 
 /** Full catalog serialized for NEWS_RSS_FEEDS env var. */

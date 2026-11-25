@@ -6,13 +6,71 @@
     "about": "Acerca de",
     "contact": "Contacto",
     "privacy": "Privacidad",
-    "terms": "Términos de uso",
+    "terms": "Términos y condiciones",
     "logoAlt": "Veraz",
     "mainAria": "Principal",
     "homeAria": "Inicio",
     "localeEs": "Español",
     "localeEn": "English",
     "localeSwitchAria": "Idioma: {locale}. Clic para cambiar."
+  },
+  "auth": {
+    "accountEntryAria": "Cuenta",
+    "signInTitle": "Cuenta",
+    "signInLead": "Entra con tu correo o con Google. Si aún no tienes cuenta, el mismo correo la crea.",
+    "email": "Correo",
+    "password": "Contraseña",
+    "signIn": "Entrar",
+    "createAccount": "Crear cuenta",
+    "or": "o",
+    "confirmEmail": "Revisa tu correo para confirmar la cuenta. El enlace te devuelve aquí.",
+    "emailError": "Escribe un correo válido.",
+    "passwordError": "La contraseña necesita al menos 8 caracteres.",
+    "credentialsError": "Correo o contraseña incorrectos.",
+    "existsError": "Ese correo ya tiene cuenta. Entra con la contraseña.",
+    "unavailable": "Ahora no se puede entrar. Inténtalo de nuevo.",
+    "google": "Continuar con Google",
+    "googleAria": "Continuar con Google",
+    "opening": "Abriendo Google…",
+    "googleFailed": "Google no respondió. Inténtalo de nuevo.",
+    "preferences": "Preferencias",
+    "signOut": "Salir",
+    "accountAria": "Cuenta de {name}",
+    "preferencesTitle": "Tu cuenta",
+    "preferencesLead": "Tu nombre, tus intereses y el país de las noticias de tu inicio. Puedes cambiarlo cuando quieras.",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "sex": "Sexo",
+    "sexPlaceholder": "Elige",
+    "age": "Edad",
+    "ageHint": "A partir de 16 años.",
+    "sexOptions": {
+      "female": "Mujer",
+      "male": "Hombre",
+      "other": "Otro",
+      "undisclosed": "Prefiero no decirlo"
+    },
+    "emailUpdates": "Quiero recibir noticias y actualizaciones del servicio por correo.",
+    "termsAccept": "Acepto los",
+    "termsLink": "Términos y condiciones",
+    "topicsLabel": "Intereses",
+    "countriesLabel": "País",
+    "save": "Guardar",
+    "needName": "Escribe tu nombre y tu apellido.",
+    "needSex": "Elige una opción.",
+    "needAge": "La cuenta es a partir de los 16 años.",
+    "needTopic": "Elige al menos un interés.",
+    "needCountry": "Elige al menos un país.",
+    "needTerms": "Acepta los términos para guardar la cuenta.",
+    "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
+    "signInFirst": "Entra para guardar tu inicio.",
+    "countries": {
+      "MX": "México",
+      "ES": "España",
+      "AR": "Argentina",
+      "US": "Estados Unidos",
+      "GB": "Reino Unido"
+    }
   },
   "footer": {
     "copyright": "© {year} Veraz"
@@ -51,6 +109,11 @@
       "subcopy": "Agregamos noticias de fuentes de referencia, con trazabilidad a la publicación original. Sin inventar hechos ni empujar una agenda.",
       "ctaNews": "Ver noticias",
       "ctaAbout": "Conocer Veraz"
+    },
+    "ring": {
+      "eyebrow": "Hoy",
+      "title": "El día, en una sola vuelta",
+      "description": "Fotos de las notas de hoy, y de ayer si el día todavía va corto. El titular y la fuente se quedan al frente. Abre la que quieras."
     },
     "whatIs": {
       "eyebrow": "Plataforma de noticias",
@@ -153,14 +216,26 @@
     "allTab": "Todas",
     "specificTopics": "Temas específicos",
     "specificTopicsAria": "Filtrar por tema específico",
-    "emptyTitle": "Aún no hay noticias",
-    "emptyDescription": "Cuando se ingieran artículos desde RSS, aparecerán aquí ordenados por fecha de publicación.",
-    "emptyIngestHint": "Si esperabas ver noticias, verifica Supabase y ejecuta: npm run ingest:run",
+    "emptyTitle": "No hay noticias",
+    "emptyDescription": "Cuando lleguen notas nuevas, aparecerán aquí.",
+    "todayEdition": "Hoy",
+    "dayToday": "Hoy",
+    "dayYesterday": "Ayer",
+    "yesterdayLink": "¿Qué pasó ayer?",
+    "homeCountryFirst": "primero {country}",
     "languageDisclosureFinance": "Varias fuentes de referencia en finanzas publican principalmente en inglés. Mostramos el titular tal como lo publicó el medio; cada noticia indica su fuente y enlace original.",
     "languageDisclosureTech": "Varias fuentes de referencia en tecnología publican principalmente en inglés. Mostramos el titular tal como lo publicó el medio; cada noticia indica su fuente y enlace original.",
     "loadMore": "Cargar más",
+    "loadMoreFailed": "Error al cargar más noticias",
     "loading": "Cargando…",
     "endOfFeed": "Has llegado al final del feed.",
+    "sinceLastVisit": "{count, plural, one {# noticia desde tu última visita} other {# noticias desde tu última visita}}",
+    "sinceLastVisitMore": "{count, plural, one {# noticia desde tu última visita, y hay más abajo} other {# noticias desde tu última visita, y hay más abajo}}",
+    "continueMarker": "Sigues en {section}",
+    "similarHeadlines": "{count, plural, one {# medio, titular parecido} other {# medios, titulares parecidos}}",
+    "showVersions": "Ver cada fuente",
+    "hideVersions": "Ocultar fuentes",
+    "unreadLabel": "Sin leer",
     "categories": {
       "politica": "Política",
       "economia": "Finanzas",
@@ -185,6 +260,16 @@
       "criptomonedas": "Criptomonedas"
     }
   },
+  "yesterday": {
+    "title": "¿Qué pasó ayer?",
+    "description": "Notas con foto del día anterior. El titular y la fuente se quedan al frente.",
+    "mobileHelp": [
+      "Desliza a los lados para recorrer las notas.",
+      "Toca una foto para traerla al frente.",
+      "Toca otra vez la del centro para abrirla. El titular y la fuente quedan abajo."
+    ],
+    "empty": "Ayer no quedaron notas con foto."
+  },
   "article": {
     "referencesTitle": "Referencias",
     "readOriginal": "Leer artículo original",
@@ -196,7 +281,8 @@
     "factualSourceLabel": "Fuente primaria",
     "factualPublishedLabel": "Publicado",
     "factualTopicLabel": "Tema",
-    "relatedInCategory": "Más en {category}"
+    "relatedInCategory": "Más en {category}",
+    "nextArticle": "Siguiente"
   },
   "seo": {
     "category": {
@@ -305,6 +391,10 @@
           "title": "Resumen",
           "body": "Veraz recopila la mínima información necesaria para operar el sitio, medir uso agregado y responder consultas. No vendemos datos personales."
         },
+        "account": {
+          "title": "Cuenta",
+          "body": "Si creas una cuenta, guardamos el correo, el nombre, el apellido, el sexo, la edad, los intereses, los países de tu inicio, la fecha en que aceptaste los términos y si pediste recibir correo. El sexo y la edad no ordenan ni ocultan noticias. El acceso lo opera Supabase Auth. Para borrar la cuenta, escribe al correo de contacto."
+        },
         "analytics": {
           "title": "Analítica",
           "body": "Podemos usar herramientas como PostHog para entender uso agregado (páginas visitadas, idioma). Puedes usar bloqueadores de rastreo si lo prefieres."
@@ -317,26 +407,63 @@
       }
     },
     "terms": {
-      "title": "Términos de uso",
-      "metaDescription": "Términos de uso de Veraz.",
-      "pageTitle": "Términos de uso",
-      "pageDescription": "Condiciones básicas para usar la plataforma Veraz.",
+      "title": "Términos y condiciones",
+      "metaDescription": "Términos y condiciones de Veraz.",
+      "pageTitle": "Términos y condiciones",
+      "pageDescription": "Condiciones para leer Veraz y, si quieres, crear una cuenta.",
+      "updated": "Vigentes desde el 24 de noviembre de 2026.",
       "sections": {
-        "service": {
-          "title": "El servicio",
-          "body": "Veraz agrega enlaces y resúmenes de terceros. No somos autores del contenido enlazado; la responsabilidad editorial permanece en cada fuente."
+        "who": {
+          "title": "Quién ofrece Veraz",
+          "body": "Veraz es un servicio de lectura de noticias en veraz.app. Agrega titulares de medios y enlaza a la fuente original. El correo de contacto está al final de estos términos."
+        },
+        "noAccount": {
+          "title": "Se lee sin cuenta",
+          "body": "El feed público no pide registro. La cuenta es opcional y solo sirve para guardar un inicio propio."
+        },
+        "account": {
+          "title": "Cómo se crea la cuenta",
+          "body": "Puedes entrar con correo y contraseña, o con Google. El primer uso de un correo crea la cuenta y el siguiente entra. La contraseña no se guarda en claro en Veraz: la custodia el servicio de acceso. Si usas Google, Google confirma quién eres. Para crear una cuenta hay que tener al menos 16 años."
+        },
+        "data": {
+          "title": "Qué pedimos al crear la cuenta",
+          "body": "Nombre, apellido, sexo, edad, los temas que quieres ver, el país de las fuentes de tu inicio, la aceptación de estos términos y si quieres correo de Veraz. El sexo y la edad no ordenan ni ocultan noticias. Los temas y el país solo filtran tu inicio. Puedes cambiarlos cuando quieras desde la cuenta."
+        },
+        "mail": {
+          "title": "Correo",
+          "body": "Si marcas la casilla, podemos escribirte noticias y avisos del servicio a ese correo. Puedes quitarla después en tu cuenta. Los mensajes para confirmar el correo se envían aunque no marques la casilla, porque sin ellos la cuenta con correo no queda activa."
+        },
+        "google": {
+          "title": "Google",
+          "body": "El botón de Google abre la pantalla de Google. Veraz no recibe tu contraseña de Google. Recibe la identidad básica que Google comparte, en general el nombre y el correo."
+        },
+        "acceptance": {
+          "title": "Aceptación",
+          "body": "La casilla de estos términos es obligatoria para guardar la cuenta. Si no los aceptas, puedes seguir leyendo sin registrarte. Guardar la cuenta significa que aceptas la versión publicada en esta página en ese momento."
+        },
+        "content": {
+          "title": "Las noticias",
+          "body": "Los titulares pertenecen a cada medio. Veraz los ordena y enlaza; no los presenta como redacción propia. En algunas secciones en español puede mostrarse una traducción del titular en inglés, marcada como traducida, y el enlace sigue siendo el de la fuente. Comprueba en el medio original lo que te importe antes de decidir."
         },
         "use": {
           "title": "Uso permitido",
-          "body": "Puedes consultar el feed para uso personal. No está permitido el scraping agresivo ni intentos de comprometer la infraestructura."
+          "body": "El uso es personal. No está permitido el acceso masivo automatizado que degrade el servicio, ni intentar entrar en una cuenta ajena, ni usar la cuenta para hacerse pasar por otra persona."
+        },
+        "closing": {
+          "title": "Salir y borrar",
+          "body": "Puedes salir cuando quieras y cambiar tus datos. Para borrar la cuenta y lo que guardamos de ti, escribe al correo de contacto. Al salir, el inicio personal deja de aplicarse."
         },
         "liability": {
-          "title": "Limitación",
-          "body": "El servicio se ofrece tal cual. Verifica información importante en las fuentes originales antes de tomar decisiones."
+          "title": "Límite",
+          "body": "El servicio se ofrece tal como está. Que una nota aparezca depende de que el medio la publique y de que el feed la reciba. Veraz no responde por el contenido de los sitios enlazados."
+        },
+        "law": {
+          "title": "Ley aplicable",
+          "body": "Estos términos se interpretan conforme a las leyes de México. Si vives en otro país, incluidos los Estados Unidos, conservas los derechos que tu ley no permita renunciar."
         },
         "contact": {
           "title": "Contacto",
-          "bodyPrefix": "Consultas legales o de uso:",
+          "bodyPrefix": "Consultas sobre estos términos:",
           "bodySuffix": "."
         }
       }

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { AuthPill } from "@/features/auth/components/auth-pill";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { PillNav, type PillNavItem } from "@/components/ui/pill-nav";
 import { usePathname } from "@/i18n/navigation";
@@ -21,8 +22,12 @@ function resolveActiveHref(pathname: string): string {
   return stripped;
 }
 
+type SitePillNavProps = {
+  accountLabel?: string | null;
+};
+
 /** Site-wide pill navigation — logo, nav items, locale switcher. */
-export function SitePillNav() {
+export function SitePillNav({ accountLabel = null }: SitePillNavProps) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const activeHref = resolveActiveHref(pathname);
@@ -48,7 +53,12 @@ export function SitePillNav() {
       hoveredPillTextColor="#111111"
       navAriaLabel={t("mainAria")}
       homeAriaLabel={t("homeAria")}
-      trailing={<LocaleSwitcher />}
+      trailing={
+        <>
+          <AuthPill accountLabel={accountLabel} />
+          <LocaleSwitcher />
+        </>
+      }
     />
   );
 }

@@ -6,18 +6,21 @@ import { mapFeedRecordToItem } from "@/features/news/services/feed-mapper";
 import { resolveArticlesDisplay } from "@/features/news/services/resolve-article-display";
 import type { FeedLoadResult, FeedPage } from "@/features/news/types/feed";
 import { formatFeedSummary } from "@/features/news/utils/format-display-text";
+import { homeFeedSlugs } from "@/features/news/utils/home-feed";
 import { sortFeedItemsByPublishedAt } from "@/features/news/utils/sort-feed-items";
 import type { Locale } from "@/i18n/routing";
 import { encodeFeedCursor, decodeFeedCursor } from "@/lib/repositories/contracts/feed-cursor";
 import type { ArticleRepository } from "@/lib/repositories/contracts/article-repository";
 import { createContentRepositories } from "@/lib/repositories/factory";
 
-import type { NewsCategorySlug } from "@/features/news/classification/categories";
+import { getTopicGroup, getTopicSlugsForFilter, isNewsTopicSlug, type NewsCategorySlug } from "@/features/news/classification/categories";
 import {
+  isPrestigiousFeedGroup,
   resolveFeedLanguageCodes,
   resolveFeedSourceSlugs,
   resolvePrestigiousFeedQuery,
 } from "@/features/news/config/prestigious-sources";
+import { sourceSlugsForCountry } from "@/config/domains/rss-feed-catalog";
 
 export type GetFeedPageParams = {
   locale: Locale;
@@ -25,6 +28,10 @@ export type GetFeedPageParams = {
   cursor?: string | null;
   search?: string;
   categorySlug?: NewsCategorySlug;
+  /** ISO country from the request. Main feed only; category tabs stay chronological. */
+  visitorCountry?: string;
+  /** Saved home. Main feed only, and only after the reader finishes the chips. */
+  readerPreferences?: { countryCodes: readonly string[]; topicSlugs: readonly string[] } | null;
   /** Explicit null skips factory lookup (tests). */
   articleRepository?: ArticleRepository | null;
 };
@@ -58,7 +65,40 @@ export async function getFeedPage(params: GetFeedPageParams): Promise<FeedLoadRe
 
     const prestigiousQuery = resolvePrestigiousFeedQuery(params.categorySlug, params.locale);
     const languageCodes = resolveFeedLanguageCodes(params.locale, params.categorySlug);
-    const sourceSlugs = resolveFeedSourceSlugs(params.locale, prestigiousQuery.sourceSlugs);
+    const localeSourceSlugs = resolveFeedSourceSlugs(params.locale, prestigiousQuery.sourceSlugs);
+    const reader =
+      !params.categorySlug && params.readerPreferences
+        ? params.readerPreferences
+        : null;
+    const readerSourceSlugs = reader
+      ? [
+          ...new Set(
+            reader.countryCodes.flatMap((code) =>
+              sourceSlugsForCountry(code).filter(
+                (slug) => !localeSourceSlugs || localeSourceSlugs.includes(slug),
+              ),
+            ),
+          ),
+        ]
+      : null;
+    const readerCategorySlugs = reader
+      ? [
+          ...new Set(
+            reader.topicSlugs.flatMap((slug) =>
+              isNewsTopicSlug(slug) ? getTopicSlugsForFilter(slug) : [],
+            ),
+          ),
+        ]
+      : null;
+
+    if (reader && (readerSourceSlugs?.length === 0 || readerCategorySlugs?.length === 0)) {
+      return { ok: true, data: { items: [], hasMore: false } };
+    }
+
+    const sourceSlugs = readerSourceSlugs ?? localeSourceSlugs;
+    const home = params.categorySlug || reader || !params.visitorCountry
+      ? { home: [] as readonly string[], lead: [] as readonly string[] }
+      : homeFeedSlugs(params.visitorCountry, sourceSlugs);
 
     const result = await repository.listForFeed({
       limit,
@@ -67,8 +107,13 @@ export async function getFeedPage(params: GetFeedPageParams): Promise<FeedLoadRe
       ...(prestigiousQuery.categorySlug
         ? { categorySlug: prestigiousQuery.categorySlug }
         : {}),
+      ...(readerCategorySlugs?.length ? { categorySlugs: readerCategorySlugs } : {}),
+      ...(reader ? { chronological: true } : {}),
       ...(sourceSlugs?.length ? { sourceSlugs: [...sourceSlugs] } : {}),
       ...(languageCodes?.length ? { languageCodes: [...languageCodes] } : {}),
+      ...(home.home.length
+        ? { prioritizeSourceSlugs: [...home.home], leadSourceSlugs: [...home.lead] }
+        : {}),
     });
 
     const baseItems = result.items.map(mapFeedRecordToItem);
@@ -80,6 +125,13 @@ export async function getFeedPage(params: GetFeedPageParams): Promise<FeedLoadRe
         excerpt: item.excerpt,
         languageCode: item.languageCode,
       })),
+      undefined,
+      {
+        translate:
+          params.locale === "es" &&
+          params.categorySlug != null &&
+          isPrestigiousFeedGroup(getTopicGroup(params.categorySlug)),
+      },
     );
 
     const localizedItems = baseItems.map((item) => {
@@ -102,7 +154,7 @@ export async function getFeedPage(params: GetFeedPageParams): Promise<FeedLoadRe
     });
 
     const page: FeedPage = {
-      items: sortFeedItemsByPublishedAt(localizedItems),
+      items: home.home.length ? localizedItems : sortFeedItemsByPublishedAt(localizedItems),
       hasMore: result.hasMore,
       ...(result.nextCursor ? { nextCursor: encodeFeedCursor(result.nextCursor) } : {}),
     };

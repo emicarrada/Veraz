@@ -24,6 +24,8 @@ export type {
 } from "@/features/news/types/article-detail";
 
 export { getFeedPage, getFeedRevalidateSeconds } from "@/features/news/services/get-feed-page";
+export { getLandingPhotoRing, type LandingPhotoRingItem } from "@/features/news/services/get-landing-photo-ring";
+export { getYesterdayHighlights, type YesterdayHighlight } from "@/features/news/services/get-yesterday-highlights";
 export {
   getArticleBySlug,
   buildArticleDetailMetadata,
@@ -41,6 +43,7 @@ export { FeedSkeleton } from "@/features/news/components/feed-skeleton";
 export { FeedPagination } from "@/features/news/components/feed-pagination";
 export { NewsFeedPage } from "@/features/news/components/news-feed-page";
 export { NewsAppShell } from "@/features/news/components/news-app-shell";
+export { resolveVisitorCountry } from "@/features/news/utils/visitor-country";
 
 export { ArticleHeader } from "@/features/news/components/article-header";
 export { ArticleMeta } from "@/features/news/components/article-meta";

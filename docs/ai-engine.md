@@ -93,14 +93,15 @@ src/lib/ai-engine/
   providers/   # slots vacíos por vendor
   engine/      # futura implementación del facade
   index.ts     # API pública
-  translate.ts # translateArticleContent (fail-open stub)
+  translate.ts # translateArticleContent (fail-open)
 ```
 
 ### Traducción de artículos (`translate`)
 
 - Entrada: `@/lib/ai-engine/translate` → `translateArticleContent`.
-- Usado por `resolveArticleDisplay` en detalle on-demand; caché en `article_translations`.
-- Con `AI_MODE=disabled` o sin runtime de provider: retorna `null` (fail-open).
+- En `/es`, Finanzas y Tecnología traducen titular y extracto cuando el medio publicó en otro idioma. El artículo guardado no cambia. La ficha marca «Traducido» y el enlace sigue siendo el de la fuente.
+- Caché en `article_translations`. Si la traducción no responde, se muestra el texto original.
+- No depende de `AI_MODE`. El resto de capacidades de IA sigue apagado por defecto.
 
 ## Qué está prohibido
 
