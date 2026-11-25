@@ -2,8 +2,10 @@ name: Ingest — run ingestion
 
 on:
   schedule:
-    # Offset from discover_feeds (runs at :00, :15, :30, :45).
-    - cron: "5,20,35,50 * * * *"
+    # Every 10 minutes. A full pass takes about that long, so a tighter
+    # cron only queues overlapping runs. GitHub disables this schedule after
+    # 60 days without a commit; re-enable the workflow if that happens.
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 concurrency:

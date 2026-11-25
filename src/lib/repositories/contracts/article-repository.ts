@@ -59,9 +59,11 @@ export type ListFeedArticlesParams = {
   /**
    * Main feed only. These sources sort ahead of the rest.
    * Culture from the same set, via leadSourceSlugs or category cultura, sorts first.
+   * When leadExclusive is set, only leadSourceSlugs open the feed.
    */
   prioritizeSourceSlugs?: ReadonlyArray<string>;
   leadSourceSlugs?: ReadonlyArray<string>;
+  leadExclusive?: boolean;
 };
 
 export type ListFeedArticlesResult = {

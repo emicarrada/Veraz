@@ -5,7 +5,7 @@ import {
 } from "@/features/news/config/prestigious-sources";
 import { mapFeedRecordToItem } from "@/features/news/services/feed-mapper";
 import { startOfFeedDay, startOfPreviousFeedDay } from "@/features/news/utils/feed-day";
-import { homeFeedSlugs } from "@/features/news/utils/home-feed";
+import { isNewsOutlet, isNewsReportUrl } from "@/features/news/utils/news-report";
 import type { Locale } from "@/i18n/routing";
 import type { ArticleFeedRecord, ArticleRepository } from "@/lib/repositories/contracts/article-repository";
 import { createContentRepositories } from "@/lib/repositories/factory";
@@ -19,7 +19,7 @@ export type YesterdayHighlight = {
 };
 
 const HIGHLIGHT_LIMIT = 10;
-const QUERY_LIMIT = 50;
+const QUERY_LIMIT = 80;
 
 function heroProxySrc(url: string): string {
   return `/api/hero-image?src=${encodeURIComponent(url)}`;
@@ -45,7 +45,7 @@ function takeDiverse(records: readonly ArticleFeedRecord[], limit: number): Arti
   return picked;
 }
 
-/** Yesterday only, in Mexico City. Own photos, one outlet first, then the rest of that order. */
+/** Yesterday's news reports only, in Mexico City. Photos, one outlet first. */
 export function selectYesterdayHighlights(
   records: readonly ArticleFeedRecord[],
   now = new Date(),
@@ -55,6 +55,8 @@ export function selectYesterdayHighlights(
   const end = startOfFeedDay(now).getTime();
   const yesterday = records.filter((record) => {
     if (!record.heroImageUrl) return false;
+    if (!isNewsOutlet(record.sourceSlug)) return false;
+    if (!isNewsReportUrl(record.article.canonicalUrl)) return false;
     const published = new Date(record.article.publishedAt).getTime();
     return published >= start && published < end;
   });
@@ -74,7 +76,6 @@ export function selectYesterdayHighlights(
 
 export async function getYesterdayHighlights(
   locale: Locale,
-  visitorCountry?: string,
   articleRepository?: ArticleRepository | null,
   now = new Date(),
 ): Promise<YesterdayHighlight[]> {
@@ -86,19 +87,14 @@ export async function getYesterdayHighlights(
 
   const languageCodes = resolveFeedLanguageCodes(locale);
   const sourceSlugs = resolveFeedSourceSlugs(locale);
-  const home = visitorCountry
-    ? homeFeedSlugs(visitorCountry, sourceSlugs)
-    : { home: [] as readonly string[], lead: [] as readonly string[] };
 
   const result = await repository.listForFeed({
     limit: QUERY_LIMIT,
+    chronological: true,
     publishedSince: startOfPreviousFeedDay(now).toISOString(),
     publishedBefore: startOfFeedDay(now).toISOString(),
     ...(languageCodes?.length ? { languageCodes: [...languageCodes] } : {}),
     ...(sourceSlugs?.length ? { sourceSlugs: [...sourceSlugs] } : {}),
-    ...(home.home.length
-      ? { prioritizeSourceSlugs: [...home.home], leadSourceSlugs: [...home.lead] }
-      : { chronological: true }),
   });
 
   return selectYesterdayHighlights(result.items, now);

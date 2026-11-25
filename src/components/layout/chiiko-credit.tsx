@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { cn } from "@/utils/cn";
 
-const CHIIKO_URL = "https://www.chiiko.design";
+const CHIIKO_URL = "https://chiiko.studio";
 
 export type ChiikoCreditProps = {
   className?: string;

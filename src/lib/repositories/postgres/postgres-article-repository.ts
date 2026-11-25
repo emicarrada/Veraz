@@ -278,13 +278,23 @@ export class PostgresArticleRepository implements ArticleRepository {
     const homeSlugs = [...(params.prioritizeSourceSlugs ?? [])];
     const leadSlugs = [...(params.leadSourceSlugs ?? [])].filter((slug) => homeSlugs.includes(slug));
     const prioritized = homeSlugs.length > 0;
+    const leadExclusive = params.leadExclusive === true && leadSlugs.length > 0;
     let laneSql = "";
     if (prioritized) {
       values.push(homeSlugs);
       const homeIndex = values.length;
       values.push(leadSlugs.length > 0 ? leadSlugs : ["__none__"]);
       const leadIndex = values.length;
-      laneSql = `CASE
+      laneSql = leadExclusive
+        ? `CASE
+        WHEN s.slug = ANY($${leadIndex}::text[]) AND a.hero_media_id IS NOT NULL THEN 0
+        WHEN s.slug = ANY($${leadIndex}::text[]) THEN 1
+        WHEN s.slug = ANY($${homeIndex}::text[]) AND a.hero_media_id IS NOT NULL THEN 2
+        WHEN s.slug = ANY($${homeIndex}::text[]) THEN 3
+        WHEN a.hero_media_id IS NOT NULL THEN 4
+        ELSE 5
+      END`
+        : `CASE
         WHEN s.slug = ANY($${homeIndex}::text[]) AND (
           a.category_slug = 'cultura'
           OR s.slug = ANY($${leadIndex}::text[])
@@ -381,6 +391,7 @@ export class PostgresArticleRepository implements ArticleRepository {
                       homeSlugs,
                       leadSlugs,
                       Boolean(last.hero_media_id),
+                      leadExclusive,
                     ),
                   }
                 : chronological

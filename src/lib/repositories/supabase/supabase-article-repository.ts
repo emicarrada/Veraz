@@ -449,10 +449,18 @@ export class SupabaseArticleRepository implements ArticleRepository {
       rows.push(...mergeFeedRows([...culturaRows, ...leadRows]).slice(0, need));
     };
 
-    await pullCulture(0, "own");
-    await pull(1, otherHomeIds, { category: "not-cultura", image: "own" });
-    await pullCulture(2, "none");
-    await pull(3, otherHomeIds, { category: "not-cultura", image: "none" });
+    const leadExclusive = params.leadExclusive === true && leadIds.length > 0;
+    if (leadExclusive) {
+      await pull(0, leadIds, { image: "own" });
+      await pull(1, leadIds, { image: "none" });
+      await pull(2, otherHomeIds, { image: "own" });
+      await pull(3, otherHomeIds, { image: "none" });
+    } else {
+      await pullCulture(0, "own");
+      await pull(1, otherHomeIds, { category: "not-cultura", image: "own" });
+      await pullCulture(2, "none");
+      await pull(3, otherHomeIds, { category: "not-cultura", image: "none" });
+    }
     if (worldIds) {
       await pull(4, worldIds, { image: "own" });
       await pull(5, worldIds, { image: "none" });
@@ -484,6 +492,7 @@ export class SupabaseArticleRepository implements ArticleRepository {
                 homeSlugs,
                 leadSlugs,
                 Boolean(last.hero_media_id),
+                params.leadExclusive === true && leadIds.length > 0,
               ),
             },
           }

@@ -195,12 +195,14 @@ describe("getFeedPage", () => {
 
     expect(repository.listForFeed).toHaveBeenCalledWith(
       expect.objectContaining({
-        prioritizeSourceSlugs: expect.arrayContaining(["la-jornada", "reforma-cultura"]),
-        leadSourceSlugs: expect.arrayContaining(["la-jornada-cultura", "reforma-cultura"]),
+        prioritizeSourceSlugs: expect.arrayContaining(["la-jornada", "chilango", "sopitas", "xataka-mx"]),
+        leadSourceSlugs: ["chilango", "sopitas", "xataka-mx"],
+        leadExclusive: true,
       }),
     );
     expect(repository.listForFeed).toHaveBeenCalledWith(
       expect.objectContaining({
+        leadSourceSlugs: expect.not.arrayContaining(["reforma-cultura", "la-jornada-cultura"]),
         prioritizeSourceSlugs: expect.not.arrayContaining(["el-pais", "la-nacion"]),
       }),
     );
@@ -222,6 +224,24 @@ describe("getFeedPage", () => {
       expect.not.objectContaining({
         prioritizeSourceSlugs: expect.anything(),
       }),
+    );
+  });
+
+  it("keeps culture outlets ahead outside Mexico", async () => {
+    const repository = createRepository({ items: [], hasMore: false });
+    await getFeedPage({
+      locale: "en",
+      visitorCountry: "GB",
+      articleRepository: repository,
+    });
+
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        leadSourceSlugs: expect.arrayContaining(["bbc-entertainment", "guardian-culture"]),
+      }),
+    );
+    expect(repository.listForFeed).toHaveBeenCalledWith(
+      expect.not.objectContaining({ leadExclusive: true }),
     );
   });
 
@@ -265,6 +285,7 @@ describe("getFeedPage", () => {
     expect(repository.listForFeed).toHaveBeenCalledWith(
       expect.not.objectContaining({
         prioritizeSourceSlugs: expect.anything(),
+        leadExclusive: true,
       }),
     );
   });

@@ -916,6 +916,11 @@ const FlexCarousel = ({
       const cardH = m.cardH;
       let halfW = (s.lensWidth * width) / 2;
       let halfH = (s.lensHeight * width) / 2;
+      // Lens size is a fraction of the stage width. On a desktop stage that
+      // puts the glass edge outside the photos. On a phone the same fraction
+      // cuts through them. Grow the lens until the cards sit in the flat center.
+      halfW = Math.max(halfW, cardH * 2);
+      halfH = Math.max(halfH, cardH * 1.45);
       const squash = Math.abs(deform) * liquidAmount;
       halfW *= 1 + squash * 0.16;
       halfH *= 1 - squash * 0.08;

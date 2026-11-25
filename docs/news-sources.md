@@ -43,7 +43,9 @@ En **Settings → Secrets and variables → Actions** del repo, o con el script:
 |----------|----------|-----|
 | `ingest-health.yml` | cada 5 min | `health_check` |
 | `ingest-discover.yml` | cada 15 min | `discover_feeds` |
-| `ingest-run.yml` | :05, :20, :35, :50 | `run_ingestion` |
+| `ingest-run.yml` | cada 10 min | `run_ingestion` |
+
+`run_ingestion` ya descubre, baja y guarda. **Cada 10 minutos** es el ritmo para tener el feed al día: una pasada completa tarda entre 2 y 11 minutos, así que un cron más corto solo encima corridas. Los RSS no cambian cada minuto. GitHub apaga estos horarios si el repo pasa 60 días sin un commit; hay que volver a activar el workflow.
 
 Disparo manual: pestaña **Actions** → workflow → **Run workflow**.
 
@@ -120,7 +122,7 @@ Portadas generales — visibles en **Todas**, no en Finanzas/Tecnología:
 | `reforma` | Reforma | ES (México) |
 | `el-economista` | El Economista | ES (México; economía, visible en Todas) |
 
-En **Todas**, si el visitante es de un país con fuentes en el catálogo, esas fuentes van primero: cultura de ese país, luego el resto del país, luego el mundo. México usa La Jornada, Reforma y El Economista. Infobae no está en el catálogo.
+En **Todas**, si el visitante es de un país con fuentes en el catálogo, esas fuentes van primero: cultura de ese país, luego el resto del país, luego el mundo. Sin sesión, México abre con Chilango, Sopitas y Xataka México, y después el resto de medios mexicanos (La Jornada, Reforma, El Economista). Con sesión, el inicio sigue los temas y países de la ficha. Infobae no está en el catálogo.
 
 ## Rutas de producto por rubro
 

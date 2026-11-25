@@ -113,7 +113,7 @@
     "ring": {
       "eyebrow": "Hoy",
       "title": "El día, en una sola vuelta",
-      "description": "Fotos de las notas de hoy, y de ayer si el día todavía va corto. El titular y la fuente se quedan al frente. Abre la que quieras."
+      "description": "Noticias de hoy, con foto. El titular y la fuente se quedan al frente. Abre la que quieras."
     },
     "whatIs": {
       "eyebrow": "Plataforma de noticias",
@@ -262,13 +262,13 @@
   },
   "yesterday": {
     "title": "¿Qué pasó ayer?",
-    "description": "Notas con foto del día anterior. El titular y la fuente se quedan al frente.",
+    "description": "Noticias con foto del día anterior. El titular y la fuente se quedan al frente.",
     "mobileHelp": [
       "Desliza a los lados para recorrer las notas.",
       "Toca una foto para traerla al frente.",
       "Toca otra vez la del centro para abrirla. El titular y la fuente quedan abajo."
     ],
-    "empty": "Ayer no quedaron notas con foto."
+    "empty": "Ayer no quedaron noticias con foto."
   },
   "article": {
     "referencesTitle": "Referencias",

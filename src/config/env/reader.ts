@@ -13,10 +13,32 @@ function loadEnvSnapshot(): Readonly<Record<string, string | undefined>> {
   return envSnapshot;
 }
 
-/** Read a single env var from the one-time snapshot. */
+/**
+ * Static reads so Next can treat these as public values and send them to the
+ * browser. A dynamic `process.env` lookup gets blanked when the value crosses
+ * into a client component, which hid the Google button.
+ */
+function readPublicEnv(key: string): string | undefined {
+  switch (key) {
+    case ENV_KEYS.NEXT_PUBLIC_SUPABASE_URL:
+      return process.env.NEXT_PUBLIC_SUPABASE_URL;
+    case ENV_KEYS.NEXT_PUBLIC_SUPABASE_ANON_KEY:
+      return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    case ENV_KEYS.NEXT_PUBLIC_SITE_URL:
+      return process.env.NEXT_PUBLIC_SITE_URL;
+    case ENV_KEYS.NEXT_PUBLIC_APP_NAME:
+      return process.env.NEXT_PUBLIC_APP_NAME;
+    default:
+      return undefined;
+  }
+}
+
+/** Read a single env var. Public keys prefer the static binding above. */
 export function getEnv(key: EnvKey | string): string | undefined {
-  const value = loadEnvSnapshot()[key];
-  return value === "" ? undefined : value;
+  const direct = readPublicEnv(key)?.trim();
+  if (direct) return direct;
+  const value = loadEnvSnapshot()[key]?.trim();
+  return value ? value : undefined;
 }
 
 /** Read env var with string fallback. */

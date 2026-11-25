@@ -16,13 +16,14 @@ function record(partial: {
   sourceSlug: string;
   publishedAt: string;
   image?: string;
+  url?: string;
 }): ArticleFeedRecord {
   return {
     article: {
       id: partial.slug as ArticleId,
       sourceId: "source-1" as SourceId,
       slug: partial.slug,
-      canonicalUrl: `https://example.com/${partial.slug}`,
+      canonicalUrl: partial.url ?? `https://example.com/${partial.slug}`,
       urlFingerprint: partial.slug,
       title: partial.title,
       excerpt: "Excerpt",
@@ -44,7 +45,7 @@ function record(partial: {
 }
 
 describe("selectYesterdayHighlights", () => {
-  it("keeps yesterday's photos and drops today and stories without a photo", () => {
+  it("keeps yesterday's news photos and drops articles, today, and items without a photo", () => {
     const items = selectYesterdayHighlights(
       [
         record({
@@ -74,6 +75,30 @@ describe("selectYesterdayHighlights", () => {
           publishedAt: "2026-11-23T16:00:00.000Z",
           image: "https://img.example/older.jpg",
         }),
+        record({
+          slug: "opinion",
+          title: "Una columna",
+          sourceSlug: "el-economista",
+          publishedAt: "2026-11-24T17:00:00.000Z",
+          image: "https://img.example/opinion.jpg",
+          url: "https://www.eleconomista.com.mx/opinion/una-columna.html",
+        }),
+        record({
+          slug: "feature",
+          title: "Una función",
+          sourceSlug: "el-economista",
+          publishedAt: "2026-11-24T18:00:00.000Z",
+          image: "https://img.example/feature.jpg",
+          url: "https://www.eleconomista.com.mx/arteseideas/una-funcion.html",
+        }),
+        record({
+          slug: "magazine",
+          title: "Superluna",
+          sourceSlug: "chilango",
+          publishedAt: "2026-11-24T19:00:00.000Z",
+          image: "https://img.example/moon.jpg",
+          url: "https://www.chilango.com/noticias/superluna/",
+        }),
       ],
       now,
     );
@@ -89,10 +114,11 @@ describe("getYesterdayHighlights", () => {
     const listForFeed = vi.fn(async () => ({ items: [], hasMore: false }));
     const repository = { listForFeed } as unknown as ArticleRepository;
 
-    await getYesterdayHighlights("en", "US", repository, now);
+    await getYesterdayHighlights("en", repository, now);
 
     expect(listForFeed).toHaveBeenCalledWith(
       expect.objectContaining({
+        chronological: true,
         languageCodes: ["en"],
         publishedSince: startOfPreviousFeedDay(now).toISOString(),
         publishedBefore: startOfFeedDay(now).toISOString(),

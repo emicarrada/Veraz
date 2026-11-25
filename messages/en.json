@@ -113,7 +113,7 @@
     "ring": {
       "eyebrow": "Today",
       "title": "The day, in one turn",
-      "description": "Photos from today's stories, and from yesterday when the day is still short. The headline and the outlet stay up front. Open the one you want."
+      "description": "Today's news, with a photo. The headline and the outlet stay up front. Open the one you want."
     },
     "whatIs": {
       "eyebrow": "News platform",
@@ -262,13 +262,13 @@
   },
   "yesterday": {
     "title": "HangOver",
-    "description": "Yesterday's stories that have a photo. The headline and the outlet stay up front.",
+    "description": "Yesterday's news that has a photo. The headline and the outlet stay up front.",
     "mobileHelp": [
       "Swipe sideways to move through the stories.",
       "Tap a photo to bring it forward.",
       "Tap the centered one again to open it. The headline and the outlet sit below."
     ],
-    "empty": "Yesterday left no stories with a photo."
+    "empty": "Yesterday left no news with a photo."
   },
   "article": {
     "referencesTitle": "References",

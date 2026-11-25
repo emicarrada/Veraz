@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ArticleId, LanguageId, SourceId } from "@/domain/shared/ids";
 import { getLandingPhotoRing, selectLandingPhotoRing } from "@/features/news/services/get-landing-photo-ring";
-import { startOfPreviousFeedDay } from "@/features/news/utils/feed-day";
+import { startOfFeedDay } from "@/features/news/utils/feed-day";
 import type { ArticleFeedRecord, ArticleRepository } from "@/lib/repositories/contracts/article-repository";
 
 const now = new Date("2026-11-25T18:00:00.000Z");
@@ -13,13 +13,14 @@ function record(partial: {
   sourceSlug: string;
   publishedAt: string;
   image?: string;
+  url?: string;
 }): ArticleFeedRecord {
   return {
     article: {
       id: partial.slug as ArticleId,
       sourceId: "source-1" as SourceId,
       slug: partial.slug,
-      canonicalUrl: `https://example.com/${partial.slug}`,
+      canonicalUrl: partial.url ?? `https://example.com/${partial.slug}`,
       urlFingerprint: partial.slug,
       title: partial.title,
       excerpt: "Excerpt",
@@ -69,13 +70,13 @@ describe("selectLandingPhotoRing", () => {
     expect(items).toHaveLength(6);
   });
 
-  it("fills with yesterday when today is short, and skips stories without a photo", () => {
+  it("keeps today's news photos and drops yesterday, pieces without a photo, and articles", () => {
     const items = selectLandingPhotoRing(
       [
         record({
           slug: "today",
           title: "Hoy",
-          sourceSlug: "chilango",
+          sourceSlug: "el-economista",
           publishedAt: "2026-11-25T16:00:00.000Z",
           image: "https://img.example/today.jpg",
         }),
@@ -92,17 +93,25 @@ describe("selectLandingPhotoRing", () => {
           publishedAt: "2026-11-24T16:00:00.000Z",
           image: "https://img.example/yesterday.jpg",
         }),
+        record({
+          slug: "opinion",
+          title: "Columna",
+          sourceSlug: "el-economista",
+          publishedAt: "2026-11-25T17:00:00.000Z",
+          image: "https://img.example/opinion.jpg",
+          url: "https://www.eleconomista.com.mx/opinion/columna.html",
+        }),
       ],
       now,
     );
 
-    expect(items.map((item) => item.slug)).toEqual(["today", "yesterday"]);
-    expect(items[1]?.subtitle).toBe("Xataka México");
+    expect(items.map((item) => item.slug)).toEqual(["today"]);
+    expect(items[0]?.subtitle).toBe("El Economista");
   });
 });
 
 describe("getLandingPhotoRing", () => {
-  it("asks the feed for this locale since yesterday", async () => {
+  it("asks the feed for this locale since the start of today", async () => {
     const listForFeed = vi.fn(async () => ({ items: [], hasMore: false }));
     const repository = { listForFeed } as unknown as ArticleRepository;
 
@@ -112,7 +121,7 @@ describe("getLandingPhotoRing", () => {
       expect.objectContaining({
         chronological: true,
         languageCodes: ["en"],
-        publishedSince: startOfPreviousFeedDay(now).toISOString(),
+        publishedSince: startOfFeedDay(now).toISOString(),
       }),
     );
   });

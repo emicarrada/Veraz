@@ -97,7 +97,7 @@ export async function getFeedPage(params: GetFeedPageParams): Promise<FeedLoadRe
 
     const sourceSlugs = readerSourceSlugs ?? localeSourceSlugs;
     const home = params.categorySlug || reader || !params.visitorCountry
-      ? { home: [] as readonly string[], lead: [] as readonly string[] }
+      ? { home: [] as readonly string[], lead: [] as readonly string[], leadExclusive: false }
       : homeFeedSlugs(params.visitorCountry, sourceSlugs);
 
     const result = await repository.listForFeed({
@@ -112,7 +112,11 @@ export async function getFeedPage(params: GetFeedPageParams): Promise<FeedLoadRe
       ...(sourceSlugs?.length ? { sourceSlugs: [...sourceSlugs] } : {}),
       ...(languageCodes?.length ? { languageCodes: [...languageCodes] } : {}),
       ...(home.home.length
-        ? { prioritizeSourceSlugs: [...home.home], leadSourceSlugs: [...home.lead] }
+        ? {
+            prioritizeSourceSlugs: [...home.home],
+            leadSourceSlugs: [...home.lead],
+            ...(home.leadExclusive ? { leadExclusive: true } : {}),
+          }
         : {}),
     });
 

@@ -4,7 +4,8 @@ import {
   resolveFeedSourceSlugs,
 } from "@/features/news/config/prestigious-sources";
 import { mapFeedRecordToItem } from "@/features/news/services/feed-mapper";
-import { startOfFeedDay, startOfPreviousFeedDay } from "@/features/news/utils/feed-day";
+import { startOfFeedDay } from "@/features/news/utils/feed-day";
+import { isNewsOutlet, isNewsReportUrl } from "@/features/news/utils/news-report";
 import type { Locale } from "@/i18n/routing";
 import type { ArticleFeedRecord, ArticleRepository } from "@/lib/repositories/contracts/article-repository";
 import { createContentRepositories } from "@/lib/repositories/factory";
@@ -18,11 +19,15 @@ export type LandingPhotoRingItem = {
 };
 
 const RING_LIMIT = 10;
-const TODAY_ENOUGH = 6;
-const QUERY_LIMIT = 50;
+const QUERY_LIMIT = 80;
 
 function withPhoto(records: readonly ArticleFeedRecord[]): ArticleFeedRecord[] {
-  return records.filter((record) => Boolean(record.heroImageUrl));
+  return records.filter(
+    (record) =>
+      Boolean(record.heroImageUrl) &&
+      isNewsOutlet(record.sourceSlug) &&
+      isNewsReportUrl(record.article.canonicalUrl),
+  );
 }
 
 function takeDiverse(records: readonly ArticleFeedRecord[], limit: number): ArticleFeedRecord[] {
@@ -45,18 +50,18 @@ function takeDiverse(records: readonly ArticleFeedRecord[], limit: number): Arti
   return picked;
 }
 
-/** Photos from today. Yesterday fills the ring only when today is still short. */
+/** News photos published today in the feed timezone. */
 export function selectLandingPhotoRing(
   records: readonly ArticleFeedRecord[],
   now = new Date(),
   limit = RING_LIMIT,
 ): LandingPhotoRingItem[] {
-  const photos = withPhoto(records);
   const todayStart = startOfFeedDay(now).getTime();
-  const today = photos.filter((record) => new Date(record.article.publishedAt).getTime() >= todayStart);
-  const pool = today.length >= TODAY_ENOUGH ? today : photos;
+  const today = withPhoto(records).filter(
+    (record) => new Date(record.article.publishedAt).getTime() >= todayStart,
+  );
 
-  return takeDiverse(pool, limit).map((record) => {
+  return takeDiverse(today, limit).map((record) => {
     const item = mapFeedRecordToItem(record);
     const source = catalogLabelForSlug(record.sourceSlug) ?? item.sourceName;
     return {
@@ -85,7 +90,7 @@ export async function getLandingPhotoRing(
   const result = await repository.listForFeed({
     limit: QUERY_LIMIT,
     chronological: true,
-    publishedSince: startOfPreviousFeedDay(now).toISOString(),
+    publishedSince: startOfFeedDay(now).toISOString(),
     ...(languageCodes?.length ? { languageCodes: [...languageCodes] } : {}),
     ...(sourceSlugs?.length ? { sourceSlugs: [...sourceSlugs] } : {}),
   });

@@ -12,14 +12,14 @@ export type SchedulerConfig = {
 };
 
 export const DEFAULT_SCHEDULER_CONFIG: SchedulerConfig = {
-  ingestionIntervalSeconds: 900,
-  discoverIntervalSeconds: 900,
+  ingestionIntervalSeconds: 600,
+  discoverIntervalSeconds: 600,
   healthCheckIntervalSeconds: 300,
 };
 
 /** Human-readable hints for operators — not parsed at runtime. */
 export const SCHEDULER_CRON_HINTS = {
-  ingestion: "every 15 minutes (when ingestionIntervalSeconds=900)",
-  discover: "every 15 minutes (when discoverIntervalSeconds=900)",
+  ingestion: "every 10 minutes (when ingestionIntervalSeconds=600)",
+  discover: "every 10 minutes (when discoverIntervalSeconds=600)",
   healthCheck: "every 5 minutes (when healthCheckIntervalSeconds=300)",
 } as const;

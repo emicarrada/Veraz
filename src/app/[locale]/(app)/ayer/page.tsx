@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 
 import { getAppConfig } from "@/config";
@@ -8,7 +7,6 @@ import { Text } from "@/components/ui/text";
 import { YesterdayCarousel } from "@/features/news/components/yesterday-carousel";
 import { NewsAppShell } from "@/features/news/components/news-app-shell";
 import { getYesterdayHighlights } from "@/features/news/services/get-yesterday-highlights";
-import { resolveVisitorCountry } from "@/features/news/utils/visitor-country";
 import { openGraphLocale, SEO_OG_IMAGE, SEO_OG_IMAGE_HEIGHT, SEO_OG_IMAGE_WIDTH } from "@/features/seo/build-page-metadata";
 import { staticPath } from "@/i18n/paths";
 import { locales, type Locale } from "@/i18n/routing";
@@ -50,8 +48,7 @@ export async function generateMetadata({ params }: YesterdayPageProps): Promise<
 export default async function YesterdayPage({ params }: YesterdayPageProps) {
   const { locale } = await params;
   const t = await getTranslations("yesterday");
-  const visitorCountry = resolveVisitorCountry(await headers());
-  const items = await getYesterdayHighlights(locale as Locale, visitorCountry).catch(() => []);
+  const items = await getYesterdayHighlights(locale as Locale).catch(() => []);
 
   return (
     <NewsAppShell>

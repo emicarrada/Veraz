@@ -21,4 +21,13 @@ describe("resolveFeedLane", () => {
     expect(resolveFeedLane("el-pais", "cultura", home, lead, true)).toBe(4);
     expect(resolveFeedLane("el-pais", "politica", home, lead, false)).toBe(5);
   });
+
+  it("puts only the named outlets ahead when the lead is exclusive", () => {
+    const mexico = ["la-jornada", "reforma-cultura", "chilango", "sopitas", "xataka-mx"];
+    const front = ["chilango", "sopitas", "xataka-mx"];
+    expect(resolveFeedLane("chilango", "cultura", mexico, front, true, true)).toBe(0);
+    expect(resolveFeedLane("xataka-mx", "tecnologia", mexico, front, false, true)).toBe(1);
+    expect(resolveFeedLane("reforma-cultura", "cultura", mexico, front, true, true)).toBe(2);
+    expect(resolveFeedLane("la-jornada", "politica", mexico, front, false, true)).toBe(3);
+  });
 });
